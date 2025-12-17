@@ -2,111 +2,111 @@
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^1
   ROMAN_KL_DZ_S2:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^2
   ROMAN_KL_DZ_S3:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^3
   ROMAN_KL_DZ_S4:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^4
   ROMAN_KL_DZ_S5:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^5
   ROMAN_KL_DZ_S6:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^6
   ROMAN_KL_DZ_S7:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^7
   ROMAN_KL_DZ_S8:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^8
   ROMAN_KL_DZ_S9:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^9
   ROMAN_KL_DZ_S10:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.002
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.002
-    proposal: 0.002
+      scale: 0.0004
+    proposal: 0.0004
     latex: \Delta z_\mathrm{s,ROMAN_KL}^{10}
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -240,34 +240,34 @@
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^1
   ROMAN_KL_M2:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^2
   ROMAN_KL_M3:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^3
   ROMAN_KL_M4:
     prior:
@@ -284,67 +284,67 @@
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^5
   ROMAN_KL_M6:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^6
   ROMAN_KL_M7:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^7
   ROMAN_KL_M8:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^8
   ROMAN_KL_M9:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^9
   ROMAN_KL_M10:
     prior:
       dist: norm
       loc: 0.0
-      scale: 0.005
+      scale: 0.0004
     ref:
       dist: norm
       loc: 0.0
-      scale: 0.005
-    proposal: 0.005
+      scale: 0.0004
+    proposal: 0.0004
     latex: m_\mathrm{ROMAN_KL}^{10}
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------

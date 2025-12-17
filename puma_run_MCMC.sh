@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=DC1_real
-#SBATCH --output=/xdisk/timeifler/yhhuang/log/DC1_real-%A_%a.out
-#SBATCH --error=/groups/timeifler/yhhuang/CosmoLike/cocoa/Cocoa/projects/roman_real/log/DC1_real-%A_%a.err
+#SBATCH --output=/xdisk/timeifler/yhhuang/log/kl-%A.out
+#SBATCH --error=/groups/timeifler/yhhuang/log/kl-%A.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --ntasks-per-socket=2
@@ -16,8 +16,8 @@
 #SBATCH --account=timeifler
 
 # path
-export MCMC_YAML=./projects/roman_real/EXAMPLE_MCMC.yaml
-export RUN_MODE_FLAG="-f"
+export MCMC_YAML=./projects/roman_real/EXAMPLE_MCMC1.yaml
+export RUN_MODE_FLAG="-r"
 
 echo Running on host `hostname`
 echo Time is `date`

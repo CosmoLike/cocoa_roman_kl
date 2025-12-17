@@ -31,9 +31,10 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.source_file = ini.relativeFileName('nz_source_file')
     self.lens_ntomo = ini.int("lens_ntomo") #5
     self.source_ntomo = ini.int("source_ntomo") #4
-    self.ntheta = ini.int("n_theta")
-    self.theta_min_arcmin = ini.float("theta_min_arcmin")
-    self.theta_max_arcmin = ini.float("theta_max_arcmin")
+    self.ncl = ini.int("n_cl")
+    self.lmin = ini.float("l_min")
+    self.lmax = ini.float("l_max")
+    self.lmax_shear = ini.float("l_max_shear")
     
     # ------------------------------------------------------------------------   
     tmp=int(1000 + 250*self.accuracyboost)
@@ -55,7 +56,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     
     ci.init_probes(possible_probes=self.probe)
 
-    ci.init_binning(int(self.ntheta), self.theta_min_arcmin, self.theta_max_arcmin)
+    ci.init_binning(int(self.ncl), self.lmin, self.lmax, self.lmax_shear)
 
     ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())
 
@@ -70,7 +71,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
           lens_ntomo=int(self.lens_ntomo), 
           source_multihisto_file=self.source_file,
           source_ntomo=int(self.source_ntomo))
-      ci.init_data_real(self.cov_file, self.mask_file, self.data_vector_file)  
+      ci.init_data_fourier(self.cov_file, self.mask_file, self.data_vector_file)  
       
       ci.init_accuracy_boost(accuracy_boost=0.35, 
                              integration_accuracy=-1) # seems enough to compute PM
@@ -99,7 +100,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
           source_multihisto_file = self.source_file,
           source_ntomo = int(self.source_ntomo)) 
       
-      ci.init_data_real(self.cov_file, self.mask_file, self.data_vector_file)
+      ci.init_data_fourier(self.cov_file, self.mask_file, self.data_vector_file)
 
       ci.init_IA(ia_model = int(self.IA_model), 
                  ia_redshift_evolution = int(self.IA_redshift_evolution))

@@ -1,8 +1,8 @@
 path: null
-data_file: roman_kl_M1_GGL0.05.dataset
+data_file: roman_kl.dataset
 accuracyboost: 1.0
 integration_accuracy: 0
-lmax: 70000 # lmax computed for real space correlation function
+#lmax: 70000 # lmax computed for real space correlation function
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
@@ -11,7 +11,7 @@ debug: False
 #                        1 = IA_NLA_LF
 #                        2 = IA_REDSHIFT_BINNING, 
 #                        3 = IA_REDSHIFT_EVOLUTION
-IA_redshift_evolution: 3
+IA_redshift_evolution: 0
 # IA_MODEL: 0 = NLA, 1 = TATT
 IA_model: 0
 external_nz_modeling: 0

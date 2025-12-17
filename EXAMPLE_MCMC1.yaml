@@ -5,25 +5,25 @@ stop_at_error: False
 likelihood:
   roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
-    data_file: example1.dataset # that assumes lens = source
-    lmax: 70000 # gg in Roman that requires higher lmax
+    data_file: roman_kl.dataset # that assumes lens = source
+    # lmax: 70000 # gg in Roman that requires higher lmax
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
     IA_model: 0
-    IA_redshift_evolution: 3
+    IA_redshift_evolution: 0
     print_datavector: False
     ggl_exclude: [[6,0],[7,0],[7,1]]
 params:
   As_1e9:
     prior:
-      min: 0.5
-      max: 5
+      min: 0.770
+      max: 3.729
     ref:
       dist: norm
-      loc: 2.1
+      loc: 2.128048
       scale: 0.2
     proposal: 0.2
     latex: 10^9 A_\mathrm{s})
@@ -31,42 +31,42 @@ params:
     renames: A
   ns:
     prior:
-      min: 0.87
-      max: 1.07
+      min: 0.5
+      max: 1.1
     ref:
       dist: norm
-      loc: 0.96605
+      loc: 0.9645
       scale: 0.01
     proposal: 0.01
     latex: n_\mathrm{s}
   H0:
     prior:
-      min: 55
-      max: 91
+      min: 40
+      max: 90
     ref:
       dist: norm
-      loc: 67.32
+      loc: 67.27
       scale: 3
     proposal: 3
     latex: H_0
   omegab:
     prior:
-      min: 0.03
-      max: 0.07
+      min: 0.005
+      max: 0.095
     ref:
       dist: norm
-      loc: 0.0495
+      loc: 0.0491685
       scale: 0.004
     proposal: 0.004
     latex: \Omega_\mathrm{b}
     drop: true
   omegam:
     prior:
-      min: 0.1
-      max: 0.9
+      min: 0.095
+      max: 0.585
     ref:
       dist: norm
-      loc: 0.316
+      loc: 0.3156
       scale: 0.015
     proposal: 0.015
     latex: \Omega_\mathrm{m}
@@ -135,188 +135,36 @@ params:
   # Default settings in likelihood/roman_kl_params_source.yaml
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  roman_DZ_S1:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^1
-  roman_DZ_S2:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^2
-  roman_DZ_S3:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^3
-  roman_DZ_S4:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^4
-  roman_DZ_S5:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^5
-  roman_DZ_S6:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^6
-  roman_DZ_S7:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^7
-  roman_DZ_S8:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^8
+  # roman_DZ_S1:
+  #   prior:
+  #     dist: norm
+  #     loc: 0.0
+  #     scale: 0.002
+  #   ref:
+  #     dist: norm
+  #     loc: 0.0
+  #     scale: 0.002
+  #   proposal: 0.002
+  #   latex: \Delta z_\mathrm{s,roman}^1
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  roman_M1:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^1
-  roman_M2:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^2
-  roman_M3:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^3
-  roman_M4:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^4
-  roman_M5:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^5
-  roman_M6:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^6
-  roman_M7:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^7
-  roman_M8:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^8
+  # roman_M1:
+  #   prior:
+  #     dist: norm
+  #     loc: 0.0
+  #     scale: 0.005
+  #   ref:
+  #     dist: norm
+  #     loc: 0.0
+  #     scale: 0.005
+  #   proposal: 0.005
+  #   latex: m_\mathrm{roman}^1
+  
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # Intrinsic alignment
   roman_A1_1:
+    value: 0.0
     prior:
       min: -5
       max:  5
@@ -432,14 +280,13 @@ sampler:
     - [6,
         [
           roman_DZ_S1, roman_DZ_S2, roman_DZ_S3, roman_DZ_S4, roman_DZ_S5,
-          roman_DZ_S6, roman_DZ_S7, roman_DZ_S8,
-          roman_A1_1, roman_A1_2,
+          roman_DZ_S6, roman_DZ_S7, roman_DZ_S8, roman_DZ_S9, roman_DZ_S10,
         ]
       ]
     - [25,
         [
           roman_M1, roman_M2, roman_M3, roman_M4, roman_M5,
-          roman_M6, roman_M7, roman_M8,
+          roman_M6, roman_M7, roman_M8, roman_M9, roman_M10,
         ]
       ]
 
@@ -462,4 +309,4 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
 
-output: ./projects/roman_kl/chains/EXAMPLE_MCMC1
+output: ./projects/roman_kl/chains/cosmic_shear

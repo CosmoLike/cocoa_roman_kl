@@ -75,11 +75,12 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
     );
 
   m.def("init_binning",
-      &cosmolike_interface::init_binning_real_space,
+      &cosmolike_interface::init_binning_fourier,
       "Init Bining related variables",
-      py::arg("ntheta_bins").none(false).noconvert(),
-      py::arg("theta_min_arcmin").none(false),
-      py::arg("theta_max_arcmin").none(false)
+      py::arg("nells").none(false).noconvert(),
+      py::arg("lmin").none(false),
+      py::arg("lmax").none(false),
+      py::arg("lmax_shear").none(false)
     );
 
   m.def("init_cosmo_runmode",
@@ -88,7 +89,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       py::arg("is_linear").none(false)
     );
 
-  m.def("init_data_real",
+  m.def("init_data_fourier",
       [](std::string cov, std::string mask, std::string data) {
         using namespace cosmolike_interface;
         init_data_Mx2pt_N<0,3>(cov, mask, data, {0, 1, 2});
@@ -417,15 +418,15 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
   // --------------------------------------------------------------------
   // Theoretical Cosmolike Functions
   // --------------------------------------------------------------------
-  m.def("get_binning_real_space",
+  m.def("get_binning_fourier_space",
       // Why return an STL vector?
       // The conversion between STL vector and python np array is cleaner
       // arma:Col is cast to 2D np array with 1 column (not as nice!)
       []()->std::vector<double> {
-        arma::Col<double> res = cosmolike_interface::get_binning_real_space();
+        arma::Col<double> res = cosmolike_interface::get_binning_fourier_space();
         return arma::conv_to<std::vector<double>>::from(res);
       },
-      "Get real space binning (theta bins)"
+      "Get fourier space binning (ell bins)"
     );
 
   m.def("get_gs_redshift_bins",
