@@ -18,7 +18,7 @@ external_nz_modeling: 0
 use_emulator: False
 
 # REQUIRE GGL_EXCLUDE TO MATCH THE SIZE OF THE 3x2pt DATA VECTOR
-ggl_exclude: [[6,0],[7,0],[7,1]]
+# ggl_exclude: [[0,0],[7,0],[7,1]]
 
 # BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag] (see bias.c)
 #bias_model: [0,0,0,1,0]
@@ -31,7 +31,7 @@ create_baryon_pca: False
 baryon_pca_select_sims: "antilles-2-99/antilles-101-378/antilles-380-400"
 filename_baryon_pca: "./projects/desy1xplanck/chains/pca.txt"
 
-print_datavector: False
+print_datavector: True
 print_datavector_file: "./projects/roman_kl/chains/theory.modelvector"
 
 params: !defaults [params_source]
