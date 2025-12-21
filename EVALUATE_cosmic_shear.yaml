@@ -1,5 +1,5 @@
 timing: True
-debug: False
+debug: True
 stop_at_error: False
 
 likelihood:
@@ -259,8 +259,8 @@ sampler:
       roman_M8: 0.0
       roman_M9: 0.0
       roman_M10: 0.0
-      roman_A1_1: 0.6
-      roman_A1_2: -1.5
+        #  roman_A1_1: 0.6
+        #  roman_A1_2: -1.5
       w0pwa: -1.0
       w: -1.0
 
