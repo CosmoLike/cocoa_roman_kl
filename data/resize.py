@@ -44,5 +44,10 @@ with open(out_fname, 'w') as f:
             if key in data:
                 f.write(' '.join(data[key]) + '\n')
             else:
-                f.write(f'{i:d} {j:d} {fmt_float(ell1)} {fmt_float(ell2)} {tomo1:d} {tomo2:d} {tomo3:d} {tomo4:d} ' +
-                        f'{fmt_float(0.0)} {fmt_float(0.0)}\n')
+                if j != i:
+                    f.write(f'{i:d} {j:d} {fmt_float(ell1)} {fmt_float(ell2)} {tomo1:d} {tomo2:d} {tomo3:d} {tomo4:d} ' +
+                            f'{fmt_float(0.0)} {fmt_float(0.0)}\n')
+                else:
+                    f.write(f'{i:d} {j:d} {fmt_float(ell1)} {fmt_float(ell2)} {tomo1:d} {tomo2:d} {tomo3:d} {tomo4:d} ' +
+                            f'{fmt_float(1.0)} {fmt_float(0.0)}\n')
+
