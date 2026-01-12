@@ -92,7 +92,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
   m.def("init_data_fourier",
       [](std::string cov, std::string mask, std::string data) {
         using namespace cosmolike_interface;
-        init_data_Mx2pt_N<0,3>(cov, mask, data, {0, 1, 2});
+        init_data_Mx2pt_N<1,3>(cov, mask, data, {0, 1, 2});
       },
       "Load covariance matrix, mask (vec of 0/1s) and data vector",
       py::arg("COV").none(false),
@@ -320,10 +320,10 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
         using namespace cosmolike_interface;
         arma::Col<double> res;
         if (force_exclude_pm == 1) {
-          res = compute_add_calib_and_set_mask_Mx2pt_N<0,3,0>(dv,{0, 1, 2});
+          res = compute_add_calib_and_set_mask_Mx2pt_N<1,3,0>(dv,{0, 1, 2});
         } 
         else {
-          res = compute_add_calib_and_set_mask_Mx2pt_N<0,3,1>(dv,{0, 1, 2});
+          res = compute_add_calib_and_set_mask_Mx2pt_N<1,3,1>(dv,{0, 1, 2});
         }
         return arma::conv_to<std::vector<double>>::from(res);
       },
@@ -342,10 +342,10 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
         using stlvec = std::vector<double>;
         arma::Col<double> res;
         if (force_exclude_pm == 1) {
-          res = compute_add_calib_and_set_mask_Mx2pt_N<0,3,0>(dv,{0, 1, 2});
+          res = compute_add_calib_and_set_mask_Mx2pt_N<1,3,0>(dv,{0, 1, 2});
         } 
         else {
-          res = compute_add_calib_and_set_mask_Mx2pt_N<0,3,1>(dv,{0, 1, 2});
+          res = compute_add_calib_and_set_mask_Mx2pt_N<1,3,1>(dv,{0, 1, 2});
         }
         return arma::conv_to<stlvec>::from(compute_add_baryons_pcs(Q,res));
       },
@@ -361,7 +361,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
         using namespace cosmolike_interface;
         using namespace arma;
         using stlvec = std::vector<int>;
-        return conv_to<stlvec>::from(compute_data_vector_Mx2pt_N_sizes<0,3>());
+        return conv_to<stlvec>::from(compute_data_vector_Mx2pt_N_sizes<1,3>());
       },
       "Returns the data vector sizes of each 2pt correlation function",
       py::return_value_policy::move
@@ -374,7 +374,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       []()->std::vector<double> {
         using namespace cosmolike_interface;
         using stlvec = std::vector<double>;
-        return arma::conv_to<stlvec>::from(compute_Mx2pt_N_masked<0,3>({0,1,2}));
+        return arma::conv_to<stlvec>::from(compute_Mx2pt_N_masked<1,3>({0,1,2}));
       },
       "Compute theoretical data vector. Masked dimensions are filled w/ zeros",
       py::return_value_policy::move
@@ -384,7 +384,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       [](std::vector<double> Q)->std::vector<double> {
         using namespace cosmolike_interface;
         using stlvec = std::vector<double>;
-        arma::Col<double> res = compute_Mx2pt_N_masked<0,3>({0,1,2});
+        arma::Col<double> res = compute_Mx2pt_N_masked<1,3>({0,1,2});
         return arma::conv_to<stlvec>::from(compute_add_baryons_pcs(Q,res));
       },
       "Compute theoretical data vector, including contributions from baryonic"
@@ -406,7 +406,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       [](std::string scenarios, std::string allsims) {
         using namespace cosmolike_interface;
         BaryonScenario::get_instance().set_scenarios(allsims, scenarios);
-        return compute_baryon_pcas_Mx2pt_N<0,3>({0,1,2});
+        return compute_baryon_pcas_Mx2pt_N<1,3>({0,1,2});
       },
       "Compute baryonic principal components given a list of scenarios" 
       "that contaminate the matter power spectrum",
