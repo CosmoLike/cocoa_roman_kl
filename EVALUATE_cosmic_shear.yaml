@@ -82,11 +82,25 @@ params:
       scale: 0.1
     proposal: 0.06
   w0pwa:
-    value: -1.0
+    prior:
+      min: -5 
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
     drop: true
   w:
-    value: -1.0
+    prior:
+      min: -3
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_{0,\mathrm{DE}}
   tau:
     value: 0.0697186
