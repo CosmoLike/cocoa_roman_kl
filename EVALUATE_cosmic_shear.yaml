@@ -246,26 +246,26 @@ sampler:
       omegab: 0.0491685
       omegam: 0.3156
       mnu: 0.06
-      roman_DZ_S1: 0.0
-      roman_DZ_S2: 0.0
-      roman_DZ_S3: 0.0
-      roman_DZ_S4: 0.0
-      roman_DZ_S5: 0.0
-      roman_DZ_S6: 0.0
-      roman_DZ_S7: 0.0
-      roman_DZ_S8: 0.0
-      roman_DZ_S9: 0.0
-      roman_DZ_S10: 0.0
-      roman_M1: 0.0
-      roman_M2: 0.0
-      roman_M3: 0.0
-      roman_M4: 0.0
-      roman_M5: 0.0
-      roman_M6: 0.0
-      roman_M7: 0.0
-      roman_M8: 0.0
-      roman_M9: 0.0
-      roman_M10: 0.0
+      ROMAN_KL_DZ_S1: 0.0
+      ROMAN_KL_DZ_S2: 0.0
+      ROMAN_KL_DZ_S3: 0.0
+      ROMAN_KL_DZ_S4: 0.0
+      ROMAN_KL_DZ_S5: 0.0
+      ROMAN_KL_DZ_S6: 0.0
+      ROMAN_KL_DZ_S7: 0.0
+      ROMAN_KL_DZ_S8: 0.0
+      ROMAN_KL_DZ_S9: 0.0
+      ROMAN_KL_DZ_S10: 0.0
+      ROMAN_KL_M1: 0.0
+      ROMAN_KL_M2: 0.0
+      ROMAN_KL_M3: 0.0
+      ROMAN_KL_M4: 0.0
+      ROMAN_KL_M5: 0.0
+      ROMAN_KL_M6: 0.0
+      ROMAN_KL_M7: 0.0
+      ROMAN_KL_M8: 0.0
+      ROMAN_KL_M9: 0.0
+      ROMAN_KL_M10: 0.0
         #  roman_A1_1: 0.6
         #  roman_A1_2: -1.5
       w0pwa: -1.0
