@@ -16,7 +16,7 @@ likelihood:
     ggl_exclude: []
     create_baryon_pca: false
     baryon_pca_select_sims: "antilles-2-99/antilles-101-378/antilles-380-400"
-    filename_baryon_pca: "./projects/lsst_y1/chains/pca.txt"
+    filename_baryon_pca:
 params:
   As_1e9:
     prior:
@@ -73,7 +73,14 @@ params:
     latex: \Omega_\mathrm{m}
     drop: true
   mnu:
-    value: 0.06
+    prior:
+      min: 0.06
+      max: 0.6
+    ref:
+      dist: norm
+      loc: 0.25
+      scale: 0.1
+    proposal: 0.06
   w0pwa:
     value: -1.0
     latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
