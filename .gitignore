@@ -16,3 +16,5 @@ interface/.DS_Store
 likelihood/.DS_Store
 scripts/.DS_Store
 data/.DS_Store
+data/cov_dc1
+data/Roman_cov_Ncl20_Ntomo10
