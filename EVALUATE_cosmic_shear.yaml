@@ -14,9 +14,20 @@ likelihood:
     IA_model: 0
     IA_redshift_evolution: 0
     ggl_exclude: []
-    create_baryon_pca: false
-    baryon_pca_select_sims: "antilles-2-99/antilles-101-378/antilles-380-400"
-    filename_baryon_pca:
+
+    ### Generate baryonic feedback PCA from predefined hydrosims
+    ### Avaliable choices are 
+    ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN_T80(owls_AGN-1), 
+    ### owls_AGN_T85(owls_AGN-2), owls_AGN_T87(owls_AGN-3), BAHAMAS_T78(BAHAMAS-1), 
+    ### BAHAMAS_T76(BAHAMAS-2), BAHAMAS_T87(BAHAMAS-3). 
+    create_baryon_pca: true
+    baryon_pca_select_sims: "TNG100/HzAGN/mb2/illustris/eagle/owls_AGN_T80/owls_AGN_T85/owls_AGN_T87/BAHAMAS_T76/BAHAMAS_T78/BAHAMAS_T87"
+    filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
+
+    # print data vector
+    print_datavector: true
+    print_datavector_file: "./projects/roman_kl/data/roman_kl.modelvector"
+
 params:
   As_1e9:
     prior:
@@ -157,85 +168,6 @@ params:
   # Default settings in likelihood/roman_kl_params_source.yaml
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  # roman_DZ_S1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.002
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.002
-  #   proposal: 0.002
-  #   latex: \Delta z_\mathrm{s,roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # roman_M1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.005
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.005
-  #   proposal: 0.005
-  #   latex: m_\mathrm{roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # Intrinsic alignment
-  # roman_A1_1:
-  #   prior:
-  #     min: -5
-  #     max:  5
-  #   ref:
-  #     dist: norm
-  #     loc: 0.7
-  #     scale: 0.5
-  #   proposal: 0.5
-  #   latex: A_\mathrm{1-IA,roman}^1
-  # roman_A1_2:
-  #   prior:
-  #     min: -5
-  #     max:  5
-  #   ref:
-  #     dist: norm
-  #     loc: -1.7
-  #     scale: 0.5
-  #   proposal: 0.5
-  # roman_A2_1:
-  #   value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -1.36
-    #  scale: 0.5
-    #proposal: 0.5
-  #   latex: A_\mathrm{2-IA,Roman}^1
-  # roman_A2_2:
-  #   value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -2.5
-    #  scale: 0.5
-    #proposal: 0.5
-  #   latex: A_\mathrm{2-IA,Roman}^2
-  # roman_BTA_1:
-  #   value: 0.0
-    #prior:
-    #  min: 0
-    #  max: 2
-    #ref:
-    #  dist: norm
-    #  loc: 1
-    #  scale: 0.15
-    #proposal: 0.1
-    # latex: A_\mathrm{BTA-IA,Roman}^1
 
 theory:
   camb:
