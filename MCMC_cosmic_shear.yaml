@@ -256,4 +256,4 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
 
-output: ./projects/roman_kl/chains/cosmic_shear
+output: /xdisk/timeifler/yhhuang/roman_kl/chains/cosmic_shear
