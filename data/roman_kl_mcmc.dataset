@@ -1,0 +1,12 @@
+data_file = roman_kl.modelvector
+cov_file = Roman_cov_Ncl20_Ntomo10
+mask_file = roman_kl.mask
+nz_lens_file = Roman_tomo_Ntomo10_src.nz
+nz_source_file = Roman_tomo_Ntomo10_src.nz
+lens_ntomo = 10
+source_ntomo = 10
+n_cl = 20
+l_min= 20
+l_max = 4000
+l_max_shear = 4000
+all_sims_hdf5_file = baryons_logPkR.h5

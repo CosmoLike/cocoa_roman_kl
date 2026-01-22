@@ -5,7 +5,7 @@ stop_at_error: False
 likelihood:
   roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl.dataset # that assumes lens = source
+    data_file: roman_kl_mcmc.dataset # that assumes lens = source
     # lmax: 70000 # gg in Roman that requires higher lmax
     accuracyboost: 1.0
     integration_accuracy: 0
@@ -14,8 +14,9 @@ likelihood:
     non_linear_emul: 2
     IA_model: 0
     IA_redshift_evolution: 0
+    ggl_exclude: []
     print_datavector: False
-    ggl_exclude: [[6,0],[7,0],[7,1]]
+    filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
 params:
   As_1e9:
     prior:
@@ -162,60 +163,6 @@ params:
   
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  # Intrinsic alignment
-  roman_A1_1:
-    value: 0.0
-    prior:
-      min: -5
-      max:  5
-    ref:
-      dist: norm
-      loc: 0.7
-      scale: 0.5
-    proposal: 0.5
-    latex: A_\mathrm{1-IA,roman}^1
-  roman_A1_2:
-    prior:
-      min: -5
-      max:  5
-    ref:
-      dist: norm
-      loc: -1.7
-      scale: 0.5
-    proposal: 0.5
-  roman_A2_1:
-    value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -1.36
-    #  scale: 0.5
-    #proposal: 0.5
-    latex: A_\mathrm{2-IA,Roman}^1
-  roman_A2_2:
-    value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -2.5
-    #  scale: 0.5
-    #proposal: 0.5
-    latex: A_\mathrm{2-IA,Roman}^2
-  roman_BTA_1:
-    value: 0.0
-    #prior:
-    #  min: 0
-    #  max: 2
-    #ref:
-    #  dist: norm
-    #  loc: 1
-    #  scale: 0.15
-    #proposal: 0.1
-    latex: A_\mathrm{BTA-IA,Roman}^1
 
 theory:
   camb:
@@ -279,14 +226,14 @@ sampler:
       ]
     - [6,
         [
-          roman_DZ_S1, roman_DZ_S2, roman_DZ_S3, roman_DZ_S4, roman_DZ_S5,
-          roman_DZ_S6, roman_DZ_S7, roman_DZ_S8, roman_DZ_S9, roman_DZ_S10,
+          ROMAN_KL_DZ_S1, ROMAN_KL_DZ_S2, ROMAN_KL_DZ_S3, ROMAN_KL_DZ_S4, ROMAN_KL_DZ_S5,
+          ROMAN_KL_DZ_S6, ROMAN_KL_DZ_S7, ROMAN_KL_DZ_S8, ROMAN_KL_DZ_S9, ROMAN_KL_DZ_S10,
         ]
       ]
     - [25,
         [
-          roman_M1, roman_M2, roman_M3, roman_M4, roman_M5,
-          roman_M6, roman_M7, roman_M8, roman_M9, roman_M10,
+          ROMAN_KL_M1, ROMAN_KL_M2, ROMAN_KL_M3, ROMAN_KL_M4, ROMAN_KL_M5,
+          ROMAN_KL_M6, ROMAN_KL_M7, ROMAN_KL_M8, ROMAN_KL_M9, ROMAN_KL_M10,
         ]
       ]
 
