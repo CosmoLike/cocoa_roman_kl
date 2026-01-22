@@ -113,24 +113,10 @@
   # ------------------------------------------------------------------------
   # Intrinsic alignment
   ROMAN_KL_A1_1:
-    prior:
-      min: -5
-      max:  5
-    ref:
-      dist: norm
-      loc: 0.7
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
     latex: A_\mathrm{1-IA,ROMAN_KL}^1
   ROMAN_KL_A1_2:
-    prior:
-      min: -5
-      max:  5
-    ref:
-      dist: norm
-      loc: -1.7
-      scale: 0.5
-    proposal: 0.5
+    value: 0.0
     latex: A_\mathrm{1-IA,ROMAN_KL}^2
   ROMAN_KL_A1_3:
     value: 0
