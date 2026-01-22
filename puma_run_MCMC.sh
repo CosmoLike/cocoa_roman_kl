@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=kl_cocoa
 #SBATCH --output=/xdisk/timeifler/yhhuang/log/kl-%A.out
-#SBATCH --error=/groups/timeifler/yhhuang/log/kl-%A.err
+#SBATCH --error=/xdisk/timeifler/yhhuang/log/kl-%A.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --ntasks-per-socket=2
