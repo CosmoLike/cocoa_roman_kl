@@ -9,4 +9,4 @@ n_cl = 20
 l_min= 20
 l_max = 4000
 l_max_shear = 4000
-all_sims_hdf5_file = baryons_logPkR.h5
+baryon_pca_file = pca.txt
