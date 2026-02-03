@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=kl_cocoa
-#SBATCH --output=/xdisk/timeifler/yhhuang/log/kl-%A.out
-#SBATCH --error=/xdisk/timeifler/yhhuang/log/kl-%A.err
+#SBATCH --job-name=bary
+#SBATCH --output=/xdisk/timeifler/yhhuang/log/bary-%A.out
+#SBATCH --error=/xdisk/timeifler/yhhuang/log/bary-%A.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --ntasks-per-socket=2
@@ -16,8 +16,8 @@
 #SBATCH --account=timeifler
 
 # path
-export MCMC_YAML=./projects/roman_kl/MCMC_cosmic_shear.yaml
-export RUN_MODE_FLAG="-r"
+export MCMC_YAML=./projects/roman_kl/MCMC_baryon.yaml
+export RUN_MODE_FLAG="-f"
 
 echo Running on host `hostname`
 echo Time is `date`
