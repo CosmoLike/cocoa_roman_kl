@@ -16,7 +16,8 @@
 #SBATCH --account=timeifler
 
 # path
-export MCMC_YAML=./projects/roman_kl/MCMC_cosmic_shear.yaml
+# export MCMC_YAML=./projects/roman_kl/MCMC_cosmic_shear.yaml
+expport MCMC_YAML=./projects/roman_kl/MCMC_baryon.yaml
 export RUN_MODE_FLAG="-r"
 
 echo Running on host `hostname`
