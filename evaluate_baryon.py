@@ -4,6 +4,7 @@ import math
 from matplotlib import pyplot as plt
 import numpy as np
 import scipy
+import euclidemu2
 import cosmolike_roman_kl_interface as ci
 from getdist import IniFile
 from scipy.interpolate import interp1d
@@ -45,13 +46,8 @@ matplotlib.rcParams['text.usetex'] = True
 CAMBAccuracyBoost = 1.0
 non_linear_emul = 2
 CLprobe = '3x2pt'
-path = '/groups/timeifler/yhhuang/CosmoLike/cocoa/Cocoa/external_modules/data/roman_kl/'
-data_file = 'roman_kl.dataset'
 IA_model = 0
 IA_redshift_evolution = 0
-n_cl = 20
-l_min = 40.
-l_max = 4000.
 
 # evaluate parameters
 As_1e9 = 2.128048
@@ -370,12 +366,35 @@ def plot_C_ss_tomo_limber(ell, C_ss, C_ss_ref = None, param = None, colorbarlabe
         return (fig, axes)
     
 if __name__ == "__main__":
-    ell = np.logspace(np.log10(l_min), np.log10(l_max), n_cl)
-    param = ('TNG100','HzAGN','mb2','illustris','eagle','owls_AGN_T80','owls_AGN_T85',
-             'owls_AGN_T87', 'BAHAMAS_T76','BAHAMAS_T78','BAHAMAS_T80')
+    path = '/groups/timeifler/yhhuang/CosmoLike/cocoa/Cocoa/projects/roman_kl/data/'
+    data_file = 'roman_kl.dataset'
     data_path = '/xdisk/timeifler/yhhuang/roman_kl/data/'
     basename = 'roman_kl_%s.modelvector'
     figname = '/xdisk/timeifler/yhhuang/roman_kl/figures/baryon_contamination_roman_kl.pdf'
+
+    ini = IniFile(os.path.join(path, data_file))
+    lens_file = ini.relativeFileName('nz_lens_file')
+    source_file = ini.relativeFileName('nz_source_file')
+    lens_ntomo = ini.int('lens_ntomo')
+    source_ntomo = ini.int('source_ntomo')
+    n_cl = ini.int('n_cl')
+    l_min = ini.float('l_min')
+    l_max = ini.float('l_max')
+    
+    ci.initial_setup()
+    ci.init_accuracy_boost(1,0, int(1))
+    ci.init_cosmo_runmode(is_linear=False)
+    ci.init_redshift_distributions_from_files(
+        lens_multihisto_file=lens_file,
+        lens_ntomo=int(lens_ntomo), 
+        source_multihisto_file=source_file,
+        source_ntomo=int(source_ntomo))
+    ci.init_IA(ia_model=int(IA_model), IA_redshift_evolution=int(IA_redshift_evolution))
+
+    ell = np.logspace(np.log10(l_min), np.log10(l_max), n_cl)
+    param = ('TNG100','HzAGN','mb2','illustris','eagle','owls_AGN_T80','owls_AGN_T85',
+             'owls_AGN_T87', 'BAHAMAS_T76','BAHAMAS_T78','BAHAMAS_T80')
+
     C_ss = []
     for x in param:
         print('Calculating for ', x)
