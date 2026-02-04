@@ -43,6 +43,7 @@ matplotlib.rcParams['savefig.format'] = 'pdf'
 matplotlib.rcParams['text.usetex'] = True
 
 # settings
+all_sims_file = os.path.join(os.environ['ROOTDIR'], 'projects/roman_kl/data/baryons_logPkR.h5')
 CAMBAccuracyBoost = 1.0
 non_linear_emul = 2
 CLprobe = '3x2pt'
@@ -175,9 +176,9 @@ def C_ss_tomo_limber(ell,
                      As_1e9 = As_1e9, 
                      w = w, 
                      w0pwa = w0pwa,
-                     A1  = [0, 0, 0, 0, 0], 
-                     A2  = [0, 0, 0, 0, 0],
-                     BTA = [0, 0, 0, 0, 0],
+                     A1  = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                     A2  = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                     BTA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                      shear_photoz_bias = [ROMAN_KL_DZ_S1, ROMAN_KL_DZ_S2, ROMAN_KL_DZ_S3, ROMAN_KL_DZ_S4, ROMAN_KL_DZ_S5,
                                           ROMAN_KL_DZ_S6, ROMAN_KL_DZ_S7, ROMAN_KL_DZ_S8, ROMAN_KL_DZ_S9, ROMAN_KL_DZ_S10],
                      M = [ROMAN_KL_M1, ROMAN_KL_M2, ROMAN_KL_M3, ROMAN_KL_M4, ROMAN_KL_M5,
@@ -223,7 +224,7 @@ def C_ss_tomo_limber(ell,
     if baryon_sims is None:
         ci.reset_bary_struct()
     else:
-        ci.init_baryons_contamination(sim = baryon_sims)        
+        ci.init_baryons_contamination(sim = baryon_sims, allsims = all_sims_file)        
     return ci.C_ss_tomo_limber(l = ell)
 def plot_C_ss_tomo_limber(ell, C_ss, C_ss_ref = None, param = None, colorbarlabel = None, lmin = 30, lmax = 1500, 
                           cmap = 'gist_rainbow', ylim = [0.75,1.25], linestyle = None, linewidth = None,
@@ -369,7 +370,7 @@ if __name__ == "__main__":
     path = '/groups/timeifler/yhhuang/CosmoLike/cocoa/Cocoa/projects/roman_kl/data/'
     data_file = 'roman_kl.dataset'
     data_path = '/xdisk/timeifler/yhhuang/roman_kl/data/'
-    basename = 'roman_kl_%s.modelvector'
+    basename = 'roman_kl_%s'
     figname = '/xdisk/timeifler/yhhuang/roman_kl/figures/baryon_contamination_roman_kl.pdf'
 
     ini = IniFile(os.path.join(path, data_file))
@@ -382,18 +383,18 @@ if __name__ == "__main__":
     l_max = ini.float('l_max')
     
     ci.initial_setup()
-    ci.init_accuracy_boost(1,0, int(1))
+    ci.init_accuracy_boost(1.0, int(1))
     ci.init_cosmo_runmode(is_linear=False)
     ci.init_redshift_distributions_from_files(
         lens_multihisto_file=lens_file,
         lens_ntomo=int(lens_ntomo), 
         source_multihisto_file=source_file,
         source_ntomo=int(source_ntomo))
-    ci.init_IA(ia_model=int(IA_model), IA_redshift_evolution=int(IA_redshift_evolution))
+    ci.init_IA(ia_model=int(IA_model), ia_redshift_evolution=int(IA_redshift_evolution))
 
     ell = np.logspace(np.log10(l_min), np.log10(l_max), n_cl)
-    param = ('TNG100','HzAGN','mb2','illustris','eagle','owls_AGN_T80','owls_AGN_T85',
-             'owls_AGN_T87', 'BAHAMAS_T76','BAHAMAS_T78','BAHAMAS_T80')
+    param = ('TNG100-1','HzAGN-1','mb2-1','illustris-1','eagle-1','owls_AGN_t80','owls_AGN_t85',
+             'owls_AGN_t87', 'BAHAMAS_t76','BAHAMAS_t78','BAHAMAS_t80')
 
     C_ss = []
     for x in param:
@@ -401,15 +402,15 @@ if __name__ == "__main__":
         dv = C_ss_tomo_limber(ell=ell, baryon_sims=x)
         C_ss.append(dv)
         fname = os.path.join(data_path, basename % x)
-        np.savetxt(fname, np.column_stack((np.arange(0, len(dv)), dv)), fmt='%d %.6e')
+        np.save(fname, dv)
         print('Saved ', fname)
 
     C_ss_ref = C_ss_tomo_limber(ell=ell)
     fname = os.path.join(data_path, basename % 'dmo')
-    np.savetxt(fname, np.column_stack((np.arange(0, len(C_ss_ref)), C_ss_ref)), fmt='%d %.6e')
+    np.save(fname, C_ss_ref)
     print('Saved ', fname)
     # plot figures
-    plot_C_ss_tomo_limber(ell=ell, C_gs=C_ss, C_gs_ref=C_ss_ref, lmin=ell[0], lmax=ell[len(ell)-1], 
+    plot_C_ss_tomo_limber(ell=ell, C_ss=C_ss, C_ss_ref=C_ss_ref, lmin=ell[0], lmax=ell[len(ell)-1], 
                           cmap="twilight_shifted",  bintextpos = [0.15, 0.2], ylim = [0.61,1.07], 
                           legend = param, legendloc=(0.9,0.55), 
                           linewidth=[1.0, 1.3, 1.6, 1.9], linestyle = ['solid', 'dashed', 'dashdot', 'dotted'],
