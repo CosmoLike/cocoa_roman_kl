@@ -44,7 +44,7 @@ matplotlib.rcParams['text.usetex'] = True
 
 # settings
 all_sims_file = os.path.join(os.environ['ROOTDIR'], 'projects/roman_kl/data/baryons_logPkR.h5')
-CAMBAccuracyBoost = 1.0
+CAMBAccuracyBoost = 1.05
 non_linear_emul = 2
 CLprobe = '3x2pt'
 IA_model = 0
@@ -52,7 +52,7 @@ IA_redshift_evolution = 0
 
 # evaluate parameters
 As_1e9 = 2.128048
-ns = 0.96605
+ns = 0.9645
 H0 = 67.67
 omegab = 0.0491685
 omegam = 0.3156
@@ -83,7 +83,7 @@ w = -1.0
 # functions
 def get_camb_cosmology(omegam = omegam, omegab = omegab, H0 = H0, ns = ns, 
                        As_1e9 = As_1e9, w = w, w0pwa = w0pwa, AccuracyBoost=1.0, 
-                       kmax=5.0, k_per_logint=10, CAMBAccuracyBoost=1.0,
+                       kmax=10.0, k_per_logint=10, CAMBAccuracyBoost=CAMBAccuracyBoost,
                        non_linear_emul=non_linear_emul):
 
     As = lambda As_1e9: 1e-9 * As_1e9
@@ -185,7 +185,7 @@ def C_ss_tomo_limber(ell,
                           ROMAN_KL_M6, ROMAN_KL_M7, ROMAN_KL_M8, ROMAN_KL_M9, ROMAN_KL_M10],
                      baryon_sims = None,
                      AccuracyBoost = 1.0, 
-                     kmax = 7.5, 
+                     kmax = 10, 
                      k_per_logint = 10, 
                      CAMBAccuracyBoost = CAMBAccuracyBoost,
                      CLAccuracyBoost = 1.0, 
