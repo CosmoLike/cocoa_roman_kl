@@ -224,6 +224,7 @@ def C_ss_tomo_limber(ell,
     if baryon_sims is None:
         ci.reset_bary_struct()
     else:
+        print('Baryon sim = ', baryon_sims)
         ci.init_baryons_contamination(sim = baryon_sims, allsims = all_sims_file)        
     return ci.C_ss_tomo_limber(l = ell)
 def plot_C_ss_tomo_limber(ell, C_ss, C_ss_ref = None, param = None, colorbarlabel = None, lmin = 30, lmax = 1500, 
@@ -392,13 +393,13 @@ if __name__ == "__main__":
         source_ntomo=int(source_ntomo))
     ci.init_IA(ia_model=int(IA_model), ia_redshift_evolution=int(IA_redshift_evolution))
 
-    ell = np.logspace(np.log10(l_min), np.log10(l_max), n_cl)
+    dlogl = (np.log(l_max) - np.log(l_min)) / n_cl
+    ell = np.exp(np.arange(np.log(l_min), np.log(l_max), dlogl) + 0.5*dlogl)
     param = ('TNG100-1','HzAGN-1','mb2-1','illustris-1','eagle-1','owls_AGN_t80','owls_AGN_t85',
              'owls_AGN_t87', 'BAHAMAS_t76','BAHAMAS_t78','BAHAMAS_t80')
 
     C_ss = []
     for x in param:
-        print('Calculating for ', x)
         dv = C_ss_tomo_limber(ell=ell, baryon_sims=x)
         C_ss.append(dv)
         fname = os.path.join(data_path, basename % x)
@@ -410,11 +411,11 @@ if __name__ == "__main__":
     np.save(fname, C_ss_ref)
     print('Saved ', fname)
     # plot figures
-    plot_C_ss_tomo_limber(ell=ell, C_ss=C_ss, C_ss_ref=C_ss_ref, lmin=ell[0], lmax=ell[len(ell)-1], 
-                          cmap="twilight_shifted",  bintextpos = [0.15, 0.2], ylim = [0.61,1.07], 
-                          legend = param, legendloc=(0.9,0.55), 
-                          linewidth=[1.0, 1.3, 1.6, 1.9], linestyle = ['solid', 'dashed', 'dashdot', 'dotted'],
-                          figsize = (18, 12), bintextsize = 20, yaxislabelsize = 17, 
-                          yaxisticklabelsize = 14, xaxisticklabelsize = 20, 
-                          save=figname)
-    print('Figure saved at ', figname)
+    #plot_C_ss_tomo_limber(ell=ell, C_ss=C_ss, C_ss_ref=C_ss_ref, lmin=ell[0], lmax=ell[len(ell)-1], 
+    #                      cmap="twilight_shifted",  bintextpos = [0.15, 0.2], ylim = [0.61,1.07], 
+    #                      legend = param, legendloc=(0.9,0.55), 
+    #                      linewidth=[1.0, 1.3, 1.6, 1.9], linestyle = ['solid', 'dashed', 'dashdot', 'dotted'],
+    #                      figsize = (18, 12), bintextsize = 20, yaxislabelsize = 17, 
+    #                      yaxisticklabelsize = 14, xaxisticklabelsize = 20, 
+    #                      save=figname)
+    #print('Figure saved at ', figname)
