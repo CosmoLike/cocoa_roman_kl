@@ -17,7 +17,7 @@
 
 # path
 export MCMC_YAML=./projects/roman_kl/MCMC_baryon.yaml
-export RUN_MODE_FLAG="-f"
+export RUN_MODE_FLAG="-r"
 
 echo Running on host `hostname`
 echo Time is `date`
