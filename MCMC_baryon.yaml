@@ -90,31 +90,31 @@ params:
   # ------------------------------------------------------------------------
   ROMAN_KL_BARYON_Q1:
     prior:
-      min: -20.0
-      max: 20.0
+      min: -40.0
+      max: 140.0
     ref:
       dist: norm
-      loc: 0.0
+      loc: 0.1
       scale: 1.0
     proposal: 0.005
     latex: Q1_\mathrm{ROMAN_KL}^1
   ROMAN_KL_BARYON_Q2:
     prior:
-      min: -20.0
-      max: 20.0
+      min: -15.0
+      max: 15.0
     ref:
       dist: norm
-      loc: 0.0
+      loc: 0.1
       scale: 1.0
     proposal: 0.005
     latex: Q2_\mathrm{ROMAN_KL}^1
   ROMAN_KL_BARYON_Q3:
     prior:
-      min: -20.0
-      max: 20.0
+      min: -10.0
+      max: 10.0
     ref:
       dist: norm
-      loc: 0.0
+      loc: 0.1
       scale: 1.0
     proposal: 0.005
     latex: Q3_\mathrm{ROMAN_KL}^1
@@ -225,4 +225,4 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
 
-output: /xdisk/timeifler/yhhuang/roman_kl/chains/baryon
+output: /xdisk/timeifler/yhhuang/roman_kl/chains/baryon_redefined_prior
