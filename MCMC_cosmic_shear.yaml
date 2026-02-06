@@ -17,6 +17,7 @@ likelihood:
 
     # print the theory data vector to a file
     print_datavector: False
+    use_baryon_pca: True
 
 params:
   As_1e9:
@@ -139,31 +140,31 @@ params:
   # ------------------------------------------------------------------------
   ROMAN_KL_BARYON_Q1:
     prior:
-      min: -50
-      max: 50
+      min: -40.0
+      max: 140.0
     ref:
       dist: norm
-      loc: 0.0
+      loc: 0.5
       scale: 1.0
     proposal: 0.005
     latex: Q1_\mathrm{ROMAN_KL}^1
   ROMAN_KL_BARYON_Q2:
     prior:
-      min: -50
-      max: 50
+      min: -15.0
+      max: 15.0
     ref:
       dist: norm
-      loc: 0.0
+      loc: 0.1
       scale: 1.0
     proposal: 0.005
     latex: Q2_\mathrm{ROMAN_KL}^1
   ROMAN_KL_BARYON_Q3:
     prior:
-      min: -50
-      max: 50
+      min: -10.0
+      max: 10.0
     ref:
       dist: norm
-      loc: 0.0
+      loc: 0.5
       scale: 1.0
     proposal: 0.005
     latex: Q3_\mathrm{ROMAN_KL}^1
@@ -239,7 +240,7 @@ sampler:
     # ---------------------------------------------------------------------
     # Maximum number of posterior evaluations
     max_samples: .inf
-    Rminus1_stop: 0.015
+    Rminus1_stop: 0.01
     Rminus1_cl_stop: 0.17
     Rminus1_cl_level: 0.95
     # ---------------------------------------------------------------------
