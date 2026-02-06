@@ -17,8 +17,8 @@ likelihood:
 
     # print the theory data vector to a file
     print_datavector: False
+    use_baryon_pca: True
 
-    filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
 
 params:
   As_1e9: 
