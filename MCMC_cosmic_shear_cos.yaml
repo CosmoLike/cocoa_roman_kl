@@ -138,37 +138,35 @@ params:
   # Default settings in likelihood/roman_kl_params_source.yaml
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  ROMAN_KL_BARYON_Q1:
-    prior:
-      min: -40.0
-      max: 140.0
-    ref:
-      dist: norm
-      loc: 0.5
-      scale: 1.0
-    proposal: 0.005
-    latex: Q1_\mathrm{ROMAN_KL}^1
-  ROMAN_KL_BARYON_Q2:
-    prior:
-      min: -15.0
-      max: 15.0
-    ref:
-      dist: norm
-      loc: 0.1
-      scale: 1.0
-    proposal: 0.005
-    latex: Q2_\mathrm{ROMAN_KL}^1
-  ROMAN_KL_BARYON_Q3:
-    prior:
-      min: -10.0
-      max: 10.0
-    ref:
-      dist: norm
-      loc: 0.5
-      scale: 1.0
-    proposal: 0.005
-    latex: Q3_\mathrm{ROMAN_KL}^1
-
+  ROMAN_KL_BARYON_Q1: 0.0
+  ROMAN_KL_BARYON_Q2: 0.0
+  ROMAN_KL_BARYON_Q3: 0.0
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  ROMAN_KL_DZ_S1: 0.0
+  ROMAN_KL_DZ_S2: 0.0
+  ROMAN_KL_DZ_S3: 0.0
+  ROMAN_KL_DZ_S4: 0.0
+  ROMAN_KL_DZ_S5: 0.0
+  ROMAN_KL_DZ_S6: 0.0
+  ROMAN_KL_DZ_S7: 0.0
+  ROMAN_KL_DZ_S8: 0.0
+  ROMAN_KL_DZ_S9: 0.0
+  ROMAN_KL_DZ_S10: 0.0
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  ROMAN_KL_M1: 0.0
+  ROMAN_KL_M2: 0.0
+  ROMAN_KL_M3: 0.0
+  ROMAN_KL_M4: 0.0
+  ROMAN_KL_M5: 0.0
+  ROMAN_KL_M6: 0.0
+  ROMAN_KL_M7: 0.0
+  ROMAN_KL_M8: 0.0
+  ROMAN_KL_M9: 0.0
+  ROMAN_KL_M10: 0.0
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
 
   # roman_DZ_S1:
   #   prior:
