@@ -48,7 +48,7 @@ params:
       max: 90
     ref:
       dist: norm
-      loc: 67.67
+      loc: 67.27
       scale: 3
     proposal: 3
     latex: H_0
