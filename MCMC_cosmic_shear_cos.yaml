@@ -17,7 +17,7 @@ likelihood:
 
     # print the theory data vector to a file
     print_datavector: False
-    use_baryon_pca: True
+    use_baryon_pca: False
 
 params:
   As_1e9:
@@ -48,7 +48,7 @@ params:
       max: 90
     ref:
       dist: norm
-      loc: 67.27
+      loc: 67.67
       scale: 3
     proposal: 3
     latex: H_0
@@ -138,9 +138,6 @@ params:
   # Default settings in likelihood/roman_kl_params_source.yaml
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  ROMAN_KL_BARYON_Q1: 0.0
-  ROMAN_KL_BARYON_Q2: 0.0
-  ROMAN_KL_BARYON_Q3: 0.0
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   ROMAN_KL_DZ_S1: 0.0
@@ -251,25 +248,6 @@ sampler:
     oversample_power: 0.2
     oversample_thin: True
     blocking:
-    - [1,
-        [
-          As_1e9, ns, H0, omegab, omegam,
-        ]
-      ]
-    # - [6,
-    #     [
-    #       ROMAN_KL_DZ_S1, ROMAN_KL_DZ_S2, ROMAN_KL_DZ_S3, ROMAN_KL_DZ_S4, ROMAN_KL_DZ_S5,
-    #       ROMAN_KL_DZ_S6, ROMAN_KL_DZ_S7, ROMAN_KL_DZ_S8, ROMAN_KL_DZ_S9, ROMAN_KL_DZ_S10,
-    #     ]
-    #   ]
-    # - [25,
-    #     [
-    #       ROMAN_KL_M1, ROMAN_KL_M2, ROMAN_KL_M3, ROMAN_KL_M4, ROMAN_KL_M5,
-    #       ROMAN_KL_M6, ROMAN_KL_M7, ROMAN_KL_M8, ROMAN_KL_M9, ROMAN_KL_M10,
-    #       ROMAN_KL_BARYON_Q1, ROMAN_KL_BARYON_Q2, ROMAN_KL_BARYON_Q3,
-    #     ]
-    #   ]
-
     learn_every: 10d
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
