@@ -1,4 +1,4 @@
-data_file = roman_kl.modelvector
+data_file = roman_kl_2.modelvector
 cov_file = Roman_cov_Ncl20_Ntomo10
 mask_file = roman_kl.mask
 nz_lens_file = Roman_tomo_Ntomo10_src.nz

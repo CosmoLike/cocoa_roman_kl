@@ -5,7 +5,7 @@ stop_at_error: False
 likelihood:
   roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl.dataset # that assumes lens = source
+    data_file: roman_kl_mcmc.dataset # that assumes lens = source
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
@@ -20,13 +20,14 @@ likelihood:
     ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN_T80(owls_AGN-1), 
     ### owls_AGN_T85(owls_AGN-2), owls_AGN_T87(owls_AGN-3), BAHAMAS_T78(BAHAMAS-1), 
     ### BAHAMAS_T76(BAHAMAS-2), BAHAMAS_T87(BAHAMAS-3). 
-    create_baryon_pca: false
+    create_baryon_pca: False
     baryon_pca_select_sims: "TNG100/HzAGN/mb2/illustris/eagle/owls_AGN_T80/owls_AGN_T85/owls_AGN_T87/BAHAMAS_T76/BAHAMAS_T78/BAHAMAS_T80"
     filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
 
     # print data vector
-    print_datavector: true
+    print_datavector: False
     print_datavector_file: "./projects/roman_kl/data/roman_kl.modelvector"
+    use_baryon_pca: False
 
 params:
   As_1e9:
@@ -187,11 +188,11 @@ sampler:
     N: 100
     override:
       As_1e9: 2.128048
-        #ns: 0.9645
-      H0: 67.27
+      ns: 0.9645
+        #H0: 67.27
       omegab: 0.0491685
       omegam: 0.3156
-      mnu: 0.0
+      mnu: 0.06
       ROMAN_KL_DZ_S1: 0.0
       ROMAN_KL_DZ_S2: 0.0
       ROMAN_KL_DZ_S3: 0.0
@@ -218,4 +219,4 @@ sampler:
       w0pwa: -1.0
       w: -1.0
 
-output: /xdisk/timeifler/yhhuang/roman_kl/validate/ns
+output: /xdisk/timeifler/yhhuang/roman_kl/validate/run03_h0
