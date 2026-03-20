@@ -20,7 +20,7 @@ likelihood:
     ### TNG100, HzAGN, mb2, illustris, eagle, owls_AGN_T80(owls_AGN-1), 
     ### owls_AGN_T85(owls_AGN-2), owls_AGN_T87(owls_AGN-3), BAHAMAS_T78(BAHAMAS-1), 
     ### BAHAMAS_T76(BAHAMAS-2), BAHAMAS_T87(BAHAMAS-3). 
-    create_baryon_pca: true
+    create_baryon_pca: false
     baryon_pca_select_sims: "TNG100/HzAGN/mb2/illustris/eagle/owls_AGN_T80/owls_AGN_T85/owls_AGN_T87/BAHAMAS_T76/BAHAMAS_T78/BAHAMAS_T80"
     filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
 
@@ -85,7 +85,7 @@ params:
     drop: true
   mnu:
     prior:
-      min: 0.06
+      min: 0.0
       max: 0.6
     ref:
       dist: norm
@@ -184,14 +184,14 @@ theory:
 
 sampler:
   evaluate:
-    N: 1
+    N: 100
     override:
-      #As_1e9: 2.128048
-      ns: 0.9645
+      As_1e9: 2.128048
+        #ns: 0.9645
       H0: 67.27
       omegab: 0.0491685
       omegam: 0.3156
-      mnu: 0.06
+      mnu: 0.0
       ROMAN_KL_DZ_S1: 0.0
       ROMAN_KL_DZ_S2: 0.0
       ROMAN_KL_DZ_S3: 0.0
@@ -212,7 +212,10 @@ sampler:
       ROMAN_KL_M8: 0.0
       ROMAN_KL_M9: 0.0
       ROMAN_KL_M10: 0.0
+        #ROMAN_KL_BARYON_Q1: 0.0
+        #ROMAN_KL_BARYON_Q2: 0.0
+        #ROMAN_KL_BARYON_Q3: 0.0
       w0pwa: -1.0
       w: -1.0
 
-output: /xdisk/timeifler/yhhuang/roman_kl/likelihood_validate/As
+output: /xdisk/timeifler/yhhuang/roman_kl/validate/ns

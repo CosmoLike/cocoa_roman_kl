@@ -14,7 +14,7 @@
 #SBATCH --qos=user_qos_timeifler
 #SBATCH --account=timeifler
 
-export MCMC_YAML=./projects/roman_kl/likelihood_cosmic_shear.yaml
+export MCMC_YAML=./projects/roman_kl/validate_cosmic_shear.yaml
 
 echo Running on host `hostname`
 echo Time is `date`
