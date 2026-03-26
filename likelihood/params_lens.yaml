@@ -4,31 +4,31 @@
     latex: \Delta z_\mathrm{l,Roman}^1
   ROMAN_KL_DZ_L2:
     value: 'lambda ROMAN_KL_DZ_S2: ROMAN_KL_DZ_S2'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^2
   ROMAN_KL_DZ_L3:
     value: 'lambda ROMAN_KL_DZ_S3: ROMAN_KL_DZ_S3'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^3
   ROMAN_KL_DZ_L4:
     value: 'lambda ROMAN_KL_DZ_S4: ROMAN_KL_DZ_S4'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^4
   ROMAN_KL_DZ_L5:
     value: 'lambda ROMAN_KL_DZ_S5: ROMAN_KL_DZ_S5'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^5
   ROMAN_KL_DZ_L6:
     value: 'lambda ROMAN_KL_DZ_S6: ROMAN_KL_DZ_S6'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^6
   ROMAN_KL_DZ_L7:
     value: 'lambda ROMAN_KL_DZ_S7: ROMAN_KL_DZ_S7'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^7
   ROMAN_KL_DZ_L8:
     value: 'lambda ROMAN_KL_DZ_S8: ROMAN_KL_DZ_S8'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^8
   ROMAN_KL_DZ_L9:
     value: 'lambda ROMAN_KL_DZ_S9: ROMAN_KL_DZ_S9'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^9
   ROMAN_KL_DZ_L10:
     value: 'lambda ROMAN_KL_DZ_S10: ROMAN_KL_DZ_S10'
-    latex: \Delta z_\mathrm{l,Roman}^1
+    latex: \Delta z_\mathrm{l,Roman}^{10}
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -113,6 +113,26 @@
       scale: 0.1
     proposal: 0.1
     latex: b_\mathrm{1-Roman}^8
+  ROMAN_KL_B1_9:
+    prior:
+      min: 0.4
+      max: 4
+    ref:
+      dist: norm
+      loc: 1.76
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{1-Roman}^9
+  ROMAN_KL_B1_10:
+    prior:
+      min: 0.4
+      max: 4
+    ref:
+      dist: norm
+      loc: 1.76
+      scale: 0.1
+    proposal: 0.1
+    latex: b_\mathrm{1-Roman}^{10}
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -140,6 +160,12 @@
   ROMAN_KL_B2_8:
     value: 0.0
     latex: b_\mathrm{2-Roman}^8
+  ROMAN_KL_B2_9:
+    value: 0.0
+    latex: b_\mathrm{2-Roman}^9
+  ROMAN_KL_B2_10:
+    value: 0.0
+    latex: b_\mathrm{2-Roman}^{10}
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -167,6 +193,13 @@
   ROMAN_KL_BMAG_8:
     value: 0.0
     latex: b_\mathrm{BMAG-Roman}^8
+  ROMAN_KL_BMAG_9:
+    value: 0.0
+    latex: b_\mathrm{BMAG-Roman}^9
+  ROMAN_KL_BMAG_10:
+    value: 0.0
+    latex: b_\mathrm{BMAG-Roman}^{10}
+
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -195,3 +228,10 @@
   ROMAN_KL_PM8:
     value: 0.0
     latex: PM_\mathrm{Roman}^8
+  ROMAN_KL_PM9:
+    value: 0.0
+    latex: PM_\mathrm{Roman}^9
+  ROMAN_KL_PM10:
+    value: 0.0
+    latex: PM_\mathrm{Roman}^{10}
+
