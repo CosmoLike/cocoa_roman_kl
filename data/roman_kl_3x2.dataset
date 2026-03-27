@@ -3,7 +3,7 @@
 # so update data_file/mask_file when the full 3x2pt products are available.
 data_file = Roman_Ntomo10_3x2
 cov_file = Roman_3x2pt_cov_Ncl20_Ntomo10
-mask_file = one.mask
+mask_file = ones.mask
 nz_lens_file = Roman_tomo_Ntomo10_src.nz
 nz_source_file = Roman_tomo_Ntomo10_src.nz
 lens_ntomo = 10
