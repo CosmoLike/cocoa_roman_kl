@@ -2,7 +2,7 @@ path: null
 data_file: roman_kl_3x2.dataset
 accuracyboost: 1.0
 integration_accuracy: 0
-lmax: 100000 # lmax computed for real space correlation function
+# lmax: 100000 # lmax computed for real space correlation function
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
@@ -21,7 +21,7 @@ use_emulator: False
 ggl_exclude: []
 
 # BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag] (choices: see bias.h)
-bias_model: [0,0,0,0,0]
+bias_model: [0,0,0,1,0]
 
 add_baryons_on_dv: False
 which_bsims_add_on_dv: "antilles-2"

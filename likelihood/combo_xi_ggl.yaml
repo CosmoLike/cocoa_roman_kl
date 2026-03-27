@@ -21,7 +21,7 @@ use_emulator: False
 ggl_exclude: []
 
 # BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag] (choices: see bias.h)
-bias_model: [0,0,0,0,0]
+bias_model: [0,0,0,1,0]
 
 add_baryons_on_dv: False
 which_bsims_add_on_dv: "antilles-2"

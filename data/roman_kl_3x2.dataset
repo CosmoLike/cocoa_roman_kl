@@ -1,0 +1,15 @@
+# Placeholder 3x2pt dataset.
+# The current Roman files in this directory still only populate the shear block,
+# so update data_file/mask_file when the full 3x2pt products are available.
+data_file = Roman_Ntomo10_3x2
+cov_file = Roman_3x2pt_cov_Ncl20_Ntomo10
+mask_file = one.mask
+nz_lens_file = Roman_tomo_Ntomo10_src.nz
+nz_source_file = Roman_tomo_Ntomo10_src.nz
+lens_ntomo = 10
+source_ntomo = 10
+n_cl = 20
+l_min= 20
+l_max = 4000
+l_max_shear = 4000
+all_sims_hdf5_file = baryons_logPkR.h5
