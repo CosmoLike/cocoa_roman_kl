@@ -25,7 +25,7 @@ likelihood:
     filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
 
     # print data vector
-    print_datavector: true
+    print_datavector: False
     print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
 
 params:
@@ -202,16 +202,16 @@ sampler:
       ROMAN_KL_DZ_S8: 0.0
       ROMAN_KL_DZ_S9: 0.0
       ROMAN_KL_DZ_S10: 0.0
-      ROMAN_KL_DZ_L1: 0.0
-      ROMAN_KL_DZ_L2: 0.0
-      ROMAN_KL_DZ_L3: 0.0
-      ROMAN_KL_DZ_L4: 0.0
-      ROMAN_KL_DZ_L5: 0.0
-      ROMAN_KL_DZ_L6: 0.0
-      ROMAN_KL_DZ_L7: 0.0
-      ROMAN_KL_DZ_L8: 0.0
-      ROMAN_KL_DZ_L9: 0.0
-      ROMAN_KL_DZ_L10: 0.0
+      # ROMAN_KL_DZ_L1: 0.0
+      # ROMAN_KL_DZ_L2: 0.0
+      # ROMAN_KL_DZ_L3: 0.0
+      # ROMAN_KL_DZ_L4: 0.0
+      # ROMAN_KL_DZ_L5: 0.0
+      # ROMAN_KL_DZ_L6: 0.0
+      # ROMAN_KL_DZ_L7: 0.0
+      # ROMAN_KL_DZ_L8: 0.0
+      # ROMAN_KL_DZ_L9: 0.0
+      # ROMAN_KL_DZ_L10: 0.0
       ROMAN_KL_M1: 0.0
       ROMAN_KL_M2: 0.0
       ROMAN_KL_M3: 0.0
