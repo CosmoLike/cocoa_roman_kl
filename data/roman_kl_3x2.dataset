@@ -1,6 +1,3 @@
-# Placeholder 3x2pt dataset.
-# The current Roman files in this directory still only populate the shear block,
-# so update data_file/mask_file when the full 3x2pt products are available.
 data_file = Roman_Ntomo10_3x2
 cov_file = Roman_3x2pt_cov_Ncl20_Ntomo10
 mask_file = ones.mask
