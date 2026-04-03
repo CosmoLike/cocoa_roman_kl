@@ -16,12 +16,18 @@
 #SBATCH --account=timeifler
 
 # path
-export MCMC_YAML=./projects/roman_kl/MCMC_cosmic_shear_proposal.yaml
+if [ -z "$1"]; then
+    echo "Error: missing YAML inout."
+    echo "Usage: sbatch puma_run_MCMC.sh <YAML>"
+    exit 1
+fi
+export MCMC_YAML=$1
 export RUN_MODE_FLAG="-r"
 
 echo Running on host `hostname`
 echo Time is `date`
 echo Directory is `pwd`
+echo MCMC YAML is ${MCMC_YAML}
 echo Slurm job NAME is $SLURM_JOB_NAME
 echo Slurm job ID is $SLURM_JOBID
 
