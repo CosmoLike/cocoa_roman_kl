@@ -25,7 +25,7 @@ likelihood:
     filename_baryon_pca: "./projects/roman_kl/data/pca.txt"
 
     # print data vector
-    print_datavector: true
+    print_datavector: False
     print_datavector_file: "./projects/roman_kl/data/roman_kl.modelvector"
 
 params:
