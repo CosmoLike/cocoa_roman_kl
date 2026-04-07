@@ -5,8 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --ntasks-per-socket=2
-#SBATCH --cpus-per-task=8
-#SBATCH --mem-per-cpu=5GB
+#SBATCH --cpus-per-task=4
 #SBATCH --export=None
 #SBATCH --time=72:00:00
 #SBATCH --mail-type=ALL
