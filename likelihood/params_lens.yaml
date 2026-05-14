@@ -199,7 +199,6 @@
   ROMAN_KL_BMAG_10:
     value: 0.0
     latex: b_\mathrm{BMAG-Roman}^{10}
-
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
@@ -234,4 +233,69 @@
   ROMAN_KL_PM10:
     value: 0.0
     latex: PM_\mathrm{Roman}^{10}
-
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  ROMAN_KL_B3NL_1:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^1
+  ROMAN_KL_B3NL_2:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^2
+  ROMAN_KL_B3NL_3:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^3
+  ROMAN_KL_B3NL_4:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^4
+  ROMAN_KL_B3NL_5:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^5
+  ROMAN_KL_B3NL_6:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^6
+  ROMAN_KL_B3NL_7:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^7
+  ROMAN_KL_B3NL_8:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^8
+  ROMAN_KL_B3NL_9:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^9
+  ROMAN_KL_B3NL_10:
+    value: 0.0
+    latex: b_\mathrm{B3NL-Roman}^10
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  # ------------------------------------------------------------------------
+  ROMAN_KL_BK_1:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^1
+  ROMAN_KL_BK_2:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^2
+  ROMAN_KL_BK_3:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^3
+  ROMAN_KL_BK_4:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^4
+  ROMAN_KL_BK_5:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^5
+  ROMAN_KL_BK_6:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^6
+  ROMAN_KL_BK_7:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^7
+  ROMAN_KL_BK_8:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^8
+  ROMAN_KL_BK_9:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^9
+  ROMAN_KL_BK_10:
+    value: 0.0
+    latex: b_\mathrm{BK-Roman}^10

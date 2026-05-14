@@ -2,26 +2,35 @@ path: null
 data_file: roman_kl_3x2.dataset
 accuracyboost: 1.0
 integration_accuracy: 0
-# lmax: 100000 # lmax computed for real space correlation function
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
+external_nz_modeling: 0
+use_emulator: False
 debug: False
 # IA REDSHIFT EVOLUTION: 0 = NO_IA (AMPLITUDES SET TO ZERO), 
 #                        1 = IA_NLA_LF
 #                        2 = IA_REDSHIFT_BINNING, 
 #                        3 = IA_REDSHIFT_EVOLUTION
-IA_redshift_evolution: 0
+IA_redshift_evolution: 3
 # IA_MODEL: 0 = NLA, 1 = TATT
 IA_model: 0 
-external_nz_modeling: 0
-use_emulator: False
+# IA_code: 0 = C FASTPT, 1 = Python PAST-PT
+IA_code: 0
 
 # REQUIRE GGL_EXCLUDE TO MATCH THE SIZE OF THE 3x2pt DATA VECTOR
-ggl_exclude: []
+ggl_exclude: [[0,0], [1,0], [1,1], [2,0], [2,1], [2,2], 
+              [3,0], [3,1], [3,2], [3,3], [4,0], [4,1], 
+              [4,2], [4,3], [4,4], [5,0], [5,1], [5,2], 
+              [5,3], [5,4], [5,5], [6,0], [6,1], [6,2], 
+              [6,3], [6,4], [6,5], [6,6], [7,0], [7,1], 
+              [7,2], [7,3], [7,4], [7,5], [7,6], [7,7], [8,0], 
+              [8,1], [8,2], [8,3], [8,4], [8,5], [8,6], [8,7], 
+              [8,8], [9,0], [9,1], [9,2], [9,3], [9,4], [9,5], 
+              [9,6], [9,7], [9,8], [9,9]]
 
-# BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag] (choices: see bias.h)
-bias_model: [0,0,0,1,0]
+# BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag,bK] (see bias.c)
+bias_model: [0,0,0,1,0,0]
 
 add_baryons_on_dv: False
 which_bsims_add_on_dv: "antilles-2"
