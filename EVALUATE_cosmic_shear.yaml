@@ -5,7 +5,7 @@ stop_at_error: False
 likelihood:
   roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl.dataset # that assumes lens = source
+    data_file: roman_kl_mcmc.dataset # that assumes lens = source
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
