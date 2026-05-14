@@ -74,11 +74,24 @@ params:
     proposal: 0.01
     latex: \Omega_\mathrm{m}
   w0pwa:
-    value: -1.0
+    prior:
+      min: -5 
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
-    drop: true
   w:
-    value: -1.0
+    prior:
+      min: -3
+      max: -0.01
+    ref:
+      dist: norm
+      loc: -0.99
+      scale: 0.05
+    proposal: 0.05
     latex: w_{0,\mathrm{DE}}
   wa:
     value: 'lambda w0pwa, w: w0pwa - w'
@@ -100,241 +113,36 @@ params:
   # Nuisance parameters below (it overwrites the default settings)
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
-  # WL photo-z errors
-  roman_DZ_S1:
+  ROMAN_KL_BARYON_Q1:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
+      min: -40.0
+      max: 140.0
     ref:
       dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^1
-  roman_DZ_S2:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^2
-  roman_DZ_S3:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^3
-  roman_DZ_S4:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^4
-  roman_DZ_S5:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^5
-  roman_DZ_S6:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^6
-  roman_DZ_S7:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^7
-  roman_DZ_S8:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.002
-    proposal: 0.002
-    latex: \Delta z_\mathrm{s,roman}^8
-  # ------------------------------------------------------------------------
-  # Intrinsic alignment
-  # ------------------------------------------------------------------------
-  roman_A1_1:
-    prior:
-      min: -5
-      max:  5
-    ref:
-      dist: norm
-      loc: 0.7
-      scale: 0.5
-    proposal: 0.5
-    latex: A_\mathrm{1-IA,roman}^1
-  roman_A1_2:
-    prior:
-      min: -5
-      max:  5
-    ref:
-      dist: norm
-      loc: -1.7
-      scale: 0.5
-    proposal: 0.5
-  roman_A2_1:
-    value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -1.36
-    #  scale: 0.5
-    #proposal: 0.5
-    latex: A_\mathrm{2-IA,Roman}^1
-  roman_A2_2:
-    value: 0.0
-    #prior:
-    #  min: -5
-    #  max:  5
-    #ref:
-    #  dist: norm
-    #  loc: -2.5
-    #  scale: 0.5
-    #proposal: 0.5
-    latex: A_\mathrm{2-IA,Roman}^2
-  roman_BTA_1:
-    value: 0.0
-    #prior:
-    #  min: 0
-    #  max: 2
-    #ref:
-    #  dist: norm
-    #  loc: 1
-    #  scale: 0.15
-    #proposal: 0.1
-    latex: A_\mathrm{BTA-IA,Roman}^1
-  # ------------------------------------------------------------------------
-  # Shear calibration parameters
-  # ------------------------------------------------------------------------
-  roman_M1:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
+      loc: 0.5
+      scale: 1.0
     proposal: 0.005
-    latex: m_\mathrm{roman}^1
-  roman_M2:
+    latex: Q1_\mathrm{ROMAN_KL}^1
+  ROMAN_KL_BARYON_Q2:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
+      min: -15.0
+      max: 15.0
     ref:
       dist: norm
-      loc: 0.0
-      scale: 0.005
+      loc: 0.1
+      scale: 1.0
     proposal: 0.005
-    latex: m_\mathrm{roman}^2
-  roman_M3:
+    latex: Q2_\mathrm{ROMAN_KL}^1
+  ROMAN_KL_BARYON_Q3:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
+      min: -10.0
+      max: 10.0
     ref:
       dist: norm
-      loc: 0.0
-      scale: 0.005
+      loc: 0.5
+      scale: 1.0
     proposal: 0.005
-    latex: m_\mathrm{roman}^3
-  roman_M4:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^4
-  roman_M5:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^5
-  roman_M6:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^6
-  roman_M7:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^7
-  roman_M8:
-    prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    ref:
-      dist: norm
-      loc: 0.0
-      scale: 0.005
-    proposal: 0.005
-    latex: m_\mathrm{roman}^8
+    latex: Q3_\mathrm{ROMAN_KL}^1
 theory:
   emulrdrag:
     path: ./cobaya/cobaya/theories/
@@ -410,7 +218,7 @@ sampler:
     blocking:
     - [1,
         [
-          As_1e9, ns, H0, omegab, omegam,
+          As_1e9, ns, H0, omegab, omegam, 'w', 'w0pwa'
         ]
       ]
     - [35,
@@ -446,4 +254,4 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
-output: ./projects/roman_real/chains/EXAMPLE_EMUL2_MCMC1
+output: ./projects/roman_kl/chains/EXAMPLE_EMUL2_MCMC1

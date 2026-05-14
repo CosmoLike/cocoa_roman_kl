@@ -177,36 +177,6 @@ params:
       scale: 1.0
     proposal: 0.005
     latex: Q3_\mathrm{ROMAN_KL}^1
-
-
-  # roman_DZ_S1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.002
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.002
-  #   proposal: 0.002
-  #   latex: \Delta z_\mathrm{s,roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # roman_M1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.005
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.005
-  #   proposal: 0.005
-  #   latex: m_\mathrm{roman}^1
-  
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-
 theory:
   camb:
     path: ./external_modules/code/CAMB
@@ -267,13 +237,18 @@ sampler:
           As_1e9, ns, H0, omegab, omegam,
         ]
       ]
-    - [30,
+    - [25,
         [
           ROMAN_KL_DZ_S1, ROMAN_KL_DZ_S2, 
           ROMAN_KL_DZ_S3, ROMAN_KL_DZ_S4,
           ROMAN_KL_DZ_S5, ROMAN_KL_DZ_S6, 
           ROMAN_KL_DZ_S7, ROMAN_KL_DZ_S8, 
           ROMAN_KL_DZ_S9, ROMAN_KL_DZ_S10,
+          ROMAN_KL_B1_1, ROMAN_KL_B1_2,
+          ROMAN_KL_B1_3, ROMAN_KL_B1_4,
+          ROMAN_KL_B1_5, ROMAN_KL_B1_6,
+          ROMAN_KL_B1_7, ROMAN_KL_B1_8,
+          ROMAN_KL_B1_9, ROMAN_KL_B1_10
         ]
       ]
     - [60,
