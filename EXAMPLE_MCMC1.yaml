@@ -140,65 +140,14 @@ params:
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
   ROMAN_KL_BARYON_Q1:
-    prior:
-      min: -40.0
-      max: 140.0
-    ref:
-      dist: norm
-      loc: 0.5
-      scale: 1.0
-    proposal: 0.005
+    value: 0.0
     latex: Q1_\mathrm{ROMAN_KL}^1
   ROMAN_KL_BARYON_Q2:
-    prior:
-      min: -15.0
-      max: 15.0
-    ref:
-      dist: norm
-      loc: 0.1
-      scale: 1.0
-    proposal: 0.005
+    value: 0.0
     latex: Q2_\mathrm{ROMAN_KL}^1
   ROMAN_KL_BARYON_Q3:
-    prior:
-      min: -10.0
-      max: 10.0
-    ref:
-      dist: norm
-      loc: 0.5
-      scale: 1.0
-    proposal: 0.005
+    value: 0.0
     latex: Q3_\mathrm{ROMAN_KL}^1
-
-
-  # roman_DZ_S1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.002
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.002
-  #   proposal: 0.002
-  #   latex: \Delta z_\mathrm{s,roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # roman_M1:
-  #   prior:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.005
-  #   ref:
-  #     dist: norm
-  #     loc: 0.0
-  #     scale: 0.005
-  #   proposal: 0.005
-  #   latex: m_\mathrm{roman}^1
-  
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-
 theory:
   camb:
     path: ./external_modules/code/CAMB
@@ -268,14 +217,13 @@ sampler:
           ROMAN_KL_DZ_S9, ROMAN_KL_DZ_S10,
         ]
       ]
-    - [70,
+    - [60,
         [
           ROMAN_KL_M1, ROMAN_KL_M2, 
           ROMAN_KL_M3, ROMAN_KL_M4, 
           ROMAN_KL_M5, ROMAN_KL_M6, 
           ROMAN_KL_M7, ROMAN_KL_M8, 
-          ROMAN_KL_M9, ROMAN_KL_M10,
-          ROMAN_KL_BARYON_Q1, ROMAN_KL_BARYON_Q2, ROMAN_KL_BARYON_Q3,
+          ROMAN_KL_M9, ROMAN_KL_M10
         ]
       ]
     learn_every: 10d
