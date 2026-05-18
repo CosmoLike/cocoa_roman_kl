@@ -5,9 +5,9 @@ stop_at_error: False
 likelihood:
   roman_kl.combo_3x2pt:
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl_3x2.dataset # that assumes lens = source
-    accuracyboost: 1.0
-    integration_accuracy: 0
+    data_file: roman_kl_3x2_high_acc.dataset # that assumes lens = source
+    accuracyboost: 10.0
+    integration_accuracy: 10
     kmax_boltzmann: 7.5
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
@@ -26,7 +26,7 @@ likelihood:
 
     # print data vector
     print_datavector: False
-    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
+    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2_high_acc.modelvector"
 
 params:
   As_1e9:
