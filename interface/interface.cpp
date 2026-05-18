@@ -400,7 +400,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       [](std::string scenarios, std::string allsims) {
         using namespace cosmolike_interface;
         BaryonScenario::get_instance().set_scenarios(allsims, scenarios);
-        return compute_baryon_pcas_Mx2pt_N<1,3>({0,1,2});
+        return compute_baryon_pcas_Mx2pt_N<1,3>({0, 1, 2});
       },
       "Compute baryonic principal components given a list of scenarios" 
       "that contaminate the matter power spectrum",

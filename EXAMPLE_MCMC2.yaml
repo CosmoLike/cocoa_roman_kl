@@ -170,7 +170,6 @@ theory:
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
       k_per_logint: 20
-
 sampler:
   mcmc:
     # ---------------------------------------------------------------------

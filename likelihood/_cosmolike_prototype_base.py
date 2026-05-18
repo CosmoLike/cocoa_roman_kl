@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import scipy
+from scipy.interpolate import interp1d
 import sys
 import time
 import functools
@@ -42,7 +43,7 @@ def with_omp_threads(fn):
         return fn(*args, **kwargs)
     return wrapper
 
-survey = "roman"
+survey = "ROMAN_KL"
 
 class _cosmolike_prototype_base(DataSetLikelihood):
 
@@ -103,20 +104,20 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
       if self.external_nz_modeling: 
         (self.lens_nz, self.source_nz) = ci.read_redshift_distributions(
-            lens_multihisto_file=self.lens_file,
-            lens_ntomo=int(self.lens_ntomo), 
-            source_multihisto_file=self.source_file,
-            source_ntomo=int(self.source_ntomo)
+            lens_multihisto_file = self.lens_file,
+            lens_ntomo = int(self.lens_ntomo), 
+            source_multihisto_file = self.source_file,
+            source_ntomo = int(self.source_ntomo)
           ) 
         ci.init_lens_sample_size(int(self.lens_ntomo))
         ci.init_source_sample_size(int(self.source_ntomo))
         ci.init_ntomo_powerspectra() # must be called after set_source/lens_size  
       else:
         ci.init_redshift_distributions_from_files(
-          lens_multihisto_file=self.lens_file,
-          lens_ntomo=int(self.lens_ntomo), 
-          source_multihisto_file=self.source_file,
-          source_ntomo=int(self.source_ntomo)) 
+          lens_multihisto_file = self.lens_file,
+          lens_ntomo = int(self.lens_ntomo), 
+          source_multihisto_file = self.source_file,
+          source_ntomo = int(self.source_ntomo)) 
 
       ci.init_data_fourier(self.cov_file, self.mask_file, self.data_vector_file)
 
@@ -434,7 +435,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
   @with_omp_threads
   def get_datavector(self, **params):        
     if self.use_emulator == 1:
-      dv = self.internal_get_datavector_emulator(**params)
+      #dv = self.internal_get_datavector_emulator(**params)
+      dv = 0.0
     else:
       dv = self.internal_get_datavector(**params)
     return np.array(dv,dtype='float64')

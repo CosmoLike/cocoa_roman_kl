@@ -5,18 +5,19 @@ stop_at_error: False
 likelihood:
   roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl_3x2.dataset # that assumes lens = source
-    print_datavector: False
-    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
+    data_file: roman_kl_mcmc.dataset
+    print_datavector: True
+    print_datavector_file: "./projects/roman_kl/chains/roman_kl_cosmic_shear.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
+    ggl_exclude: []
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
     IA_model: 0 # NLA (0) or TATT (1)
     IA_code: 0  # CFASTPT (0) or FASTPT (1) (only works if not NLA)
     IA_redshift_evolution: 3
-    debug: false
+    debug: False
     use_baryon_pca: false
     create_baryon_pca: false
     filename_baryon_pca: "./projects/roman_kl/chains/pca.txt"
@@ -160,6 +161,18 @@ params:
   # Default settings in likelihood/roman_kl_params_source.yaml
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
+  ROMAN_KL_A1_1:
+    value: 0.0
+    latex: A_\mathrm{1-IA,ROMAN_KL}^1
+  ROMAN_KL_A1_2:
+    value: 0.0
+    latex: A_\mathrm{1-IA,ROMAN_KL}^2
+  ROMAN_KL_A2_1:
+    value: 0.0
+    latex: A_\mathrm{2-IA,Roman}^1
+  ROMAN_KL_A2_2:
+    value: 0.0
+    latex: A_\mathrm{2-IA,Roman}^2
 theory:
   camb:
     path: ./external_modules/code/CAMB
@@ -167,12 +180,11 @@ theory:
     use_renames: True
     extra_args:
       halofit_version: takahashi
-      AccuracyBoost: 1.1
-      lens_potential_accuracy: 1.0
+      AccuracyBoost: 1.05
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
-      k_per_logint: 15
-      kmax: 10.0
+      k_per_logint: 10
+      kmax: 10
 sampler:
   evaluate:
     N: 1

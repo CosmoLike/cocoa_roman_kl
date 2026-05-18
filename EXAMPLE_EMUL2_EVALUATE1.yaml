@@ -8,7 +8,7 @@ likelihood:
     path: ./external_modules/data/roman_kl
     data_file: roman_kl_3x2.dataset # that assumes lens = source
     print_datavector: False
-    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
+    print_datavector_file: "./projects/roman_kl/chains/roman_kl_cosmic_shear.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5

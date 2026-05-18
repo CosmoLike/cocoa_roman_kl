@@ -4,12 +4,15 @@ stop_at_error: False
 
 likelihood:
   roman_kl.combo_3x2pt:
+  #roman_kl.combo_xi_ggl:
+  #roman_kl.combo_xi_gg:
+  #roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
     data_file: roman_kl_3x2.dataset # that assumes lens = source
-    print_datavector: False
-    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
+    print_datavector: True
+    print_datavector_file: "./projects/roman_kl/chains/roman_kl_3x2.modelvector"
     accuracyboost: 1.0
-    integration_accuracy: 0
+    integration_accuracy: 1
     kmax_boltzmann: 7.5
     # 1 EE2, 2 Halofit
     non_linear_emul: 2
@@ -175,12 +178,11 @@ theory:
     use_renames: True
     extra_args:
       halofit_version: takahashi
-      AccuracyBoost: 1.1
-      lens_potential_accuracy: 1.0
+      AccuracyBoost: 1.05
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
-      k_per_logint: 15
-      kmax: 10.0
+      k_per_logint: 10
+      kmax: 10
 sampler:
   evaluate:
     N: 1
@@ -191,6 +193,8 @@ sampler:
       omegab: 0.0491685
       omegam: 0.3156
       mnu: 0.06
+      w0pwa: -1.0
+      w: -1.0
       ROMAN_KL_DZ_S1: 0.0
       ROMAN_KL_DZ_S2: 0.0
       ROMAN_KL_DZ_S3: 0.0
@@ -221,6 +225,4 @@ sampler:
       ROMAN_KL_B1_8: 2.08
       ROMAN_KL_B1_9: 2.20
       ROMAN_KL_B1_10: 2.32
-      w0pwa: -1.0
-      w: -1.0
 output: ./projects/roman_kl/chains/EXAMPLE_EVALUATE2
