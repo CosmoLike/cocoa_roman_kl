@@ -6,7 +6,7 @@ likelihood:
   roman_kl.cosmic_shear:
     path: ./external_modules/data/roman_kl
     data_file: roman_kl_mcmc.dataset
-    print_datavector: True
+    print_datavector: False
     print_datavector_file: "./projects/roman_kl/chains/roman_kl_cosmic_shear.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
@@ -19,8 +19,9 @@ likelihood:
     IA_redshift_evolution: 3
     debug: False
     use_baryon_pca: false
-    create_baryon_pca: false
-    filename_baryon_pca: "./projects/roman_kl/chains/pca.txt"
+    create_baryon_pca: true
+    baryon_pca_select_sims: "TNG100-1/HzAGN-1/mb2-1/illustris-1/eagle-1/owls_AGN_t80/owls_AGN_t85/owls_AGN_t87/BAHAMAS_t76/BAHAMAS_t78/BAHAMAS_t80"
+    filename_baryon_pca: "./projects/roman_kl/chains/pca_cosmic_shear.txt"
 params:
   As_1e9:
     prior:
