@@ -6,9 +6,9 @@ likelihood:
   roman_kl.cosmic_shear:
     use_emulator: 2
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl_3x2.dataset # that assumes lens = source
+    data_file: roman_kl_3x2_emul2.dataset # that assumes lens = source
     print_datavector: False
-    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
+    print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2_emul2.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
@@ -74,24 +74,27 @@ params:
     proposal: 0.01
     latex: \Omega_\mathrm{m}
   w0pwa:
-    prior:
-      min: -5 
-      max: -0.01
-    ref:
-      dist: norm
-      loc: -0.99
-      scale: 0.05
-    proposal: 0.05
+    value: -1.0
+    # prior:
+    #   min: -5 
+    #   max: -0.01
+    # ref:
+    #   dist: norm
+    #   loc: -0.99
+    #   scale: 0.05
+    # proposal: 0.05
     latex: w_{0,\mathrm{DE}}+w_{a,\mathrm{DE}}
+    drop: true
   w:
-    prior:
-      min: -3
-      max: -0.01
-    ref:
-      dist: norm
-      loc: -0.99
-      scale: 0.05
-    proposal: 0.05
+    value: -1.0
+    # prior:
+    #   min: -3
+    #   max: -0.01
+    # ref:
+    #   dist: norm
+    #   loc: -0.99
+    #   scale: 0.05
+    # proposal: 0.05
     latex: w_{0,\mathrm{DE}}
   wa:
     value: 'lambda w0pwa, w: w0pwa - w'
@@ -197,7 +200,7 @@ sampler:
     blocking:
     - [20,
         [
-          As_1e9, ns, H0, omegab, omegam, 'w', 'w0pwa'
+          As_1e9, ns, H0, omegab, omegam, #'w', 'w0pwa'
         ]
       ]
     - [35,
@@ -232,4 +235,4 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
     Rminus1_single_split: 4
-output: ./projects/roman_kl/chains/EXAMPLE_EMUL2_MCMC1
+output: /xdisk/timeifler/yhhuang/roman_kl/chains_v4.11/EMUL2_cosmic_shear

@@ -6,9 +6,9 @@ likelihood:
   roman_kl.cosmic_shear:
     use_emulator: 2
     path: ./external_modules/data/roman_kl
-    data_file: roman_kl_3x2.dataset # that assumes lens = source
+    data_file: roman_kl_3x2_emul2.dataset # that assumes lens = source
     print_datavector: False
-    print_datavector_file: "./projects/roman_kl/chains/roman_kl_cosmic_shear.modelvector"
+    print_datavector_file: "./projects/roman_kl/chains/roman_kl_cosmic_shear_emul2.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
