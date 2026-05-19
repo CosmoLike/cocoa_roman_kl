@@ -26,9 +26,9 @@ likelihood:
                   [8,6], [8,7], [8,8], [9,0], [9,1], [9,2], [9,3], 
                   [9,4], [9,5], [9,6], [9,7], [9,8], [9,9]]
     debug: false
-    use_baryon_pca: false
+    use_baryon_pca: true
     create_baryon_pca: false
-    filename_baryon_pca: "./projects/roman_kl/chains/pca.txt"
+    filename_baryon_pca: "./projects/roman_kl/chains/pca_emul2.txt"
 params:
   As_1e9:
     prior:

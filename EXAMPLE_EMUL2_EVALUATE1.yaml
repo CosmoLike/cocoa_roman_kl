@@ -17,10 +17,19 @@ likelihood:
     IA_model: 0 # NLA (0) or TATT (1)
     IA_code: 0  # CFASTPT (0) or FASTPT (1) (only works if not NLA)
     IA_redshift_evolution: 3
+    ggl_exclude: [[0,0], [1,0], [1,1], [2,0], [2,1], [2,2], [3,0], 
+                  [3,1], [3,2], [3,3], [4,0], [4,1], [4,2], [4,3], 
+                  [4,4], [5,0], [5,1], [5,2], [5,3], [5,4], [5,5], 
+                  [6,0], [6,1], [6,2], [6,3], [6,4], [6,5], [6,6], 
+                  [7,0], [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], 
+                  [7,7], [8,0], [8,1], [8,2], [8,3], [8,4], [8,5], 
+                  [8,6], [8,7], [8,8], [9,0], [9,1], [9,2], [9,3], 
+                  [9,4], [9,5], [9,6], [9,7], [9,8], [9,9]]
     debug: false
     use_baryon_pca: false
     create_baryon_pca: false
-    filename_baryon_pca: "./projects/roman_kl/chains/pca.txt"
+    baryon_pca_select_sims: "TNG100-1/HzAGN-1/mb2-1/illustris-1/eagle-1/owls_AGN_t80/owls_AGN_t85/owls_AGN_t87/BAHAMAS_t76/BAHAMAS_t78/BAHAMAS_t80"
+    filename_baryon_pca: "./projects/roman_kl/chains/pca_emul2.txt"
 params:
   As_1e9:
     prior:
