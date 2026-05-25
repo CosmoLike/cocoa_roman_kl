@@ -23,20 +23,20 @@ likelihood:
 params:
   As_1e9:
     prior:
-      min: 0.770
-      max: 3.729
+      min: 0.5
+      max: 5
     ref:
       dist: norm
-      loc: 2.128048
-      scale: 0.2
+      loc: 2.12
+      scale: 0.25
     proposal: 0.2
     latex: 10^9 A_\mathrm{s})
     drop: true
     renames: A
   ns:
     prior:
-      min: 0.5
-      max: 1.1
+      min: 0.87
+      max: 1.07
     ref:
       dist: norm
       loc: 0.9645
@@ -45,18 +45,18 @@ params:
     latex: n_\mathrm{s}
   H0:
     prior:
-      min: 40
-      max: 90
+      min: 55
+      max: 91
     ref:
       dist: norm
       loc: 67.27
-      scale: 3
+      scale: 5
     proposal: 3
     latex: H_0
   omegab:
     prior:
-      min: 0.005
-      max: 0.095
+      min: 0.03
+      max: 0.07
     ref:
       dist: norm
       loc: 0.0491685
@@ -66,13 +66,13 @@ params:
     drop: true
   omegam:
     prior:
-      min: 0.095
-      max: 0.585
+      min: 0.1
+      max: 0.9
     ref:
       dist: norm
       loc: 0.3156
-      scale: 0.015
-    proposal: 0.015
+      scale: 0.01
+    proposal: 0.01
     latex: \Omega_\mathrm{m}
     drop: true
   w0pwa:
