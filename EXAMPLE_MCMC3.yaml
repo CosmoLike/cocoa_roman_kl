@@ -3,11 +3,9 @@ debug: False
 stop_at_error: False
 
 likelihood:
-  roman_kl.cosmic_shear:
+  roman_kl.combo_3x2pt:
     path: ./external_modules/data/roman_kl
     data_file: roman_kl_3x2_b1z.dataset # that assumes lens = source
-    # print_datavector: False
-    # print_datavector_file: "./projects/roman_kl/data/roman_kl_3x2.modelvector"
     accuracyboost: 1.0
     integration_accuracy: 0
     kmax_boltzmann: 7.5
@@ -16,10 +14,20 @@ likelihood:
     IA_model: 0 # NLA (0) or TATT (1)
     IA_code: 0  # CFASTPT (0) or FASTPT (1) (only works if not NLA)
     IA_redshift_evolution: 3
+    ggl_exclude: [[0,0], [1,0], [1,1], [2,0], [2,1], [2,2], [3,0], 
+                  [3,1], [3,2], [3,3], [4,0], [4,1], [4,2], [4,3], 
+                  [4,4], [5,0], [5,1], [5,2], [5,3], [5,4], [5,5], 
+                  [6,0], [6,1], [6,2], [6,3], [6,4], [6,5], [6,6], 
+                  [7,0], [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], 
+                  [7,7], [8,0], [8,1], [8,2], [8,3], [8,4], [8,5], 
+                  [8,6], [8,7], [8,8], [9,0], [9,1], [9,2], [9,3], 
+                  [9,4], [9,5], [9,6], [9,7], [9,8], [9,9]]
+    # BIAS REDSHIFT EVOLUTION [b1,b2,bs2,b3,bmag,bK] (see bias.c)
+    bias_model: [5,0,0,1,0,0]
     debug: false
     use_baryon_pca: false
     create_baryon_pca: false
-    filename_baryon_pca: "./projects/roman_kl/chains/pca.txt"
+    filename_baryon_pca: "./projects/roman_kl/chains/pca_b1z.txt"
 params:
   As_1e9:
     prior:
@@ -48,8 +56,6 @@ params:
       dist: norm
       loc: 73.0
       scale: 20.0
-        #min: 55
-        #max: 91
     ref:
       dist: norm
       loc: 67.27
@@ -61,8 +67,6 @@ params:
       dist: norm
       loc: 0.05
       scale: 0.022
-        #min: 0.03
-        #max: 0.07
     ref:
       dist: norm
       loc: 0.0491685
@@ -145,6 +149,51 @@ params:
   # Default settings in likelihood/roman_kl_params_source.yaml
   # ------------------------------------------------------------------------
   # ------------------------------------------------------------------------
+  ROMAN_KL_B1_1:
+    prior:
+      min: 0.0
+      max: 1.7
+    ref:
+      dist: norm
+      loc: 0.98
+      scale: 0.05
+    proposal: 0.05
+    latex: b_\mathrm{1-Roman}^1
+  ROMAN_KL_B1_2:
+    prior:
+      min: 0.1
+      max: 1.0
+    ref:
+      dist: norm
+      loc: 0.34
+      scale: 0.05
+    proposal: 0.05
+    latex: b_\mathrm{1-Roman}^2
+  ROMAN_KL_B1_3:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^3
+  ROMAN_KL_B1_4:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^4
+  ROMAN_KL_B1_5:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^5
+  ROMAN_KL_B1_6:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^6
+  ROMAN_KL_B1_7:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^7
+  ROMAN_KL_B1_8:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^8
+  ROMAN_KL_B1_9:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^9
+  ROMAN_KL_B1_10:
+    value: 1.0
+    latex: b_\mathrm{1-Roman}^{10}
+  # baryon PCA
   ROMAN_KL_BARYON_Q1:
     value: 0.0
     latex: Q1_\mathrm{ROMAN_KL}^1
@@ -168,14 +217,13 @@ theory:
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
       k_per_logint: 20
-
 sampler:
   mcmc:
     # ---------------------------------------------------------------------
     # File (w/ path) or matrix defining a covariance matrix for the proposal:
     # - null (default): will be generated from params info (prior and proposal)
     # - matrix: remember to set `covmat_params` to the parameters in the matrix
-    covmat: /xdisk/timeifler/yhhuang/roman_kl/proposal_cov/cs_Gauss.covmat
+    covmat:
     covmat_params:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
@@ -194,9 +242,12 @@ sampler:
     # Convergence and stopping
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
+    # Warm up
+    max_samples: 10000
+    Rminus1_stop: 0.5
     # Maximum number of posterior evaluations
-    max_samples: .inf
-    Rminus1_stop: 0.01
+    # max_samples: .inf
+    # Rminus1_stop: 0.01
     Rminus1_cl_stop: 0.2
     Rminus1_cl_level: 0.95
     # ---------------------------------------------------------------------
@@ -214,13 +265,14 @@ sampler:
           As_1e9, ns, H0, omegab, omegam,
         ]
       ]
-    - [35,
+    - [25,
         [
           ROMAN_KL_DZ_S1, ROMAN_KL_DZ_S2, 
           ROMAN_KL_DZ_S3, ROMAN_KL_DZ_S4,
           ROMAN_KL_DZ_S5, ROMAN_KL_DZ_S6, 
           ROMAN_KL_DZ_S7, ROMAN_KL_DZ_S8, 
           ROMAN_KL_DZ_S9, ROMAN_KL_DZ_S10,
+          ROMAN_KL_B1_1, ROMAN_KL_B1_2,
         ]
       ]
     - [60,
@@ -250,4 +302,4 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
-output: /xdisk/timeifler/yhhuang/roman_kl/production/MCMC_cs
+output: /xdisk/timeifler/yhhuang/roman_kl/production/MCMC_3x2_b1z

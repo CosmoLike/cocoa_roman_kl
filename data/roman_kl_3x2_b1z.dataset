@@ -1,0 +1,13 @@
+data_file = roman_kl_3x2_b1z.modelvector
+cov_file = Roman_3x2pt_cov_Ncl20_Ntomo10_b1z.cv
+mask_file = ones.mask
+nz_lens_file = Roman_tomo_Ntomo10_src.nz
+nz_source_file = Roman_tomo_Ntomo10_src.nz
+lens_ntomo = 10
+source_ntomo = 10
+n_cl = 20
+l_min= 20
+l_max = 4000
+l_max_shear = 4000
+baryon_pca_file = pca_b1z.txt
+all_sims_hdf5_file = baryons_logPkR.h5
