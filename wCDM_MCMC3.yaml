@@ -239,7 +239,8 @@ sampler:
     # File (w/ path) or matrix defining a covariance matrix for the proposal:
     # - null (default): will be generated from params info (prior and proposal)
     # - matrix: remember to set `covmat_params` to the parameters in the matrix
-    covmat:
+    # covmat: /xdisk/timeifler/yhhuang/roman_kl/proposal_cov/MCMC_3x2_waw0.covmat
+    covmat: /xdisk/timeifler/yhhuang/roman_kl/proposal_cov/MCMC_2x2_waw0.covmat
     covmat_params:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
@@ -259,11 +260,11 @@ sampler:
     # ---------------------------------------------------------------------
     # ---------------------------------------------------------------------
     # Warm up
-    max_samples: 10000
-    Rminus1_stop: 0.5
+    # max_samples: 10000
+    # Rminus1_stop: 0.5
     # Maximum number of posterior evaluations
-    # max_samples: .inf
-    # Rminus1_stop: 0.01
+    max_samples: .inf
+    Rminus1_stop: 0.01
     Rminus1_cl_stop: 0.2
     Rminus1_cl_level: 0.95
     # ---------------------------------------------------------------------
