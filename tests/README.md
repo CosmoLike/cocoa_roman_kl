@@ -3,9 +3,9 @@
 These tests catch two kinds of silent breakage: a $\chi^2$ that drifted
 because code or data changed by accident, and a race condition (a bug
 where evaluating several points in a row corrupts a later result
-through leftover internal state or colliding OpenMP threads). The
-suite also measures the accuracy of the EMUL2 emulated pipelines and
-reports whether they are accurate enough for data analysis (advisory:
+through leftover internal state or colliding OpenMP threads). These
+tests also measure the accuracy of the EMUL2 emulated pipelines and
+report whether they are accurate enough for data analysis (advisory:
 no pass/fail).
 
 Every model build runs in its own worker subprocess: example1 and
@@ -25,14 +25,15 @@ Without pytest:
 
     python -m unittest discover -s ./projects/roman_kl/tests -v
 
-The suite changes no project files. Each test streams a progress line
+The tests change no project files. Each test streams a progress line
 per model build and per evaluation, then a report block with the
 computed $\chi^2$, the stored reference, the difference, and the pass
 limit. A full run performs about 100 likelihood evaluations and takes
 a few minutes. The test modules force `OMP_NUM_THREADS=4` internally.
-The suite never waits for a keypress: a space/enter prompt between
-tests means the output is being piped through a pager such as `less`,
-so run the command with nothing piped after it.
+The tests never stop to ask for input. If the terminal pauses until
+space or enter is pressed, something sent the output through `less`
+(a program that stops after each full screen): run the commands
+exactly as written above, with nothing added after them.
 
 ## The tests
 
