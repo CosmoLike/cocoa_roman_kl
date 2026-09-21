@@ -67,8 +67,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
 # The recommendation threshold on |emulator - exact| chi2. It equals
-# CHI2_TOLERANCE on purpose: an emulator whose error already rivals
-# the suite's drift budget would eat the whole error margin of a real
+# CHI2_TOLERANCE on purpose: the reference tests allow the exact
+# pipeline a 0.2 chi2 band, and an emulator whose own error already
+# rivals that band would eat the whole error margin of a real
 # analysis.
 RECOMMENDATION_LIMIT = u.CHI2_TOLERANCE
 

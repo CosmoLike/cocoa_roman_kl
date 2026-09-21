@@ -39,11 +39,12 @@ tests. The frozen state has three parts:
   - frozen/data/: the tests' own copy of the data vectors, covariance,
     n(z), and masks. (The EMUL2 trained-network files are NOT copied:
     they live in external_modules/data/emultrf, pinned by the EMULTRF
-    keys in set_installation_options.sh, and their drift is part of
-    what the advisory checks measure.)
+    keys in set_installation_options.sh. When a retrained network
+    replaces them the emulator chi2 changes, and measuring that
+    change is part of the advisory checks' job.)
   - frozen/EXAMPLE_*.yaml: snapshots of the example yaml files at
-    freeze time, kept only so a human can diff how the live examples
-    drifted; no test reads them.
+    freeze time, kept only so a human can see what changed
+    in the live examples since the freeze; no test reads them.
 
 UNIQUE TO THIS PROJECT: example1 (roman_kl_mcmc.dataset) and example2
 (roman_kl_3x2.dataset) use different data sets with different mask and
@@ -108,8 +109,9 @@ TATT_POINT = {
 # The TATT variants evaluate against data vectors GENERATED WITH TATT
 # at the fiducial point. Reason: against an NLA-based vector the TATT
 # chi2 sits away from its minimum, where it responds linearly (not
-# quadratically) to tiny numerical changes, making drift bounds
-# twitchy. The two examples use different data sets, so each gets its
+# quadratically) to tiny numerical changes: harmless
+# rounding-level shifts would then eat much of the 0.2 chi2 band the
+# reference tests allow. The two examples use different data sets, so each gets its
 # own generated vector; the 2x2pt configuration shares example2's.
 TATT_GENERATORS = {
     "tatt_roman_kl_shear.dataset": "example1",
@@ -118,8 +120,8 @@ TATT_GENERATORS = {
 
 # The shipped roman_kl modelvectors sit away from the current code's
 # minimum (chi2 10-12 at the fiducial), where the chi2 responds
-# linearly to tiny numerical changes and drift/accuracy numbers get
-# inflated. The NLA variants therefore evaluate against SYNTHETIC
+# linearly to tiny numerical changes, and every chi2 comparison
+# (reference or accuracy alike) comes out inflated. The NLA variants therefore evaluate against SYNTHETIC
 # data vectors generated with the default (NLA) model at the fiducial
 # during the freeze, one per data set, exactly like the TATT vectors.
 SYNTHETIC_VECTORS = {
@@ -487,8 +489,9 @@ def report_emul2_advisory(label, chi2, frozen_ref, exact_ref, limit):
     """Print one EMUL2 accuracy check: measurements and a recommendation.
 
     There is no pass/fail here. An emulator is an approximation, so
-    the useful outputs are the numbers themselves: the drift against
-    the frozen emulator reference (did the installed emulator change),
+    the useful outputs are the numbers themselves: the change against
+    the frozen emulator reference (nonzero: the installed emulator no
+    longer reproduces the chi2 it gave at freeze time),
     the difference against the exact-physics chi2 at the same
     cosmology (how accurate the emulator is), and the recommendation
     derived from that accuracy. Emulated configuration and exact
@@ -798,7 +801,7 @@ def load_frozen_point(example):
 
 
 def build_point(model, example, tatt):
-    """Assemble the exact point a test evaluates, with a drift check.
+    """Assemble the exact point a test evaluates, with a safety check.
 
     The frozen point must cover the model's sampled parameters one to
     one. When likelihood or theory code changes its parameter set (a
@@ -914,8 +917,11 @@ def _single_model_chi2_impl(example, tatt, high_accuracy=False,
     info = load_frozen_info(example, tatt, high_accuracy=high_accuracy,
                             overrides=overrides)
     model = make_model(info)
-    # build_point returns the frozen evaluation point, cross-checked
-    # against the model's sampled-parameter set (drift fails loudly)
+    # build_point returns the frozen evaluation point after checking
+    # that the point and the model name the same sampled parameters:
+    # if the likelihood or theory code gained or lost a sampled
+    # parameter since the freeze, the mismatch is reported by name
+    # instead of failing deep inside cobaya
     point = build_point(model, example, tatt)
     print("  evaluating the fiducial point ...", flush=True)
     return evaluate_chi2(model, point)
