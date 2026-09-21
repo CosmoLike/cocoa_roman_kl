@@ -1,5 +1,8 @@
 path: null
 data_file: roman_kl_3x2.dataset
+# NOTE: the KL ell-binned integration does not converge smoothly in accuracyboost
+# (the tests/ scan shows chi2 jitter of 0.3-3 between boosts 1.25 and 6, under
+# investigation); changing this value away from 1.0 is not a refinement.
 accuracyboost: 1.0
 integration_accuracy: 0
 kmax_boltzmann: 7.5

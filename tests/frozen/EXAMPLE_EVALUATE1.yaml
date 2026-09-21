@@ -472,10 +472,16 @@ theory:
     use_renames: True
     extra_args:
       halofit_version: takahashi
+      # k_per_logint 50: the tests/ accuracy scan shows the default 10 carries
+      # ~0.26 of chi2 error in 3x2pt, converged by 25-50, and the knob is cheap.
+      # CAMB AccuracyBoost stays at its old value: its apparent ~0.8 sensitivity
+      # cannot be attributed while the cosmolike accuracyboost integration
+      # jitters (under investigation), and raising it is expensive; revisit
+      # after the jitter is fixed.
       AccuracyBoost: 1.05
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
-      k_per_logint: 10
+      k_per_logint: 50
       kmax: 10
   # bfmt:
   #   baryon_model: 2 # 1 = SP(k), 2 = BCEmu, 3 = FlamingoEmulator, 4 = BACCOemu, 5 = BCemu2025
