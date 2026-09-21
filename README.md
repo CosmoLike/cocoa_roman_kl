@@ -278,15 +278,17 @@ minimum of a synthetic data vector:
   apparent camb `AccuracyBoost` sensitivity collapses from +0.80 to
   +0.002: the expensive knob was standing in for cheap transfer
   sampling, so `AccuracyBoost` keeps its old value.
-- cosmolike `accuracyboost`: the ell-binned integration does not
-  converge smoothly in this knob (chi2 jitter of 0.3-3 between boosts
-  1.25 and 6, noted in the likelihood yaml files, interface
-  investigation pending). Do not treat raising it as a refinement.
-- Remaining all-knobs deltas at the current defaults (the all-knobs
-  set compares accuracyboost 1 against 3): +0.010 (shear NLA), +0.104
-  (shear TATT), +0.91 (2x2pt), +0.92/+0.96 (3x2pt), dominated by the
-  accuracyboost jitter above. Raising integration_accuracy (checked
-  at 10) does not remove the jitter.
+- cosmolike `accuracyboost`: the boost now refines the z grid of the
+  power-spectrum tables dyadically (nested nodes; see
+  likelihood/_cosmolike_prototype_base.py). The former chi2 jitter of
+  0.3-3 between boosts came from an additive node count re-phasing
+  the linear-interpolation sawtooth; with the nested grid the boost
+  scan is monotone: +0.0028 / +0.0031 / +0.0039 / +0.0058 / +0.0065
+  at boosts 1.25 / 1.5 / 2 / 3 / 5.
+- All-knobs deltas at the current defaults (comparing accuracyboost 1
+  against 3): +0.002 (shear NLA), +0.104 (shear TATT), +0.0055
+  (2x2pt), +0.0074 (3x2pt NLA), +0.043 (3x2pt TATT). Every probe sits
+  far below the 0.2 target.
 
 When several knobs move the chi2 in any project, raise cosmolike
 `accuracyboost` first (cheap), then camb `k_per_logint`, and only

@@ -1,9 +1,9 @@
 path: null
 data_file: roman_kl.dataset
-# NOTE: the KL ell-binned integration does not converge smoothly in accuracyboost
-# (the tests/ scan shows chi2 jitter of 0.3-3 between boosts 1.25 and 6, under
-# investigation); changing this value away from 1.0 is not a refinement.
-# Raising integration_accuracy (checked at 10) does not remove the jitter.
+# accuracyboost refines the redshift grid of the power-spectrum tables
+# dyadically (nested nodes; see likelihood/_cosmolike_prototype_base.py), so
+# raising it is a true refinement: the tests/ boost scan is monotone with
+# chi2 differences below 0.007 through boost 5.
 accuracyboost: 1.0
 integration_accuracy: 0
 kmax_boltzmann: 7.5
