@@ -277,9 +277,11 @@ minimum of a synthetic data vector:
   converge smoothly in this knob (chi2 jitter of 0.3-3 between boosts
   1.25 and 6, noted in the likelihood yaml files, interface
   investigation pending). Do not treat raising it as a refinement.
-- Remaining all-knobs deltas at the current defaults: +0.005 (shear
-  NLA), +0.10 (shear TATT), +0.54 (2x2pt), +0.55/+0.59 (3x2pt),
-  dominated by the accuracyboost jitter above.
+- Remaining all-knobs deltas at the current defaults (the all-knobs
+  set compares accuracyboost 1 against 3): +0.010 (shear NLA), +0.104
+  (shear TATT), +0.91 (2x2pt), +0.92/+0.96 (3x2pt), dominated by the
+  accuracyboost jitter above. Raising integration_accuracy (checked
+  at 10) does not remove the jitter.
 
 When several knobs move the chi2 in any project, raise cosmolike
 `accuracyboost` first (cheap), then camb `k_per_logint`, and only
