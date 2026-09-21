@@ -1,6 +1,6 @@
 # Unit tests for the roman_kl likelihoods
 
-These tests catch two kinds of silent breakage: a chi2 that drifted
+These tests catch two kinds of silent breakage: a $\chi^2$ that drifted
 because code or data changed by accident, and a race condition (a bug
 where evaluating several points in a row corrupts a later result
 through leftover internal state or colliding OpenMP threads). The
@@ -27,7 +27,7 @@ Without pytest:
 
 The suite changes no project files. Each test streams a progress line
 per model build and per evaluation, then a report block with the
-computed chi2, the stored reference, the difference, and the pass
+computed $\chi^2$, the stored reference, the difference, and the pass
 limit. A full run performs about 100 likelihood evaluations and takes
 a few minutes. The test modules force `OMP_NUM_THREADS=4` internally.
 The suite never waits for a keypress: a space/enter prompt between
@@ -36,15 +36,15 @@ so run the command with nothing piped after it.
 
 ## The tests
 
-The standard configurations get four tests each: a chi2 drift check
+The standard configurations get four tests each: a $\chi^2$ drift check
 and a race check, both in the NLA and in the TATT intrinsic-alignment
 model (TATT: `IA_model: 1` with `ROMAN_KL_A2_1=0.05`, `ROMAN_KL_BTA_1=0.05`,
 `ROMAN_KL_A2_2=-1.51541`).
 
 | check | pass limit                                        | a failure means                    |
 |-------|---------------------------------------------------|------------------------------------|
-| chi2  | within 0.2 of `frozen/reference_chi2.json`        | code or data changed the numbers   |
-| race  | fresh vs 10th of 10 cosmologies in a row, to 1e-4 | leftover state or an OpenMP race   |
+| $\chi^2$  | within 0.2 of `frozen/reference_chi2.json`        | code or data changed the numbers   |
+| race  | fresh vs 10th of 10 cosmologies in a row, to $10^{-4}$ | leftover state or an OpenMP race   |
 
 | tests | file | configuration |
 |-------|------|---------------|
@@ -54,14 +54,15 @@ model (TATT: `IA_model: 1` with `ROMAN_KL_A2_1=0.05`, `ROMAN_KL_BTA_1=0.05`,
 
 Advisory checks (`test_emul2.py`, E1-E4): the EXAMPLE_EMUL2 examples,
 where trained machine-learning emulators replace the Boltzmann code.
-No pass/fail: each check prints the emulator chi2, its drift against
+No pass/fail: each check prints the emulator $\chi^2$, its drift against
 the frozen emulator reference, the difference against the
-exact-physics chi2 at the same cosmology, and the recommendation
-(RECOMMENDED for actual data analysis when |emulator - exact| chi2
-< 0.2, NOT recommended otherwise), plus a race check that warns
+exact-physics $\chi^2$ at the same cosmology, and the recommendation
+(RECOMMENDED for actual data analysis when
+$\lvert\chi^2_\text{emulator} - \chi^2_\text{exact}\rvert < 0.2$, NOT recommended otherwise), plus a race check that warns
 instead of failing. Each emulated configuration evaluates the SAME
 synthetic NLA vector as its exact counterpart (where the exact
-reference chi2 is 0.000000 by construction), so |emulator - exact| is
+reference $\chi^2$ is 0.000000 by construction), so
+$\lvert\chi^2_\text{emulator} - \chi^2_\text{exact}\rvert$ is
 the emulator error at the same data and nothing else; the shipped
 EMUL2 modelvectors are not used. The trained-network files are read
 from external_modules/data/emultrf, not from the frozen state; the
@@ -70,10 +71,10 @@ availability.
 
 Accuracy checks (`test_accuracy.py`, A1-A6): the three probes with
 both IA models re-evaluated with the numerical settings pushed far
-beyond the defaults (cosmolike accuracyboost 5, integration_accuracy
-10, kmax_boltzmann 40; CAMB AccuracyBoost 2, k_per_logint 50, kmax
+beyond the defaults (cosmolike `accuracyboost: 5`, integration_accuracy
+10, `kmax_boltzmann: 40`; CAMB `AccuracyBoost: 2`, `k_per_logint: 50`, kmax
 50; no lmax here, the ell range lives in the dataset). Each check
-reports delta chi2 = chi2(high accuracy) - chi2(default, frozen), no
+reports $\Delta\chi^2 = \chi^2(\text{high accuracy}) - \chi^2(\text{default})$, no
 pass/fail. High-accuracy evaluations take minutes; skip the file with
 `--ignore ./projects/roman_kl/tests/test_accuracy.py`.
 
@@ -86,8 +87,8 @@ fiducial point during the freeze, one pair per data set, under
 | example1 (shear) | `synthetic_roman_kl_shear` | `tatt_roman_kl_shear` |
 | example2 (3x2pt) | `synthetic_roman_kl_3x2` | `tatt_roman_kl_3x2` |
 
-The shipped modelvectors sit off the current-code minimum (chi2 10-12
-at the fiducial), and away from a minimum the chi2 responds linearly
+The shipped modelvectors sit off the current-code minimum ($\chi^2$ 10-12
+at the fiducial), and away from a minimum the $\chi^2$ responds linearly
 to tiny numerical changes; at its own minimum the response is
 quadratic and the drift and accuracy numbers stay meaningful. The
 accuracy file also runs a one-knob-at-a-time scan before the
@@ -128,6 +129,6 @@ or likelihood defaults requires a re-freeze:
 
 Run it from the `Cocoa/` folder with the environment set up as above.
 It rebuilds `frozen/` from the current project, prints the eight new
-reference chi2 values, and rewrites the manifest. Review the printed
-chi2 values against the old references before committing: they define
+reference $\chi^2$ values, and rewrites the manifest. Review the printed
+$\chi^2$ values against the old references before committing: they define
 what every later test run compares against.

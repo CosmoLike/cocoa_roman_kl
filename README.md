@@ -247,14 +247,14 @@ Now, users must follow all the steps below.
 # Unit tests
 
 The `tests/` folder holds 12 pass/fail tests and advisory checks.
-The pass/fail tests compare the chi2 of cosmic shear, 3x2pt, and
+The pass/fail tests compare the $\chi^2$ of cosmic shear, 3x2pt, and
 2x2pt (each in NLA and TATT) against frozen references within 0.2,
 and re-evaluate each fiducial as the 10th of 10 cosmologies in a row
 under `OMP_NUM_THREADS=4` to catch state leaks and OpenMP races.
 Advisory files measure the EMUL2 emulated pipelines against the
 exact physics at the same data and cosmology (E1-E4, with the
 recommendation RECOMMENDED for actual data analysis when
-|emulator - exact| chi2 < 0.2) and the numerical error of the
+|emulator - exact| $\chi^2$ < 0.2) and the numerical error of the
 default accuracy settings. Everything evaluated is frozen and pinned
 by a SHA-256 manifest, and every model build runs in its own worker
 subprocess because the data sets here have different dimensions and
@@ -269,10 +269,10 @@ state.
 
 # Minimum accuracy parameters
 
-The accuracy checks (`tests/test_accuracy.py`) measured, at the chi2
+The accuracy checks (`tests/test_accuracy.py`) measured, at the $\chi^2$
 minimum of a synthetic data vector:
 
-- camb `k_per_logint`: the old default 10 carried about 0.26 of chi2
+- camb `k_per_logint`: the old default 10 carried about 0.26 of $\chi^2$
   error in 3x2pt, converged by 25 (plateau 0.255-0.257 through 100).
   The examples now default to `k_per_logint: 50`, and with it the
   apparent camb `AccuracyBoost` sensitivity collapses from +0.80 to
@@ -280,12 +280,12 @@ minimum of a synthetic data vector:
   sampling, so `AccuracyBoost` keeps its old value.
 - cosmolike `accuracyboost`: the boost now refines the z grid of the
   power-spectrum tables dyadically (nested nodes; see
-  `likelihood/_cosmolike_prototype_base.py`). The former chi2 jitter
+  `likelihood/_cosmolike_prototype_base.py`). The former $\chi^2$ jitter
   of 0.3-3 between boosts came from an additive node count re-phasing
   the linear-interpolation sawtooth; with the nested grid the boost
   scan is monotone:
 
-| cosmolike `accuracyboost` | delta chi2 |
+| cosmolike `accuracyboost` | $\Delta\chi^2$ |
 |---------------------------|-----------:|
 | 1.25                      |    +0.0028 |
 | 1.5                       |    +0.0031 |
@@ -293,10 +293,10 @@ minimum of a synthetic data vector:
 | 3                         |    +0.0058 |
 | 5 (stress)                |    +0.0065 |
 
-All-knobs deltas at the current defaults (comparing accuracyboost 1
+All-knobs deltas at the current defaults (comparing `accuracyboost: 1`
 against 3):
 
-| configuration      | delta chi2 |
+| configuration      | $\Delta\chi^2$ |
 |--------------------|-----------:|
 | cosmic shear, NLA  |     +0.002 |
 | cosmic shear, TATT |     +0.104 |
@@ -306,7 +306,7 @@ against 3):
 
 Every probe sits far below the 0.2 target.
 
-When several knobs move the chi2 in any project, raise cosmolike
+When several knobs move the $\chi^2$ in any project, raise cosmolike
 `accuracyboost` first (cheap), then camb `k_per_logint`, and only
 then camb `AccuracyBoost` (expensive at run time, and able to
 masquerade for the cheap knobs, as measured here). `kmax_boltzmann`
