@@ -268,46 +268,32 @@ cosmolike aborts a process that initializes two of them. From the
 
 # Minimum accuracy parameters
 
-The accuracy checks (`tests/test_accuracy.py`) measured, at the $\chi^2$
-minimum of a synthetic data vector:
+The advisory checks in `tests/test_accuracy.py` measure the
+numerical error of the default accuracy settings: each setting is
+raised one at a time on the 3x2pt configuration, so a large
+$\Delta\chi^2$ can be attributed to the setting causing it, and
+then every setting at once. Each check prints the $\Delta\chi^2$
+between the high-accuracy and the default evaluations. The measured
+values sit far below the 0.2 band the reference tests allow, so the
+shipped defaults are adequate. The values are not quoted here: rerun
+the checks to measure them on the current code, and see
+[tests/README.md](tests/README.md) for each check, the settings
+raised, and what each setting controls.
 
-- camb `k_per_logint`: the old default 10 carried about 0.26 of $\chi^2$
-  error in 3x2pt, converged by 25 (plateau 0.255-0.257 through 100).
-  The examples now default to `k_per_logint: 50`, and with it the
-  apparent camb `AccuracyBoost` sensitivity collapses from +0.80 to
-  +0.002: the expensive setting was standing in for cheap transfer
-  sampling, so `AccuracyBoost` keeps its old value.
-- cosmolike `accuracyboost`: the boost now refines the z grid of the
-  power-spectrum tables dyadically (nested nodes; see
-  `likelihood/_cosmolike_prototype_base.py`). The former $\chi^2$ jitter
-  of 0.3-3 between boosts came from an additive node count re-phasing
-  the linear-interpolation sawtooth; with the nested grid the boost
-  scan is monotone:
+`accuracyboost` refines a nested z grid in the power-spectrum
+tables: every coarser grid's nodes are a subset of every finer
+grid's, so a higher boost tightens the same interpolation instead of
+moving the nodes (the construction is commented in
+`likelihood/_cosmolike_prototype_base.py`).
 
-| cosmolike `accuracyboost` | $\Delta\chi^2$ |
-|---------------------------|-----------:|
-| 1.25                      |    +0.0028 |
-| 1.5                       |    +0.0031 |
-| 2                         |    +0.0039 |
-| 3                         |    +0.0058 |
-| 5 (stress)                |    +0.0065 |
+When several settings move the $\chi^2$, settle them in cost order:
+raise cosmolike `accuracyboost` first (cheap), then CAMB
+`k_per_logint`, and CAMB `AccuracyBoost` last (expensive at run
+time, and able to masquerade for the cheap settings).
+`kmax_boltzmann` and CAMB `kmax` are one physical cutoff seen from
+two sides; move them together.
 
-Raised-at-once $\Delta\chi^2$ values at the current defaults (comparing `accuracyboost: 1`
-against 3):
-
-| configuration      | $\Delta\chi^2$ |
-|--------------------|-----------:|
-| cosmic shear, NLA  |     +0.002 |
-| cosmic shear, TATT |     +0.104 |
-| 2x2pt              |    +0.0055 |
-| 3x2pt, NLA         |    +0.0074 |
-| 3x2pt, TATT        |     +0.043 |
-
-Cosmic shear, 2x2pt, and 3x2pt all sit far below the 0.2 target.
-
-When several settings move the $\chi^2$ in any project, raise cosmolike
-`accuracyboost` first (cheap), then camb `k_per_logint`, and only
-then camb `AccuracyBoost` (expensive at run time, and able to
-masquerade for the cheap settings, as measured here). `kmax_boltzmann`
-and camb `kmax` are one physical cutoff seen from two sides and move
-together.
+The examples default to `k_per_logint: 50`: the old default
+undersampled the CAMB transfer functions, and that error masqueraded
+as an apparent CAMB `AccuracyBoost` sensitivity until the transfer
+sampling was raised.
