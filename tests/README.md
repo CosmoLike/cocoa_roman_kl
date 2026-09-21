@@ -74,9 +74,9 @@ The test files and the configurations they cover:
 
 | tests | file | configuration |
 |-------|------|---------------|
-| 1-4   | `test_example1.py` | cosmic shear (example1) |
-| 5-8   | `test_example2.py` | 3x2pt (example2) |
-| 11-14 | `test_example2_2x2pt.py` | 2x2pt (`roman_kl.combo_2x2pt`: example2 reduced to galaxy clustering plus galaxy-galaxy lensing) |
+| 1-4   | `test_example1.py` | cosmic shear |
+| 5-8   | `test_example2.py` | 3x2pt |
+| 11-14 | `test_example2_2x2pt.py` | 2x2pt (`roman_kl.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing) |
 
 ### Running Advisory checks (`test_emul2.py`, E1-E4) <a name="advisory_checks"></a>
 
@@ -140,8 +140,8 @@ fiducial point during the freeze, one pair per data set, under
 
 | data set | NLA vector | TATT vector |
 |----------|-----------|-------------|
-| example1 (shear) | `synthetic_roman_kl_shear` | `tatt_roman_kl_shear` |
-| example2 (3x2pt) | `synthetic_roman_kl_3x2` | `tatt_roman_kl_3x2` |
+| cosmic shear | `synthetic_roman_kl_shear` | `tatt_roman_kl_shear` |
+| 3x2pt | `synthetic_roman_kl_3x2` | `tatt_roman_kl_3x2` |
 
 The shipped modelvectors sit off the current-code minimum ($\chi^2$ 10-12
 at the fiducial), and away from a minimum the $\chi^2$ responds linearly
