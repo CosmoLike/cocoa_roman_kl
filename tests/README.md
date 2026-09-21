@@ -26,12 +26,12 @@ Contents:
 
 ## Running the tests <a name="run_tests"></a>
 
-**Step :one:**: from the `Cocoa/` folder, activate the cocoa Conda
-environment and source `start_cocoa.sh`
+We assume users are in the Conda cocoa environment from a previous
+`conda activate cocoa` command, that the shell is bash, and that the
+current folder is the cocoa main folder `cocoa/Cocoa`.
 
-    conda activate cocoa
-
-and
+**Step :one:**: activate the private Python environment by sourcing
+the script `start_cocoa.sh`
 
     source start_cocoa.sh
 
