@@ -248,14 +248,14 @@ Now, users must follow all the steps below.
 
 The `tests/` folder holds 12 pass/fail tests and advisory checks.
 The pass/fail tests compare the $\chi^2$ of cosmic shear, 3x2pt, and
-2x2pt (each in NLA and TATT) against frozen references within 0.2,
+2x2pt (each in NLA and TATT) against stored references within 0.2,
 and re-evaluate each fiducial as the 10th of 10 cosmologies in a row
 under `OMP_NUM_THREADS=4` to catch state leaks and OpenMP races.
-Advisory files measure the EMUL2 emulated pipelines against the
+Advisory files measure the hybrid emulated pipelines against the
 exact physics at the same data and cosmology (E1-E4, with the
 recommendation RECOMMENDED for actual data analysis when
-|emulator - exact| $\chi^2$ < 0.2) and the numerical error of the
-default accuracy settings. Everything evaluated is frozen and pinned
+$\lvert\chi^2_\text{emulator} - \chi^2_\text{exact}\rvert < 0.2$) and the numerical error of the
+default accuracy settings. Everything evaluated comes from the tests' own snapshot, pinned
 by a SHA-256 manifest, and every model build runs in its own worker
 subprocess because the data sets here have different dimensions and
 cosmolike aborts a process that initializes two of them. From the
@@ -264,8 +264,7 @@ cosmolike aborts a process that initializes two of them. From the
 
     python -m pytest ./projects/roman_kl/tests
 
-`tests/README.md` describes every test and how to refresh the frozen
-state.
+`tests/README.md` describes every test and how to refresh the snapshot.
 
 # Minimum accuracy parameters
 
@@ -276,7 +275,7 @@ minimum of a synthetic data vector:
   error in 3x2pt, converged by 25 (plateau 0.255-0.257 through 100).
   The examples now default to `k_per_logint: 50`, and with it the
   apparent camb `AccuracyBoost` sensitivity collapses from +0.80 to
-  +0.002: the expensive knob was standing in for cheap transfer
+  +0.002: the expensive setting was standing in for cheap transfer
   sampling, so `AccuracyBoost` keeps its old value.
 - cosmolike `accuracyboost`: the boost now refines the z grid of the
   power-spectrum tables dyadically (nested nodes; see
@@ -293,7 +292,7 @@ minimum of a synthetic data vector:
 | 3                         |    +0.0058 |
 | 5 (stress)                |    +0.0065 |
 
-All-knobs deltas at the current defaults (comparing `accuracyboost: 1`
+Raised-at-once $\Delta\chi^2$ values at the current defaults (comparing `accuracyboost: 1`
 against 3):
 
 | configuration      | $\Delta\chi^2$ |
@@ -304,11 +303,11 @@ against 3):
 | 3x2pt, NLA         |    +0.0074 |
 | 3x2pt, TATT        |     +0.043 |
 
-Every probe sits far below the 0.2 target.
+Cosmic shear, 2x2pt, and 3x2pt all sit far below the 0.2 target.
 
-When several knobs move the $\chi^2$ in any project, raise cosmolike
+When several settings move the $\chi^2$ in any project, raise cosmolike
 `accuracyboost` first (cheap), then camb `k_per_logint`, and only
 then camb `AccuracyBoost` (expensive at run time, and able to
-masquerade for the cheap knobs, as measured here). `kmax_boltzmann`
+masquerade for the cheap settings, as measured here). `kmax_boltzmann`
 and camb `kmax` are one physical cutoff seen from two sides and move
 together.
