@@ -244,7 +244,7 @@ Now, users must follow all the steps below.
 - The fix is to parse table values with `std::strtod` and only treat range errors as fatal when the parsed result is non-finite. Finite underflowed values are accepted.
 - If you see this error, switch `Cocoa/external_modules/code/cosmolike_core` to branch `nonlimber-dev` or apply the same `generic_interface.cpp` patch, then rebuild `projects/roman_kl/interface/cosmolike_roman_kl_interface.so`.
 
-## Unit tests
+# Unit tests
 
 The `tests/` folder holds 12 pass/fail tests and advisory checks.
 The pass/fail tests compare the chi2 of cosmic shear, 3x2pt, and
@@ -267,7 +267,7 @@ cosmolike aborts a process that initializes two of them. From the
 `tests/README.md` describes every test and how to refresh the frozen
 state.
 
-## Minimum accuracy parameters
+# Minimum accuracy parameters
 
 The accuracy checks (`tests/test_accuracy.py`) measured, at the chi2
 minimum of a synthetic data vector:
