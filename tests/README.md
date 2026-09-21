@@ -58,12 +58,17 @@ reports delta chi2 = chi2(high accuracy) - chi2(default, frozen), no
 pass/fail. High-accuracy evaluations take minutes; skip the file with
 `--ignore ./projects/roman_kl/tests/test_accuracy.py`.
 
-All TATT variants evaluate against TATT-generated data vectors
-(`frozen/data/tatt_roman_kl_shear.dataset` for cosmic shear,
-`frozen/data/tatt_roman_kl_3x2.dataset` for 3x2pt and 2x2pt), written
-during the freeze at the fiducial point: at its own minimum the TATT
-chi2 responds quadratically to numerical changes instead of linearly
-on the side of a hill.
+Every variant evaluates against a data vector generated at the
+fiducial point during the freeze (NLA: `synthetic_roman_kl_shear` /
+`synthetic_roman_kl_3x2`; TATT: `tatt_roman_kl_shear` /
+`tatt_roman_kl_3x2`, one pair per data set, under `frozen/data/`).
+The shipped modelvectors sit off the current-code minimum (chi2 10-12
+at the fiducial), and away from a minimum the chi2 responds linearly
+to tiny numerical changes; at its own minimum the response is
+quadratic and the drift and accuracy numbers stay meaningful. The
+accuracy file also runs a one-knob-at-a-time scan before the
+all-knobs checks, so a large delta can be attributed to the knob
+causing it.
 
 ## Why the tests keep their own copy of everything
 

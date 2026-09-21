@@ -243,3 +243,47 @@ Now, users must follow all the steps below.
 - The original `read_table` implementation in `cosmolike_core/cosmolike/generic_interface.cpp` used `std::stod`, which raised a range error on these finite underflowed values and stopped likelihood initialization.
 - The fix is to parse table values with `std::strtod` and only treat range errors as fatal when the parsed result is non-finite. Finite underflowed values are accepted.
 - If you see this error, switch `Cocoa/external_modules/code/cosmolike_core` to branch `nonlimber-dev` or apply the same `generic_interface.cpp` patch, then rebuild `projects/roman_kl/interface/cosmolike_roman_kl_interface.so`.
+
+## Unit tests
+
+The `tests/` folder holds 12 pass/fail tests and an advisory accuracy
+file. The pass/fail tests compare the chi2 of cosmic shear, 3x2pt,
+and 2x2pt (each in NLA and TATT) against frozen references within
+0.2, and re-evaluate each fiducial as the 10th of 10 cosmologies in a
+row under `OMP_NUM_THREADS=4` to catch state leaks and OpenMP races.
+Everything they evaluate is frozen and pinned by a SHA-256 manifest,
+and every model build runs in its own worker subprocess because the
+two data sets here have different dimensions and cosmolike aborts a
+process that initializes both. From the `Cocoa/` folder, with the
+cocoa environment active and `start_cocoa.sh` sourced:
+
+    python -m pytest ./projects/roman_kl/tests
+
+`tests/README.md` describes every test and how to refresh the frozen
+state.
+
+## Minimum accuracy parameters
+
+The accuracy checks (`tests/test_accuracy.py`) measured, at the chi2
+minimum of a synthetic data vector:
+
+- camb `k_per_logint`: the old default 10 carried about 0.26 of chi2
+  error in 3x2pt, converged by 25 (plateau 0.255-0.257 through 100).
+  The examples now default to `k_per_logint: 50`, and with it the
+  apparent camb `AccuracyBoost` sensitivity collapses from +0.80 to
+  +0.002: the expensive knob was standing in for cheap transfer
+  sampling, so `AccuracyBoost` keeps its old value.
+- cosmolike `accuracyboost`: the ell-binned integration does not
+  converge smoothly in this knob (chi2 jitter of 0.3-3 between boosts
+  1.25 and 6, noted in the likelihood yaml files, interface
+  investigation pending). Do not treat raising it as a refinement.
+- Remaining all-knobs deltas at the current defaults: +0.005 (shear
+  NLA), +0.10 (shear TATT), +0.54 (2x2pt), +0.55/+0.59 (3x2pt),
+  dominated by the accuracyboost jitter above.
+
+When several knobs move the chi2 in any project, raise cosmolike
+`accuracyboost` first (cheap), then camb `k_per_logint`, and only
+then camb `AccuracyBoost` (expensive at run time, and able to
+masquerade for the cheap knobs, as measured here). `kmax_boltzmann`
+and camb `kmax` are one physical cutoff seen from two sides and move
+together.
