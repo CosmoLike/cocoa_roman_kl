@@ -106,15 +106,16 @@ The three probes with
 both IA models re-evaluated with every setting pushed far beyond the
 defaults at once:
 
-    # cosmolike likelihood settings
-    accuracyboost: 5
-    integration_accuracy: 10
-    # (no lmax here: the ell range lives in the dataset)
-    kmax_boltzmann: 40
-    # CAMB extra_args (kmax moves with kmax_boltzmann: one physical cutoff)
-    AccuracyBoost: 2
-    k_per_logint: 50
-    kmax: 50
+| setting | raised to | what it controls |
+|---------|-----------|------------------|
+| `accuracyboost` (cosmolike) | 5 | sizes of cosmolike's internal lookup tables, including the dyadic z grid of the power-spectrum tables |
+| `integration_accuracy` (cosmolike) | 10 | extra refinement passes of cosmolike's numerical integrals |
+| `kmax_boltzmann` (cosmolike) | 40 | the k cutoff of the power spectrum the likelihood requests from CAMB |
+| `AccuracyBoost` (CAMB) | 2 | CAMB's overall accuracy multiplier: denser sampling in every internal CAMB grid, the most expensive knob |
+| `k_per_logint` (CAMB) | 50 | k samples CAMB computes per logarithmic interval of the transfer functions |
+| `kmax` (CAMB) | 50 | highest k of CAMB's matter power spectrum; one physical cutoff with `kmax_boltzmann`, seen from the CAMB side |
+
+There is no `lmax` entry here: the ell range lives in the dataset.
 
 Each check reports $\Delta\chi^2 = \chi^2(\text{high accuracy}) -
 \chi^2(\text{default})$: the numerical error of the default
