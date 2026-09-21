@@ -1,0 +1,31 @@
+{
+  "_comment": "SHA-256 of every file under tests/frozen/; verified by every test before evaluating anything.",
+  "files": {
+    "frozen/EXAMPLE_EVALUATE1.yaml": "3f54ec15bf52add476151c7e20bfd808229532fae87b1a607b36705fefaee975",
+    "frozen/EXAMPLE_EVALUATE2.yaml": "dda7df6c192e64fe074970b012a176d3ecc590b3bb3e71c4a2d249607276b012",
+    "frozen/data/Roman_3x2pt_cov_Ncl20_Ntomo10.cv": "c9af1fdc788534a352bd9a3633bafa0af7b1c13b2d1194d2d2577226d7ee8e11",
+    "frozen/data/Roman_cov_Ncl20_Ntomo10.cv": "caef5168af4eaf9b3376fa4ece4f7d7a7be866810aa0bed9c76e48dffebf02c3",
+    "frozen/data/Roman_ssss_cov_Ncl20_Ntomo10.cv": "74ed37fa66c6e34943a3e26395bec45661baffd58b0e57e8468c62a8b481f3c0",
+    "frozen/data/Roman_tomo_Ntomo10_src.nz": "a84874cd0cc8fb25c172065f64c9ba75effa2ef47198bb1f647e04be34776c43",
+    "frozen/data/baryons_logPkR.h5": "1ab5cc0604925089787dd775740b368db2a83a0d10c88af54f3b3f4bfa33570d",
+    "frozen/data/calculate_mask.py": "9c88d8c859c03256d7f9e356ba20a7312972504543a594f111fb50e0bd0f2203",
+    "frozen/data/cut_covmat.py": "01bb0ccb52625020207bd5c94b7ac167fd557bb6770da54f1901620405866509",
+    "frozen/data/ones.mask": "b49476a21d48ba8bc025002869e7504364cc499736472dfcad7e8ff610a34e16",
+    "frozen/data/pca.txt": "8f057856db4d4e620cceb5d8989fa3ca1f74f34cf5608ed64368ac80aa78fa96",
+    "frozen/data/resize.py": "dbea49526ac3c37c17b8813b5abba4705925cd2750e0315a4cf2621999ed968e",
+    "frozen/data/roman_kl.mask": "f71a081120a6b347295cc2cef1a362f6b05c40cafbf1d35e809228da5300d118",
+    "frozen/data/roman_kl_2.modelvector": "3b831128b329e46ad0b0334a6ed963f77fc0ae26c678bd6beb246caf975c2b9b",
+    "frozen/data/roman_kl_3x2.dataset": "1361f875e4d94337e54025fa3919b6838d1bcc0419374cc820c18f50f020da20",
+    "frozen/data/roman_kl_3x2.modelvector": "f19f0748d0942f1676fd3beb767b39f839bbabfb480a81f2e7f81b4817eb1371",
+    "frozen/data/roman_kl_3x2_test.modelvector": "400448776bd20ca97cbefb8d5680432e700d6bf02f986db7ac4025c753694b70",
+    "frozen/data/roman_kl_mcmc.dataset": "278f0812df27c19c1334bb566250dabbaf20031516ababd5b93c08923f358e84",
+    "frozen/data/tatt_roman_kl_3x2.dataset": "58d5bb1a6b003a1c5fee271da162f767ebaed4259ad48ef573fe8c126b4dba0c",
+    "frozen/data/tatt_roman_kl_3x2.modelvector": "aa78eef7644dae7b1c1d1b6a772ff5a4cde80345ae783be5f49c58189cdd99c6",
+    "frozen/data/tatt_roman_kl_shear.dataset": "8b5b257ba7bbfd68b20c7c8d79f17cd12dfaa900590af735ba1fc7d54aecad59",
+    "frozen/data/tatt_roman_kl_shear.modelvector": "00a0bbd557657ba9fcce950032a0b2ac3a3cde174b29c22e5d108c614a97e19e",
+    "frozen/frozen_config_example1.py": "c14b1cde7470f05d85837315c65645da325beb0bf0fad6fcffe4f7e0a628a0e9",
+    "frozen/frozen_config_example2.py": "9f2be290209393066cfa5dce5b13d33083a2c1269307b3a5e8f63ffe94c318b0",
+    "frozen/frozen_config_example2_2x2pt.py": "aea1942358ecf736edc8eff10e3c6a8c534de7eb81cfc070c35ddbafbc6bbc0d",
+    "frozen/reference_chi2.json": "d0c0c13ccf5bc2b493acc2bbe443115fffe555739c774a8819ad4640d6c0d93b"
+  }
+}
