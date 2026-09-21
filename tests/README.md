@@ -57,7 +57,9 @@ model. The TATT variants set
 | 5-8   | `test_example2.py` | 3x2pt (example2) |
 | 11-14 | `test_example2_2x2pt.py` | 2x2pt (`roman_kl.combo_2x2pt`: example2 reduced to galaxy clustering plus galaxy-galaxy lensing) |
 
-Advisory checks (`test_emul2.py`, E1-E4): the EXAMPLE_EMUL2 examples,
+### Advisory checks (`test_emul2.py`, E1-E4)
+
+The EXAMPLE_EMUL2 examples,
 where trained machine-learning emulators replace the Boltzmann code.
 No pass/fail: each check prints the emulator $\chi^2$, its drift against
 the frozen emulator reference, the difference against the
@@ -74,7 +76,9 @@ from external_modules/data/emultrf, not from the frozen state; the
 network device is frozen to `cpu` so the numbers do not depend on GPU
 availability.
 
-Accuracy checks (`test_accuracy.py`, A1-A6): the three probes with
+### Accuracy checks (`test_accuracy.py`, A1-A6)
+
+The three probes with
 both IA models re-evaluated with every setting pushed far beyond the
 defaults at once:
 
@@ -95,6 +99,8 @@ the file on its own, or skip it with
 
     python -m pytest ./projects/roman_kl/tests --ignore ./projects/roman_kl/tests/test_accuracy.py
 
+### Synthetic data vectors
+
 Every variant evaluates against a data vector generated at the
 fiducial point during the freeze, one pair per data set, under
 `frozen/data/`:
@@ -112,7 +118,7 @@ accuracy file also runs a one-knob-at-a-time scan before the
 all-knobs checks, so a large delta can be attributed to the knob
 causing it.
 
-## Why the tests keep their own copy of everything
+## Tests keep their own copy of configurations and data
 
 The tests read nothing from the live project: not `../data`, not the
 `EXAMPLE_EVALUATE` yaml files, and not the likelihood default yaml
