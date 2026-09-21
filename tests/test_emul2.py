@@ -63,6 +63,8 @@ import unittest
 
 # The tests folder is not a package; put it on the import path so the
 # shared harness resolves no matter where pytest was launched from.
+# __file__ is this file's own path; insert(0, ...) puts its folder
+# FIRST in the search order, ahead of any same-named module.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
@@ -84,6 +86,8 @@ class TestEmul2Advisory(unittest.TestCase):
     files are not.
     """
 
+    # @classmethod hands the class itself in as cls; unittest calls
+    # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
         u.require_cocoa_environment()
@@ -100,6 +104,7 @@ class TestEmul2Advisory(unittest.TestCase):
           label   = one line naming the emulated configuration.
         """
         chi2 = u.single_model_chi2(example, tatt=False)
+        # the f-string builds the key, for example emul2_example1_nla
         frozen_ref = self.reference[f"{example}_nla"]
         exact_ref = self.reference[u.EXAMPLES[example]["exact_reference"]]
         u.report_emul2_advisory(f"{name}: {label}", chi2, frozen_ref,
@@ -115,6 +120,8 @@ class TestEmul2Advisory(unittest.TestCase):
           label   = one line naming the emulated configuration.
         """
         u.assert_omp_threads()
+        # the call returns a (fresh, tenth) pair; the assignment
+        # unpacks it into the two names
         fresh, tenth = u.ten_in_a_row_chi2(example, tatt=False)
         u.report_emul2_race(f"{name}: {label}", fresh, tenth)
 

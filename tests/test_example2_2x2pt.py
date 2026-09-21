@@ -34,6 +34,8 @@ import unittest
 
 # The tests folder is not a package; put it on the import path so the
 # shared harness resolves no matter where pytest was launched from.
+# __file__ is this file's own path; insert(0, ...) puts its folder
+# FIRST in the search order, ahead of any same-named module.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
@@ -49,6 +51,8 @@ class TestExample2TwoXTwo(unittest.TestCase):
     the frozen reference chi2 values.
     """
 
+    # @classmethod hands the class itself in as cls; unittest calls
+    # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
         u.require_cocoa_environment()
@@ -67,6 +71,7 @@ class TestExample2TwoXTwo(unittest.TestCase):
         u.report_chi2_test(
             11, "example2 (2x2pt, NLA) chi2 vs frozen reference",
             chi2, ref, u.CHI2_TOLERANCE)
+        # :.6f in the failure message = fixed six decimals
         self.assertLess(
             abs(chi2 - ref), u.CHI2_TOLERANCE,
             msg=f"chi2 = {chi2:.6f} vs frozen reference {ref:.6f} "
@@ -75,6 +80,8 @@ class TestExample2TwoXTwo(unittest.TestCase):
     def test_x12_no_race_condition_ten_in_a_row(self):
         """The fiducial as 10th of 10 cosmologies matches a fresh run."""
         u.assert_omp_threads()
+        # the call returns a (fresh, tenth) pair; the assignment
+        # unpacks it into the two names
         fresh, tenth = u.ten_in_a_row_chi2(EXAMPLE, tatt=False)
         u.report_race_test(
             12, "example2 (2x2pt, NLA) race check: 10 cosmologies in a row",

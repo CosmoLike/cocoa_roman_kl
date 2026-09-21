@@ -47,6 +47,8 @@ import unittest
 
 # The tests folder is not a package; put it on the import path so the
 # shared harness resolves no matter where pytest was launched from.
+# __file__ is this file's own path; insert(0, ...) puts its folder
+# FIRST in the search order, ahead of any same-named module.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
@@ -60,6 +62,8 @@ class TestAccuracyAdvisory(unittest.TestCase):
     reference chi2 values.
     """
 
+    # @classmethod hands the class itself in as cls; unittest calls
+    # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
         u.require_cocoa_environment()
@@ -78,6 +82,7 @@ class TestAccuracyAdvisory(unittest.TestCase):
           label   = one line naming the probe and IA model.
         """
         chi2_high = u.single_model_chi2(example, tatt, high_accuracy=True)
+        # `"tatt" if tatt else "nla"` picks the reference-key suffix
         suffix = "tatt" if tatt else "nla"
         default_ref = self.reference[f"{example}_{suffix}"]
         u.report_accuracy(f"{name}: {label}", chi2_high, default_ref)
@@ -93,6 +98,9 @@ class TestAccuracyAdvisory(unittest.TestCase):
         """
         default_ref = self.reference["example2_nla"]
         print("", flush=True)
+        # each entry is (label, likelihood overrides, camb overrides);
+        # the two _ discard the overrides, only the label is needed
+        # here (the worker looks the knob up again by its label)
         for label, _, _ in u.ACCURACY_KNOBS:
             chi2 = u.single_model_chi2("example2", False, knob=label)
             u.report_knob(label, chi2, default_ref)
