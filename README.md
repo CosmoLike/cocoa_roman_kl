@@ -246,16 +246,21 @@ Now, users must follow all the steps below.
 
 ## Unit tests
 
-The `tests/` folder holds 12 pass/fail tests and an advisory accuracy
-file. The pass/fail tests compare the chi2 of cosmic shear, 3x2pt,
-and 2x2pt (each in NLA and TATT) against frozen references within
-0.2, and re-evaluate each fiducial as the 10th of 10 cosmologies in a
-row under `OMP_NUM_THREADS=4` to catch state leaks and OpenMP races.
-Everything they evaluate is frozen and pinned by a SHA-256 manifest,
-and every model build runs in its own worker subprocess because the
-two data sets here have different dimensions and cosmolike aborts a
-process that initializes both. From the `Cocoa/` folder, with the
-cocoa environment active and `start_cocoa.sh` sourced:
+The `tests/` folder holds 12 pass/fail tests and advisory checks.
+The pass/fail tests compare the chi2 of cosmic shear, 3x2pt, and
+2x2pt (each in NLA and TATT) against frozen references within 0.2,
+and re-evaluate each fiducial as the 10th of 10 cosmologies in a row
+under `OMP_NUM_THREADS=4` to catch state leaks and OpenMP races.
+Advisory files measure the EMUL2 emulated pipelines against the
+exact physics at the same data and cosmology (E1-E4, with the
+recommendation RECOMMENDED for actual data analysis when
+|emulator - exact| chi2 < 0.2) and the numerical error of the
+default accuracy settings. Everything evaluated is frozen and pinned
+by a SHA-256 manifest, and every model build runs in its own worker
+subprocess because the data sets here have different dimensions and
+cosmolike aborts a process that initializes two of them. From the
+`Cocoa/` folder, with the cocoa environment active and
+`start_cocoa.sh` sourced:
 
     python -m pytest ./projects/roman_kl/tests
 

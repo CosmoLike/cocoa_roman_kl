@@ -3,7 +3,10 @@
 These tests catch two kinds of silent breakage: a chi2 that drifted
 because code or data changed by accident, and a race condition (a bug
 where evaluating several points in a row corrupts a later result
-through leftover internal state or colliding OpenMP threads).
+through leftover internal state or colliding OpenMP threads). The
+suite also measures the accuracy of the EMUL2 emulated pipelines and
+reports whether they are accurate enough for data analysis (advisory:
+no pass/fail).
 
 Every model build runs in its own worker subprocess: example1 and
 example2 use data sets with different mask and covariance dimensions,
@@ -25,8 +28,8 @@ Without pytest:
 The suite changes no project files. Each test streams a progress line
 per model build and per evaluation, then a report block with the
 computed chi2, the stored reference, the difference, and the pass
-limit. A full run performs about 50 likelihood evaluations and takes a
-few minutes. The test modules force `OMP_NUM_THREADS=4` internally.
+limit. A full run performs about 100 likelihood evaluations and takes
+a few minutes. The test modules force `OMP_NUM_THREADS=4` internally.
 The suite never waits for a keypress: a space/enter prompt between
 tests means the output is being piped through a pager such as `less`,
 so run the command with nothing piped after it.
@@ -48,6 +51,22 @@ so run the command with nothing piped after it.
 9. -14. `test_example2_2x2pt.py` (numbered 11-14): the four standard
    tests on `roman_kl.combo_2x2pt` (example2 with the probe selection
    reduced to galaxy clustering plus galaxy-galaxy lensing).
+
+Advisory checks (`test_emul2.py`, E1-E4): the EXAMPLE_EMUL2 examples,
+where trained machine-learning emulators replace the Boltzmann code.
+No pass/fail: each check prints the emulator chi2, its drift against
+the frozen emulator reference, the difference against the
+exact-physics chi2 at the same cosmology, and the recommendation
+(RECOMMENDED for actual data analysis when |emulator - exact| chi2
+< 0.2, NOT recommended otherwise), plus a race check that warns
+instead of failing. Each emulated configuration evaluates the SAME
+synthetic NLA vector as its exact counterpart (where the exact
+reference chi2 is 0.000000 by construction), so |emulator - exact| is
+the emulator error at the same data and nothing else; the shipped
+EMUL2 modelvectors are not used. The trained-network files are read
+from external_modules/data/emultrf, not from the frozen state; the
+network device is frozen to `cpu` so the numbers do not depend on GPU
+availability.
 
 Accuracy checks (`test_accuracy.py`, A1-A6): the three probes with
 both IA models re-evaluated with the numerical settings pushed far
@@ -76,15 +95,19 @@ The tests read nothing from the live project: not `../data`, not the
 `EXAMPLE_EVALUATE` yaml files, and not the likelihood default yaml
 files. Instead, `frozen/` holds:
 
-- `frozen_config_example{1,2}.py`: the complete cobaya configuration
-  as a yaml string plus the exact evaluation point. Every option and
-  every parameter is written out, including the ones that normally
-  come from `params_source.yaml` and the other default files, so
-  editing those files cannot change what the tests evaluate.
+- `frozen_config_*.py`: one module per configuration, holding the
+  complete cobaya configuration as a yaml string plus the exact
+  evaluation point. Every option and every parameter is written out,
+  including the ones that normally come from `params_source.yaml` and
+  the other default files, so editing those files cannot change what
+  the tests evaluate.
 - `data/`: the tests' own copy of the data vectors, covariance, n(z),
-  and masks.
-- `EXAMPLE_EVALUATE{1,2}.yaml`: snapshots kept only so a human can
-  diff how the live examples drifted since the freeze.
+  and masks. (The EMUL2 trained-network files are not copied: they
+  live in `external_modules/data/emultrf`, pinned by the EMULTRF keys
+  in `set_installation_options.sh`, and their drift is part of what
+  the advisory checks measure.)
+- `EXAMPLE_*.yaml`: snapshots kept only so a human can diff how the
+  live examples drifted since the freeze.
 
 `manifest_sha256.json` stores a SHA-256 hash (a fingerprint that
 changes when any byte changes) of every frozen file. Each test
@@ -101,7 +124,7 @@ or likelihood defaults requires a re-freeze:
     python ./projects/roman_kl/tests/generate_frozen_reference.py --overwrite
 
 Run it from the `Cocoa/` folder with the environment set up as above.
-It rebuilds `frozen/` from the current project, prints the four new
+It rebuilds `frozen/` from the current project, prints the eight new
 reference chi2 values, and rewrites the manifest. Review the printed
 chi2 values against the old references before committing: they define
 what every later test run compares against.

@@ -12,6 +12,13 @@ The tests answer two questions about the roman_kl likelihoods:
      fresh evaluation of the same point. That class of bug is called a
      race condition or a state leak.
 
+Beyond the twelve pass/fail tests, the suite carries ADVISORY checks:
+the accuracy file (test_accuracy.py: the same physics with the
+numerical knobs pushed beyond the defaults) and the EMUL2 examples
+(machine-learning emulators in place of the Boltzmann code; see
+test_emul2.py: no pass/fail, only the measured accuracy and a
+recommendation).
+
 Everything a test evaluates is FROZEN: stored under tests/frozen/ and
 pinned by a SHA-256 hash (a 64-character fingerprint that changes when
 any byte of the file changes) in tests/manifest_sha256.json. The live
@@ -19,20 +26,24 @@ project configuration is never read, so a user can edit the examples,
 the likelihood default yaml files, or ../data without touching these
 tests. The frozen state has three parts:
 
-  - frozen/frozen_config_example{1,2}.py: one auto-generated module per
-    example holding (a) the complete cobaya configuration as a yaml
-    string, with every likelihood option and every parameter written
-    out, including the ones that normally come from the likelihood
-    default files (cosmic_shear.yaml, combo_3x2pt.yaml,
-    params_source.yaml, params_lens.yaml), and (b) the exact
-    sampled-parameter point the reference chi2 was evaluated at.
-    Because every default is materialized in the frozen copy, a later
-    edit to a live default file is shadowed and cannot reach the test.
+  - frozen/frozen_config_*.py: one auto-generated module per
+    configuration in EXAMPLES, holding (a) the complete cobaya
+    configuration as a yaml string, with every likelihood option and
+    every parameter written out, including the ones that normally come
+    from the likelihood default files (cosmic_shear.yaml,
+    combo_3x2pt.yaml, params_source.yaml, params_lens.yaml), and
+    (b) the exact sampled-parameter point the reference chi2 was
+    evaluated at. Because every default is materialized in the frozen
+    copy, a later edit to a live default file is shadowed and cannot
+    reach the test.
   - frozen/data/: the tests' own copy of the data vectors, covariance,
-    n(z), and masks.
-  - frozen/EXAMPLE_EVALUATE{1,2}.yaml: snapshots of the example yaml
-    files at freeze time, kept only so a human can diff how the live
-    examples drifted; no test reads them.
+    n(z), and masks. (The EMUL2 trained-network files are NOT copied:
+    they live in external_modules/data/emultrf, pinned by the EMULTRF
+    keys in set_installation_options.sh, and their drift is part of
+    what the advisory checks measure.)
+  - frozen/EXAMPLE_*.yaml: snapshots of the example yaml files at
+    freeze time, kept only so a human can diff how the live examples
+    drifted; no test reads them.
 
 UNIQUE TO THIS PROJECT: example1 (roman_kl_mcmc.dataset) and example2
 (roman_kl_3x2.dataset) use different data sets with different mask and
@@ -164,6 +175,21 @@ ACCURACY_KNOBS = [
     ("camb k_per_logint -> 50", {}, {"k_per_logint": 50}),
 ]
 
+# The EMUL2 entries below carry three extra fields:
+#   "emulator"        = an EMUL2 configuration: machine-learning
+#                       emulators (the emulrdrag, emulbaosn, and
+#                       emulmps theory blocks) replace the Boltzmann
+#                       code. These are ADVISORY (no pass/fail; see
+#                       test_emul2.py) and have no TATT variant;
+#   "exact_example"   = the exact-physics configuration this entry is
+#                       the emulated version of; its "nla_dataset" is
+#                       reused, so the emulated chi2 and the exact
+#                       reference are computed against the SAME
+#                       synthetic NLA vector (against different data
+#                       their difference would mix data mismatch with
+#                       emulator error);
+#   "exact_reference" = the exact-physics reference chi2 key the
+#                       emulator's accuracy is judged against.
 EXAMPLES = {
     "example1": {
         "frozen_module": "frozen_config_example1.py",
@@ -185,6 +211,24 @@ EXAMPLES = {
         "source_likelihood": "roman_kl.combo_3x2pt",
         "likelihood": "roman_kl.combo_2x2pt",
         "tatt_dataset": "tatt_roman_kl_3x2.dataset",
+        "nla_dataset": "synthetic_roman_kl_3x2.dataset",
+    },
+    "emul2_example1": {
+        "frozen_module": "frozen_config_emul2_example1.py",
+        "provenance": "EXAMPLE_EMUL2_EVALUATE1.yaml",
+        "likelihood": "roman_kl.cosmic_shear",
+        "emulator": True,
+        "exact_example": "example1",
+        "exact_reference": "example1_nla",
+        "nla_dataset": "synthetic_roman_kl_shear.dataset",
+    },
+    "emul2_example2": {
+        "frozen_module": "frozen_config_emul2_example2.py",
+        "provenance": "EXAMPLE_EMUL2_EVALUATE2.yaml",
+        "likelihood": "roman_kl.combo_3x2pt",
+        "emulator": True,
+        "exact_example": "example2",
+        "exact_reference": "example2_nla",
         "nla_dataset": "synthetic_roman_kl_3x2.dataset",
     },
 }
@@ -369,10 +413,11 @@ def load_reference():
 
     Returns:
       the dictionary stored in frozen/reference_chi2.json: one entry
-      per configuration ("example1_nla", "example1_tatt",
-      "example2_nla", "example2_tatt") plus a "_meta" entry recording
-      when and how the references were generated. The file sits inside
-      frozen/, so verify_frozen() also protects it from editing.
+      per configuration and variant ("example1_nla", "example1_tatt",
+      ..., "emul2_example1_nla"; the EMUL2 entries have no TATT
+      variant) plus a "_meta" entry recording when and how the
+      references were generated. The file sits inside frozen/, so
+      verify_frozen() also protects it from editing.
     """
     with open(REFERENCE_FILE) as f:
         return json.load(f)
@@ -434,6 +479,78 @@ TEST {number}: {label}
   |delta chi2|        = {delta:.8f}   (limit: < {tol})
   OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
   -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
+{'-' * 66}""", flush=True)
+    return delta
+
+
+def report_emul2_advisory(label, chi2, frozen_ref, exact_ref, limit):
+    """Print one EMUL2 accuracy check: measurements and a recommendation.
+
+    There is no pass/fail here. An emulator is an approximation, so
+    the useful outputs are the numbers themselves: the drift against
+    the frozen emulator reference (did the installed emulator change),
+    the difference against the exact-physics chi2 at the same
+    cosmology (how accurate the emulator is), and the recommendation
+    derived from that accuracy. Emulated configuration and exact
+    counterpart both evaluate the counterpart's synthetic NLA vector
+    (see load_frozen_info), and the exact reference is 0.000000 there
+    by construction, so |emulator - exact| is the emulator error at
+    the same data and nothing else.
+
+    Arguments:
+      label      = one line naming the emulated configuration.
+      chi2       = the emulator chi2 computed in this run.
+      frozen_ref = the frozen emulator reference chi2.
+      exact_ref  = the exact-physics reference chi2 (from the matching
+                   example's frozen reference).
+      limit      = the recommendation threshold on |chi2 - exact_ref|.
+
+    Returns:
+      |chi2 - exact_ref|, the accuracy difference the recommendation
+      is based on.
+    """
+    drift = chi2 - frozen_ref
+    delta_exact = abs(chi2 - exact_ref)
+    if delta_exact < limit:
+        verdict = "RECOMMENDED for actual data analysis"
+    else:
+        verdict = ("NOT recommended for actual data analysis "
+                   f"(|delta chi2| >= {limit})")
+    print(f"""
+{'-' * 66}
+EMUL2 ADVISORY: {label}
+  chi2 (this run, emulator)   = {chi2:.6f}
+  frozen emulator reference   = {frozen_ref:.6f}  (drift {drift:+.6f})
+  exact-physics reference     = {exact_ref:.6f}
+  |emulator - exact| chi2     = {delta_exact:.6f}   (threshold: {limit})
+  -> {verdict}
+{'-' * 66}""", flush=True)
+    return delta_exact
+
+
+def report_emul2_race(label, fresh, tenth):
+    """Print one EMUL2 race check, advisory only.
+
+    Arguments:
+      label = one line naming the emulated configuration.
+      fresh = chi2 of the point evaluated first on the model.
+      tenth = chi2 of the same point as the 10th of a row.
+
+    Returns:
+      |tenth - fresh|, the printed difference. A value above
+      RACE_TOLERANCE is flagged as a possible race or state leak, but
+      nothing fails: this file only alerts.
+    """
+    delta = abs(tenth - fresh)
+    note = ("consistent" if delta < RACE_TOLERANCE
+            else "WARNING: possible race condition or state leak")
+    print(f"""
+{'-' * 66}
+EMUL2 ADVISORY: {label}
+  fresh-model chi2    = {fresh:.8f}
+  10th of 10 in a row = {tenth:.8f}
+  |delta chi2|        = {delta:.8f}   ({note})
+  OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
 {'-' * 66}""", flush=True)
     return delta
 
@@ -533,6 +650,25 @@ def load_frozen_info(example, tatt, high_accuracy=False,
       - cobaya's log level is raised to WARNING (debug: 30) so the
         component-loading chatter does not bury the test reports.
 
+    An EMUL2 entry (the "emulator" flag in EXAMPLES) gets two more
+    adjustments, both serving the accuracy measurement of
+    test_emul2.py. First, its data_file becomes the SAME synthetic
+    NLA vector its exact counterpart evaluates (the counterpart's
+    "nla_dataset", where the exact reference chi2 is 0.000000 by
+    construction): the shipped EMUL2 examples point at the shipped
+    modelvectors, which sit off the current-code minimum, and a chi2
+    difference taken against different data would mix that mismatch
+    with the emulator error, while against the same data
+    |emulator - exact| is the emulator error and nothing else.
+    Second, the counterpart's ggl_exclude is copied in: a dataset's
+    mask length must equal the data-vector layout cosmolike computes
+    from ggl_exclude, and the two differ between the shipped EMUL2
+    example1 (55 excluded GGL pairs, the 2200-row ones.mask) and the
+    exact example1 (no exclusions, the 3300-row roman_kl.mask);
+    without the copy cosmolike aborts with "IP::set_mask:
+    inconsistent mask". For cosmic shear the layout carries no
+    physics: the mask selects the shear entries either way.
+
     Arguments:
       example = a key of EXAMPLES.
       tatt    = True selects the TATT IA model, False keeps NLA; the
@@ -540,14 +676,26 @@ def load_frozen_info(example, tatt, high_accuracy=False,
                 TATT-generated dataset (see TATT_GENERATORS).
       high_accuracy = True applies HIGH_ACCURACY_LIKELIHOOD and
                 HIGH_ACCURACY_CAMB_EXTRA_ARGS on top of the frozen
-                configuration (accuracy advisory checks only).
+                configuration (accuracy advisory checks only; not
+                available for the emulator configurations, which have
+                no camb block).
 
     Returns:
       the input dictionary ready for cobaya's get_model.
+
+    Raises:
+      ValueError when tatt or high_accuracy is requested for an
+      EMUL2 entry (the emulators were trained for the shipped IA
+      settings and carry no camb accuracy knobs to push).
     """
     from cobaya.yaml import yaml_load
 
     cfg = EXAMPLES[example]
+    if cfg.get("emulator") and (tatt or high_accuracy):
+        raise ValueError(
+            f"{example}: the EMUL2 configurations run only at their "
+            "shipped IA settings (no TATT variant) and carry no camb "
+            "accuracy knobs (no high_accuracy variant)")
     # _frozen_module loads frozen/<frozen_module>.py by path and hands
     # back its yaml_string attribute: the complete configuration with
     # every option and parameter written out at freeze time
@@ -578,8 +726,21 @@ def load_frozen_info(example, tatt, high_accuracy=False,
     else:
         # NLA does the same against its synthetic vector: the shipped
         # modelvectors sit off the current-code minimum (see the
-        # SYNTHETIC_VECTORS comment)
+        # SYNTHETIC_VECTORS comment). For an EMUL2 entry "nla_dataset"
+        # is the exact counterpart's synthetic vector, so the emulated
+        # chi2 and the exact reference are measured at the same data
         likelihood_block["data_file"] = cfg["nla_dataset"]
+    if cfg.get("emulator"):
+        # the dataset just selected belongs to the exact counterpart,
+        # and cosmolike only accepts a mask whose length equals the
+        # data-vector layout it computes from ggl_exclude (see the
+        # docstring); copy the counterpart's frozen layout so the two
+        # configurations describe the same data vector
+        exact_cfg = EXAMPLES[cfg["exact_example"]]
+        exact_module = _frozen_module(cfg["exact_example"])
+        exact_info = yaml_load(exact_module.yaml_string)
+        exact_block = exact_info["likelihood"][exact_cfg["likelihood"]]
+        likelihood_block["ggl_exclude"] = exact_block["ggl_exclude"]
     if high_accuracy:
         likelihood_block.update(HIGH_ACCURACY_LIKELIHOOD)
         info["theory"]["camb"]["extra_args"].update(
@@ -793,8 +954,13 @@ def _ten_in_a_row_impl(example, tatt):
     fresh = evaluate_chi2(model, point)
     print(f"  fresh model, fiducial point:  chi2 = {fresh:.8f}", flush=True)
     for i, perturbation in enumerate(RACE_PERTURBATIONS, start=1):
-        chi2 = evaluate_chi2(model, {**point, **perturbation})
-        changed = ", ".join(f"{k}={v}" for k, v in perturbation.items())
+        # the EMUL2 configurations sample fewer parameters than the
+        # exact ones (mnu is fixed inside the emulator training), so a
+        # perturbation key the model does not sample is dropped rather
+        # than kept in a separate perturbation table per configuration
+        applied = {k: v for k, v in perturbation.items() if k in point}
+        chi2 = evaluate_chi2(model, {**point, **applied})
+        changed = ", ".join(f"{k}={v}" for k, v in applied.items())
         print(f"  row {i:2d}/10 ({changed}):  chi2 = {chi2:.4f}", flush=True)
     tenth = evaluate_chi2(model, point)
     print(f"  row 10/10 (fiducial again):  chi2 = {tenth:.8f}", flush=True)

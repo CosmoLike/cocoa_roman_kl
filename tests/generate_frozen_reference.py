@@ -10,18 +10,30 @@ What one run produces, all under tests/ (see cocoa_test_utils for how
 the tests consume each piece):
 
   - frozen/data/: a copy of the CURRENT ../data folder.
-  - frozen/EXAMPLE_EVALUATE{1,2}.yaml: snapshots of the current
-    examples, kept for humans to diff (the tests never load them).
-  - frozen/frozen_config_example{1,2}.py: for each example, the model
-    is built from the CURRENT example yaml, cobaya resolves it against
-    the CURRENT likelihood defaults, and the complete resolved
-    configuration is written back out as a yaml string, together with
-    the exact evaluation point. Writing out every resolved option and
-    parameter is what makes the tests independent of later edits to
-    the live files.
-  - frozen/reference_chi2.json: the four reference chi2 values
-    (example1/2, each with NLA and TATT), computed FROM the frozen
-    modules just written, exactly the way the tests will compute them.
+  - frozen/EXAMPLE_*.yaml: snapshots of the current examples, kept
+    for humans to diff (the tests never load them).
+  - frozen/frozen_config_*.py: for each configuration listed in
+    cocoa_test_utils.EXAMPLES, the model is built from the CURRENT
+    example yaml, cobaya resolves it against the CURRENT likelihood
+    defaults, and the complete resolved configuration is written back
+    out as a yaml string, together with the exact evaluation point.
+    Writing out every resolved option and parameter is what makes the
+    tests independent of later edits to the live files. The 2x2pt
+    entry starts from example2 with the likelihood block renamed; the
+    EMUL2 entries carry the emulator theory stack with the network
+    device forced to "cpu" (deterministic and machine-independent; the
+    trained network files themselves are NOT copied: they live in
+    external_modules/data/emultrf and are pinned by the EMULTRF keys
+    in set_installation_options.sh).
+  - frozen/reference_chi2.json: the eight reference chi2 values
+    (cosmic shear, 3x2pt, and 2x2pt, each with NLA and TATT, plus the
+    two EMUL2 entries with NLA only), computed FROM the frozen
+    modules just written, exactly the way the tests will compute
+    them. The EMUL2 references are evaluated against the exact
+    counterparts' synthetic NLA vectors, where the exact references
+    are 0.000000 by construction, so the advisory
+    |emulator - exact| difference measures the emulator error at the
+    same data (see load_frozen_info in cocoa_test_utils).
   - manifest_sha256.json: the SHA-256 pin of every frozen file.
 
 Usage (from the Cocoa/ folder, cocoa environment active,
@@ -114,6 +126,12 @@ def freeze_example(example, stamp):
     live["likelihood"][cfg["likelihood"]] = likelihood_block
     likelihood_block["path"] = FROZEN_DATA_RELPATH
     likelihood_block["IA_model"] = 0
+    if cfg.get("emulator"):
+        # the emulated BAO/SN network declares device "cuda" in the
+        # example; freezing "cpu" keeps the reference reproducible on
+        # machines without a CUDA GPU (and torch on cpu is
+        # deterministic)
+        live["theory"]["emulbaosn"]["extra_args"]["device"] = "cpu"
 
     # make_model builds the evaluable cobaya Model; building it is
     # what forces cobaya to merge the live likelihood defaults into
@@ -269,11 +287,11 @@ def main():
 
     The steps, in order: refuse without --overwrite; delete and
     recreate frozen/; copy the data and the example snapshots; write
-    the two expanded frozen-configuration modules; evaluate the four
-    reference chi2 values from those modules (the same code path the
-    tests use); write the reference file; hash everything into the
-    manifest. The manifest comes last so it covers every file the
-    earlier steps produced.
+    the expanded frozen-configuration modules; generate the synthetic
+    data vectors; evaluate the eight reference chi2 values from those
+    modules (the same code path the tests use); write the reference
+    file; hash everything into the manifest. The manifest comes last
+    so it covers every file the earlier steps produced.
 
     Returns:
       0 on success, 1 when --overwrite was not given (the usage text
@@ -326,8 +344,15 @@ def main():
             "chi2_tolerance": u.CHI2_TOLERANCE,
         }
     }
-    for example in u.EXAMPLES:
-        for tatt in (False, True):
+    for example, cfg in u.EXAMPLES.items():
+        # every configuration gets an NLA reference; TATT only makes
+        # sense for the exact-physics ones (the emulators were trained
+        # for the shipped IA settings and are advisory-only)
+        if cfg.get("emulator"):
+            variants = (False,)
+        else:
+            variants = (False, True)
+        for tatt in variants:
             key = f"{example}_{'tatt' if tatt else 'nla'}"
             t0 = time.time()
             chi2 = u.single_model_chi2(example, tatt)
