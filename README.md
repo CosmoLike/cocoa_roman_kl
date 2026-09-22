@@ -243,3 +243,45 @@ Now, users must follow all the steps below.
 - The original `read_table` implementation in `cosmolike_core/cosmolike/generic_interface.cpp` used `std::stod`, which raised a range error on these finite underflowed values and stopped likelihood initialization.
 - The fix is to parse table values with `std::strtod` and only treat range errors as fatal when the parsed result is non-finite. Finite underflowed values are accepted.
 - If you see this error, switch `Cocoa/external_modules/code/cosmolike_core` to branch `nonlimber-dev` or apply the same `generic_interface.cpp` patch, then rebuild `projects/roman_kl/interface/cosmolike_roman_kl_interface.so`.
+
+# Unit tests
+
+The `tests/` folder holds unit tests for the likelihoods of this
+project: they compare each likelihood against stored reference
+values, check for race conditions from OpenMP threading, and measure
+the numerical error of the default accuracy settings, and the accuracy of the
+hybrid emulated pipelines. The
+tests read nothing from the live project;
+[tests/README.md](tests/README.md) describes every test, the tests'
+own data snapshot, and how to refresh it.
+
+We assume users are in the Conda cocoa environment from a previous
+`conda activate cocoa` command, that the shell is bash, and that the
+current folder is the cocoa main folder `cocoa/Cocoa`.
+
+**Step :one:**: activate the private Python environment by sourcing
+the script `start_cocoa.sh`
+
+    source start_cocoa.sh
+
+**Step :two:**: run the tests of this project
+
+    python -m pytest ./projects/roman_kl/tests
+
+## Minimum accuracy parameters
+
+The advisory checks in `tests/test_accuracy.py` measure the
+numerical error of the default accuracy settings: each setting is
+raised one at a time on the 3x2pt configuration, so a large
+$\Delta\chi^2$ can be attributed to the setting causing it, and
+then every setting at once. Each check prints the $\Delta\chi^2$
+between the high-accuracy and the default evaluations, to compare
+against the 0.2 band the reference tests allow. No measured values
+are quoted here: rerun the checks to measure them on the current
+code, and see [tests/README.md](tests/README.md) for each check,
+the settings raised, and what each setting controls.
+
+The examples default to `k_per_logint: 50`: the old default
+undersampled the CAMB transfer functions, and that error masqueraded
+as an apparent CAMB `AccuracyBoost` sensitivity until the transfer
+sampling was raised.
