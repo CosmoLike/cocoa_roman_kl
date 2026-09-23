@@ -19,10 +19,11 @@ The isolation is internal; the commands below stay the same.
 1. [Running the tests](#run_tests)
 2. [The tests](#the_tests)
     1. [The CFASTPT vs FASTPT comparison](#cfastpt_fastpt)
-    2. [Advisory checks](#advisory_checks)
-    3. [Accuracy checks](#accuracy_checks)
-    4. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
-    5. [Baryonic feedback drift tests](#baryon_drift_tests)
+    2. [The Halofit vs EE2 checks](#halofit_ee2)
+    3. [Advisory checks](#advisory_checks)
+    4. [Accuracy checks](#accuracy_checks)
+    5. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
+    6. [Baryonic feedback drift tests](#baryon_drift_tests)
 3. [Appendix](#appendix)
     1. [FAQ: Do the tests keep their own data?](#frozen_copy)
     2. [FAQ: Why do the tests use their own data vectors?](#synthetic_vectors)
@@ -218,6 +219,37 @@ with `--high=1`), and at the all-zero IA point the two
 implementations printed identical data vectors on every unmasked
 row ($\Delta\chi^2 = 0.000000$).
 
+
+### The Halofit vs EE2 checks (`test_nonlinear.py`, NL1-NL2) <a name="halofit_ee2"></a>
+
+The likelihood can source the nonlinear matter power from CAMB's
+Takahashi halofit (`non_linear_emul: 2`, the frozen contracts'
+setting) or from EuclidEmulator2 (`non_linear_emul: 1`). Check NL1
+evaluates the cosmic-shear data vector and check NL2 the 3x2pt
+data vector with both at ten fixed cosmologies across the
+omegam/ns/As space (every other parameter at the frozen fiducial)
+and reports, per cosmology, the $\Delta\chi^2$ of the Halofit
+vector against the EE2 vector.
+
+The EE2 vector is that cosmology's fiducial, so the baseline is
+zero by construction and no stored data vector enters the metric.
+The checks are advisory - there is no pass limit: the numbers say
+how much of the statistical error budget the Halofit-vs-emulator
+difference consumes under the chosen scale cuts. The `--mask`
+option of the comparison sweeps applies (`frozen` and `ones`).
+
+On 2026-09-23 check NL1 measured, under the frozen mask,
+per-cosmology $\Delta\chi^2$ between 8.8 and 491.2 (median 64.4),
+largest at the high-omegam draws; check NL2 measured between 375.0
+and 3,092.8 (median 911.8).
+
+The 3x2pt frozen mask is already the all-ones mask, so NL2 under
+`--mask=ones` reproduces the frozen numbers by construction; the
+2026-09-23 run printed identical digits. NL1 under `--mask=ones`
+weights the difference with the full 3,300-dimension inverse
+covariance (every row unmasked) and also reproduced the frozen
+numbers at the printed four decimals: max $\Delta\chi^2 =
+491.2244$, median 64.4280.
 
 ### Advisory checks (`test_emul2.py`, E1-E4) <a name="advisory_checks"></a>
 
