@@ -24,7 +24,7 @@
     "frozen/data/baryon_spk_power_law.dataset": "1030757808857a34a48cee42c4a7fcce99b8fa1dbdd9a38fc8f2fef38038be32",
     "frozen/data/baryon_spk_power_law.modelvector": "9886ffe2523157f26e231d1420b8aec7eb12ce1af2f6fce16cc83ef676c06b6b",
     "frozen/data/baryons_logPkR.h5": "1ab5cc0604925089787dd775740b368db2a83a0d10c88af54f3b3f4bfa33570d",
-    "frozen/data/calculate_mask.py": "9c88d8c859c03256d7f9e356ba20a7312972504543a594f111fb50e0bd0f2203",
+    "frozen/data/calculate_mask.py": "6f52368ca3043055786ec3e3fe80ed55fb7ea478823595bf2a33a8fd40ffacfa",
     "frozen/data/cut_covmat.py": "01bb0ccb52625020207bd5c94b7ac167fd557bb6770da54f1901620405866509",
     "frozen/data/ones.mask": "b49476a21d48ba8bc025002869e7504364cc499736472dfcad7e8ff610a34e16",
     "frozen/data/ones_shear.mask": "363ca4ea1ab7b86643e8563cbc5b4c3f58391b16ebe74ea9e2ad7cddf419183a",

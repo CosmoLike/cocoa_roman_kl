@@ -1,93 +1,46 @@
 import numpy as np
-import os
-from astropy.cosmology import FlatLambdaCDM
-import math as mt
 
-#HB adapted from VM & Surpanta's code
+#VM Fourier-space mask generator for the roman_kl project.
+#VM Regenerates data/roman_kl.mask, data/ones.mask and the frozen
+#VM ones_shear.mask exactly. The project uses two data-vector shapes
+#VM (n_cl = 20 log-spaced C_ell bins in [20, 4000], 10 lens = 10 source
+#VM tomographic bins, no per-ell scale cuts):
+#VM   shear family (roman_kl_mcmc.dataset, ggl_exclude = []):
+#VM     55 shear + 100 ggl + 10 clustering = 165 blocks x 20 = 3300
+#VM   3x2pt family (roman_kl_3x2.dataset, ggl_exclude = lens >= source):
+#VM     55 shear + 45 ggl + 10 clustering = 110 blocks x 20 = 2200
 
-redshift_file = 'example1.nz' #redshift file - change to your own file
-ggl_skip_combos = [[6,0],[7,0],[7,1]] #skip these combinations of lens and source bins
+#VM INPUT (from data/*.dataset and likelihood/*.yaml) ----------------------
+N_CL   = 20  # Number of C_ell bins (log-spaced in [l_min, l_max])
+N_LENS = 10  # Number of lens tomographic bins
+N_SRC  = 10  # Number of source tomographic bins
 
-ξp_CUTOFF = 0  # cutoff scale in arcminutes
-ξm_CUTOFF = 0 # cutoff scale in arcminutes
-gc_CUTOFF = 1.5 # Galaxy clustering cutoff in Mpc/h
+#VM GLOBAL VARIABLES -------------------------------------------------------
+N_SHEAR = int(N_SRC * (N_SRC + 1) / 2)  # 55 shear blocks
 
-THETA_MIN  = 2.5    # Minimum angular scale (in arcminutes)
-THETA_MAX  = 250.  # Maximum angular scale (in arcminutes)
-N_ANG_BINS = 15    # Number of angular bins
-N_LENS = 8  # Number of lens tomographic bins
-N_SRC  = 8  # Number of source tomographic bins
-N_XI_PS = int(N_SRC * (N_SRC + 1) / 2) 
-N_XI    = int(N_XI_PS * N_ANG_BINS)
+def nblocks(ggl_exclude):
+  "Total number of [shear, ggl, clustering] blocks given the ggl exclusions"
+  return N_SHEAR + (N_LENS * N_SRC - len(ggl_exclude)) + N_LENS
 
-def calculate_average_redshift(filename):
-    """
-    Reads a text file with redshift bins and corresponding number of data points,
-    then calculates the average redshift weighted by the number of data points.
+def save_mask(filename, mask):
+  np.savetxt(filename,
+    np.column_stack((np.arange(0, len(mask)), mask)),
+    fmt='%d %1.1f')
 
-    Parameters:
-        filename (str): Path to the input text file.
+#VM SHEAR FAMILY (3300 = 165 blocks x 20 ells, ggl_exclude = []) -----------
+NDATA_SHEAR_FAMILY = nblocks([]) * N_CL
 
-    Returns:
-        float: The weighted average redshift.
-    """
-    # Load data from the file
-    data = np.loadtxt(filename)
-    avg_redshifts = []
+# roman_kl.mask: cosmic-shear-only analysis on the full-shape vector; the
+# 55 shear blocks are kept and every ggl and clustering block is zeroed
+mask = np.zeros(NDATA_SHEAR_FAMILY)
+mask[0 : N_SHEAR * N_CL] = 1.0
+save_mask("roman_kl.mask", mask)
 
-    # Extract columns
-    redshifts = data[:, 0]  # First column: redshift bins
-    for i in np.arange(1,9):
-        counts = data[:, i]      # Second column: number of data points
+save_mask("ones_shear.mask", np.ones(NDATA_SHEAR_FAMILY))
 
-        # Compute the weighted average redshift
-        avg_redshifts.append(np.sum(redshifts * counts) / np.sum(counts))
+#VM 3x2PT FAMILY (2200 = 110 blocks x 20 ells) -----------------------------
+# ggl_exclude (likelihood yaml) drops every lens >= source pair (55 pairs)
+GGL_EXCLUDE = [[i, j] for i in range(N_LENS) for j in range(i + 1)]
+NDATA_3X2PT_FAMILY = nblocks(GGL_EXCLUDE) * N_CL
 
-    return avg_redshifts
-
-# Calculate average redshifts
-zavg = calculate_average_redshift(redshift_file)
-    
-# COMPUTE SHEAR SCALE CUTS
-vtmin = THETA_MIN * 2.90888208665721580e-4;
-vtmax = THETA_MAX * 2.90888208665721580e-4;
-logdt = (mt.log(vtmax) - mt.log(vtmin))/N_ANG_BINS;
-theta = np.zeros(N_ANG_BINS+1)
-
-for i in range(N_ANG_BINS):
-  tmin = mt.exp(mt.log(vtmin) + (i + 0.0) * logdt);
-  tmax = mt.exp(mt.log(vtmin) + (i + 1.0) * logdt);
-  x = 2./ 3.
-  theta[i] = x * (tmax**3 - tmin**3) / (tmax**2- tmin**2)
-  theta[i] = theta[i]/2.90888208665721580e-4
-
-cosmo = FlatLambdaCDM(H0=100, Om0=0.3)
-def ang_cut(z):
-  "Get Angular Cutoff from redshit z"
-  theta_rad = gc_CUTOFF / cosmo.angular_diameter_distance(z).value
-  return theta_rad * 180. / np.pi * 60.
-
-
-#VM COSMIC SHEAR SCALE CUT -------------------------------------------------
-ξp_mask = np.hstack([(theta[:-1] > ξp_CUTOFF) for i in range(N_XI_PS)])
-ξm_mask = np.hstack([(theta[:-1] > ξm_CUTOFF) for i in range(N_XI_PS)])   
-
-## GGL mask ---------------------------------------------------------------
-γt_mask = []  #initialize empty list for γt_mask
-for j in range(N_LENS): 
-    for k in range(N_SRC):
-        if [j,k] in ggl_skip_combos:
-            continue
-        else:
-            γt_mask.append((theta[:-1] > ang_cut(zavg[j])))
-γt_mask = np.hstack(γt_mask) 
-
-## w_theta mask -----------------------------------------------------------
-w_mask = np.hstack([(theta[:-1] > ang_cut(zavg[j])) for j in range(N_LENS)])
-mask = np.hstack([ξp_mask, ξm_mask, γt_mask, w_mask])
-
-## Output mask -------------------------------------------------------------
-np.savetxt("example1.mask",
- np.column_stack((np.arange(0,len(mask)),
- mask.astype(int))),fmt='%d %1.1f')
-
+save_mask("ones.mask", np.ones(NDATA_3X2PT_FAMILY))
