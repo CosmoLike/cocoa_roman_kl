@@ -20,10 +20,11 @@ The isolation is internal; the commands below stay the same.
 2. [The tests](#the_tests)
     1. [The CFASTPT vs FASTPT comparison](#cfastpt_fastpt)
     2. [The Halofit vs EE2 checks](#halofit_ee2)
-    3. [Advisory checks](#advisory_checks)
-    4. [Accuracy checks](#accuracy_checks)
-    5. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
-    6. [Baryonic feedback drift tests](#baryon_drift_tests)
+    3. [The EE2 race test](#ee2_race)
+    4. [Advisory checks](#advisory_checks)
+    5. [Accuracy checks](#accuracy_checks)
+    6. [Baryonic feedback accuracy checks](#baryon_accuracy_checks)
+    7. [Baryonic feedback drift tests](#baryon_drift_tests)
 3. [Appendix](#appendix)
     1. [FAQ: Do the tests keep their own data?](#frozen_copy)
     2. [FAQ: Why do the tests use their own data vectors?](#synthetic_vectors)
@@ -98,6 +99,7 @@ The test files and the configurations they cover:
 | 15 | `test_fastpt.py` | cosmic shear; IA modeling: TATT; the C cfastpt (`IA_code: 0`) vs the python FAST-PT package (`IA_code: 1`) at 30 fixed points (20 across the intrinsic-alignment prior plus a one-parameter-at-a-time family), cosmology at the fiducial | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point; the cfastpt vector is that point's fiducial, so agreement means zero |
 | 16 | `test_fastpt.py` | 3x2pt; IA modeling: TATT; the same 30-point cfastpt-vs-FAST-PT sweep as test 15 on the 3x2pt likelihood (the one-loop bias amplitudes stay fixed at zero) | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point, under the 3x2pt masked inverse covariance |
 | 17 | `test_fastpt.py` | 2x2pt (`roman_kl.combo_2x2pt`); IA modeling: TATT; the same 30-point sweep with cosmic shear dropped | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point, under the 2x2pt masked inverse covariance |
+| 18 | `test_ee2.py` | cosmic shear; IA modeling: NLA; the nonlinear matter power from EuclidEmulator2 (`non_linear_emul: 1`) | race condition (OpenMP threading, including EE2's own threaded compute): fiducial alone vs after nine other cosmologies |
 
 ### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, tests 15-17) <a name="cfastpt_fastpt"></a>
 
@@ -256,6 +258,33 @@ Measured on 2026-09-23 (the figure below, frozen mask):
   identical digits.
 
 ![The ten cosmologies, colored by the Halofit-vs-EE2 difference](halofit_vs_ee2_points.png)
+
+### The EE2 race test (`test_ee2.py`, test 18) <a name="ee2_race"></a>
+
+Cocoa pins a modified EuclidEmulator2: OpenMP threading, a
+1,010-redshift capacity, the `get_boost2` API with a pre-built
+emulator, memory-leak fixes, and a bilinear interpolation with a
+border fix. The modifications are documented in the repository's own
+README (`external_modules/code/euclidemu2/README.md`). The gate that
+compiles the pre-modification build (commit `ff59f66`) and compares
+the two builds' data vectors runs as the lsst_y1 project's test 18
+(its `tests/test_ee2.py`) and is not repeated here.
+
+Test 18 is the race check with EE2 on: the fiducial evaluated fresh
+and again as the 10th of 10 cosmologies on one model instance, with
+the nonlinear matter power from EE2 (`non_linear_emul: 1`). EE2's
+compute is OpenMP-threaded, so a thread race inside it shifts the
+second fiducial value; the two must agree within $10^{-4}$.
+
+Measured on 2026-09-23:
+
+- Test 18: the fresh and 10th-in-a-row fiducial agree to all eight
+  printed decimals.
+- The pre-modification build, compiled side by side and evaluated at
+  the ten cosmologies of the Halofit-vs-EE2 checks on this project's
+  cosmic shear under its frozen mask, measured max
+  $\Delta\chi^2 = 1.1\times10^{-4}$ against the installed build (max
+  fractional data-vector difference $2.7\times10^{-5}$).
 
 ### Advisory checks (`test_emul2.py`, E1-E4) <a name="advisory_checks"></a>
 
