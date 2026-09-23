@@ -146,7 +146,6 @@ model).
 1. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_kl_baryonic_feedback)
 2. [Running Hybrid Cosmolike-ML emulators](#roman_kl_examples_emul2)
 3. [Unit tests](#unit_tests)
-4. [FAST-PT accuracy for TATT (`IA_code: 1`)](#fastpt_accuracy)
 
 # Running Hybrid Cosmolike-ML emulators <a name="roman_kl_examples_emul2"></a>
 
@@ -292,52 +291,3 @@ The examples default to `k_per_logint: 50`: the old default
 undersampled the CAMB transfer functions, and that error masqueraded
 as an apparent CAMB `AccuracyBoost` sensitivity until the transfer
 sampling was raised.
-
-# FAST-PT accuracy for TATT (`IA_code: 1`) <a name="fastpt_accuracy"></a>
-
-Cosmolike computes the TATT perturbation-theory integrals with two
-implementations: cfastpt, the C code inside the compiled interface
-(`IA_code: 0`, the default), and the python FAST-PT package through
-the fastpt theory block (`IA_code: 1`). Unit test 15 compares them
-at 30 fixed points across the intrinsic-alignment prior: at every
-point both implementations write their theory vector, and
-$\Delta\chi^2$ is the $\chi^2$ of the FAST-PT vector against the
-cfastpt vector through this project's masked inverse covariance,
-zero for identical predictions.
-
-The default fastpt settings were validated on a restricted region of
-the TATT prior, where the two implementations agree closely; across
-the entire prior volume they disagree by up to
-$\Delta\chi^2 = 26409$ at this project's precision. The
-disagreement falls as a power law with the fastpt `accuracyboost`,
-but at this precision the 0.2 band needs a boost near 5120, at about
-160 s per cosmology (the 0.2 band is first reached at 5120).
-
-| FAST-PT grid boost | max $\Delta\chi^2$ | median $\Delta\chi^2$ | cost per cosmology |
-|---|---|---|---|
-| 1 (default settings) | 26409 | 175 | 2.0 s |
-| 40 | 412 | 2.75 | 2.9 s |
-| 80 | 115.7 | 0.78 | 3.7 s |
-| 160 | 31.3 | 0.214 | 4.0 s |
-| 320 | 8.50 | 0.061 | 7.8 s |
-| 640 (test setting) | 2.41 | 0.020 | 17 s |
-| 1280 | 0.77 | 0.0078 | 33 s |
-| 2560 | 0.311 | 0.0041 | 74 s |
-| 5120 (0.2 band) | 0.189 | 0.0027 | 159 s |
-
-![The 30 comparison points, colored by the per-point difference](tests/cfastpt_vs_fastpt_points.png)
-
-> [!Warning]
-> Do not use `IA_code: 1` for TATT analyses in this project: keeping
-> accuracy over the entire intrinsic-alignment prior needs a fastpt
-> `accuracyboost` near 5120, at about 160 s per cosmology. FAST-PT
-> here is a code cross-check; production analyses use cfastpt
-> (`IA_code: 0`), the converged and faster reference.
-
-> [!NOTE]
-> Unit test 15 runs the comparison at the largest practical boost
-> for a routine check (640) with this project's measured band,
-> 4, as the pass limit.
-> [tests/README.md](tests/README.md#cfastpt_fastpt) carries the
-> test, the convergence details, and the running flow.
-

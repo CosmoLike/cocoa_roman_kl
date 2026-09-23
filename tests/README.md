@@ -113,39 +113,36 @@ zero for identical vectors and quadratic in their difference. A
 comparison against the shipped data vector would measure the slope
 of the distance to the data instead of the numerics.
 
-The default fastpt settings were validated on a restricted region of
-the TATT prior, where the two implementations agree closely; across
-the entire prior volume, at this project's precision, keeping the
-agreement inside the 0.2 band of the other checks needs an
-`accuracyboost` near 5120, at about 160 s per cosmology
-(the 0.2 band is first reached at 5120). The test therefore runs FAST-PT at the
-largest practical boost for a routine check, 640, with this
-project's measured band, 4, as the pass limit; a doubled
-boost repeats the measurement as an advisory. The point values and
-the design are shared with the lsst_y1 project (its tests/README.md
-carries the figures and the full discussion); the convergence below
-is this project's own sweep:
+The fastpt block computes on two grids: `accuracyboost` multiplies
+the density of the output table cosmolike reads with linear
+interpolation (the accuracy driver), and `internal_accuracyboost`
+the density of the internal grid the FFTLog convolutions run on,
+with a cubic spline in log k upsampling the terms from one grid
+onto the other. Both boosts are rebased so 1.0 is the converged
+configuration, and the test runs FAST-PT at the
+defaults with the 0.2 band of the other checks as the pass
+limit; a doubled configuration repeats the measurement as an
+advisory. The point values, the design, and the
+decision record live with the lsst_y1 project (its tests/README.md
+carries the full discussion); the table below is this project's own
+measurement:
 
-| FAST-PT grid boost | max $\Delta\chi^2$ | median $\Delta\chi^2$ | cost per cosmology |
+| output table (points) | internal grid (points) | max $\Delta\chi^2$ | cost per cosmology |
 |---|---|---|---|
-| 1 (default settings) | 26409 | 175 | 2.0 s |
-| 40 | 412 | 2.75 | 2.9 s |
-| 80 | 115.7 | 0.78 | 3.7 s |
-| 160 | 31.3 | 0.214 | 4.0 s |
-| 320 | 8.50 | 0.061 | 7.8 s |
-| 640 (test setting) | 2.41 | 0.020 | 17 s |
-| 1280 | 0.77 | 0.0078 | 33 s |
-| 2560 | 0.311 | 0.0041 | 74 s |
-| 5120 (0.2 band) | 0.189 | 0.0027 | 159 s |
+| 1,100 (the historical single grid) | 1,100 (shared) | 26409 | 2.0 s |
+| 1,024,900 (`accuracyboost: 1`, the default) | 1,100 (the default) | 0.1886 | 2.3 s |
+| 2,048,900 (`accuracyboost: 2`) | 1,300 (`internal_accuracyboost: 2`) | 0.1804 | 2.7 s |
+| 4,096,900 | 1,100 | 0.177 | 3.4 s |
+| 8,192,900 | 1,100 | 0.175 | 4.6 s |
 
 ![The 30 comparison points, colored by the per-point difference](cfastpt_vs_fastpt_points.png)
 
-> [!Warning]
-> Do not use `IA_code: 1` for TATT analyses in this project: keeping
-> accuracy over the entire intrinsic-alignment prior needs a fastpt
-> `accuracyboost` near 5120, at about 160 s per cosmology. FAST-PT
-> here is a code cross-check; production analyses use cfastpt
-> (`IA_code: 0`), the converged and faster reference.
+> [!NOTE]
+> The fastpt defaults hold the band on their own. The sweep also
+> measured a residual floor near 0.175 that further density does
+> not move - the one project where a difference beyond the table
+> density is visible, safely inside the band. cfastpt
+> (`IA_code: 0`) remains the reference implementation.
 
 #### Running the comparison <a name="run_cfastpt_fastpt"></a>
 

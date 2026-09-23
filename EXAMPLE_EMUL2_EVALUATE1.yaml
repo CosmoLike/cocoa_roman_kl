@@ -139,17 +139,16 @@ theory:
       nl_metadata_file: "external_modules/data/emultrf/emulmps/w0wa_halofit/metadata.joblib"
       use_syren: False
       param_order: ["As_1e9", "ns", "H0", "omegab", "omegam", 'w', 'wa']
-#  Warning: FAST-PT under TATT is a code cross-check for this
-#  project, never an analysis path. Reaching the 0.2 agreement
-#  band against cfastpt needs accuracyboost near 5120, at about
-#  160 s per cosmology; with the default fastpt settings the data
-#  vectors differ by up to delta chi2 = 26409 across the
-#  intrinsic-alignment prior. Use cfastpt (IA_code: 0) for
-#  analyses (see tests/README.md, test 15).
+#  NOTE: under TATT with IA_code: 1 the fastpt defaults are the
+#  converged two-grid configuration: accuracyboost multiplies the
+#  density of the output table cosmolike interpolates (the accuracy
+#  driver) and internal_accuracyboost the FFTLog grid, both rebased
+#  so 1.0 just works (see tests/README.md, test 15).
 #  fastpt:
 #    path: ./external_modules/code/FAST-PT
 #    extra_args:
-#      accuracyboost: 5120
+#      accuracyboost: 1.0
+#      internal_accuracyboost: 1.0
 #      kmax_boltzmann: 7.5
 #      extrap_kmax: 250.0
 sampler:

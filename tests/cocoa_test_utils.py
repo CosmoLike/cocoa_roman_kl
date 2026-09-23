@@ -1923,36 +1923,42 @@ FASTPT_COMPARISON_POINTS = [
 ]
 
 # Pass limit on the covariance-weighted difference of the two
-# implementations at FASTPT_LOW_SETTINGS (the largest PRACTICAL grid
-# boost for a routine test). For this project the 0.2 band of the
-# other checks is out of practical reach: it needs a FAST-PT grid
-# boost near 5120, at about 160 seconds per cosmology, so FAST-PT
-# under TATT is a code cross-check here, never an analysis path (the
-# README carries the full convergence curve and the verdict). The
-# limit is this project's measured agreement at the test's boost,
-# with headroom to catch regressions, not a statistical-noise band.
-FASTPT_COMPARISON_TOLERANCE = 4.0
+# implementations at FASTPT_LOW_SETTINGS: at each point both blocks
+# print their theory data vector, and the tested number is
+# delta^T C^-1 delta - the chi2 OF the implementation difference,
+# zero when the vectors agree. 0.2 is the house comfort band of the
+# other checks, in reach since the two-grid fastpt block made the
+# output-table density cheap (this project's own sweep: max delta
+# chi2 0.188561 at the converged defaults; the historical
+# single-grid default reached 26409 across the prior). The sweep
+# also measured a residual floor near 0.175 that further density
+# does not move (0.175 at eight times the density) - the one
+# project where a difference beyond table density is visible,
+# safely inside the band.
+FASTPT_COMPARISON_TOLERANCE = 0.2
 
 # The python FAST-PT side has numerical settings of its own, read by
 # the fastpt theory block from its extra_args block
 # (external_modules/code/PyFAST-PT/fastpt.py, symlinked into cobaya
-# as theories/fastpt). Low is the recommended minimum the example
-# yamls carry in their commented fastpt block, hard-coded here so the
-# test keeps evaluating this exact configuration even if the yamls
-# later move. The grid boost refines the FAST-PT k grid only; the
-# Boltzmann k_max request stays at kmax_boltzmann, with the grid's
-# high-k reach served by the Pk interpolator's log-extrapolation.
-# High doubles the boost, so the advisory column shows the residual
-# grid error of low. Low here is the largest practical boost for a
-# routine test, not the yamls' recommended minimum (see the
-# tolerance comment).
+# as theories/fastpt). The block computes on two grids: accuracyboost
+# multiplies the density of the output table cosmolike reads with
+# linear interpolation (the accuracy driver), and
+# internal_accuracyboost the density of the internal grid the FFTLog
+# convolutions run on; a cubic spline in log k upsamples the terms
+# from one grid onto the other. Both boosts default to 1.0 = the
+# converged configuration, so low IS the default; it is hard-coded
+# here so the test keeps evaluating this exact configuration even if
+# the defaults later move. High doubles both boosts, so the advisory
+# column shows the residual grid response of low.
 FASTPT_LOW_SETTINGS = {
-    "accuracyboost": 640.0,
+    "accuracyboost": 1.0,
+    "internal_accuracyboost": 1.0,
     "kmax_boltzmann": 7.5,
     "extrap_kmax": 250.0,
 }
 FASTPT_HIGH_SETTINGS = {
-    "accuracyboost": 1280.0,
+    "accuracyboost": 2.0,
+    "internal_accuracyboost": 2.0,
     "kmax_boltzmann": 7.5,
     "extrap_kmax": 250.0,
 }
@@ -2330,8 +2336,8 @@ def cfastpt_vs_fastpt_chi2s(example, high=False):
          measured against (its own chi2 against that vector is zero
          by construction);
       2. python FAST-PT (IA_code 1) at FASTPT_LOW_SETTINGS, the
-         recommended minimum settings of the example yamls;
-      3. python FAST-PT at FASTPT_HIGH_SETTINGS, the doubled grid.
+         pass configuration;
+      3. python FAST-PT at FASTPT_HIGH_SETTINGS, the doubled boosts.
 
     Block 2's per-point delta^T C^-1 delta against block 1 is the
     pass/fail quantity; block 3's shows how the deviation responds
