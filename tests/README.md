@@ -129,7 +129,7 @@ measurement:
 
 | output table (points) | internal grid (points) | max $\Delta\chi^2$ | cost per cosmology |
 |---|---|---|---|
-| 1,100 (the historical single grid) | 1,100 (shared) | 26409 | 2.0 s |
+| 1,100 | 1,100 (shared) | 26409 | 2.0 s |
 | 1,024,900 (`accuracyboost: 1`, the default) | 1,100 (the default) | 0.1886 | 2.3 s |
 | 2,048,900 (`accuracyboost: 2`) | 1,300 (`internal_accuracyboost: 2`) | 0.1804 | 2.7 s |
 | 4,096,900 | 1,100 | 0.177 | 3.4 s |
