@@ -160,17 +160,20 @@ configuration fixes the one-loop bias amplitudes (`ROMAN_KL_B2_*`,
 `ROMAN_KL_B3NL_*`) at zero, so the sweep compares the
 intrinsic-alignment tables only, on the wider data vector.
 
-On 2026-09-23 it measured max $\Delta\chi^2 = 0.174298$ at the default
-camb/cosmolike settings and 0.077547 with `--high=1` (advisory
-doubled-grid columns 0.165475 and 0.051343).
-
 Test 17 runs it on the 2x2pt likelihood (galaxy clustering plus
 galaxy-galaxy lensing, cosmic shear dropped). Clustering carries no
 intrinsic alignment, so the TATT tables are scored through
-galaxy-galaxy lensing alone. On 2026-09-23 it measured max
-$\Delta\chi^2 = 0.000012$ at the default settings and 0.000004 with
-`--high=1`: next to tests 15 and 16, essentially all of the
-implementation difference sits in the cosmic-shear block.
+galaxy-galaxy lensing alone.
+
+Measured on 2026-09-23:
+
+- Test 16 (3x2pt): max $\Delta\chi^2 = 0.174298$ at the default
+  camb/cosmolike settings and 0.077547 with `--high=1` (advisory
+  doubled-grid columns 0.165475 and 0.051343).
+- Test 17 (2x2pt): max $\Delta\chi^2 = 0.000012$ at the default
+  settings and 0.000004 with `--high=1`: next to tests 15 and 16,
+  essentially all of the implementation difference sits in the
+  cosmic-shear block.
 
 #### Running the comparison <a name="run_cfastpt_fastpt"></a>
 
@@ -212,12 +215,14 @@ settings
 > inverse covariance (every row unmasked) instead of the shear-block
 > masked inverse.
 
-On 2026-09-23 every `--mask=ones` sweep passed and reproduced its
-frozen-mask numbers at the printed six decimals: test 15 measured
-max $\Delta\chi^2 = 0.188561$ at the default settings (0.076974
-with `--high=1`), and at the all-zero IA point the two
-implementations printed identical data vectors on every unmasked
-row ($\Delta\chi^2 = 0.000000$).
+Measured on 2026-09-23:
+
+- Every `--mask=ones` sweep passed and reproduced its frozen-mask
+  numbers at the printed six decimals: test 15 measured max
+  $\Delta\chi^2 = 0.188561$ at the default settings (0.076974 with
+  `--high=1`).
+- At the all-zero IA point the two implementations printed identical
+  data vectors on every unmasked row ($\Delta\chi^2 = 0.000000$).
 
 
 ### The Halofit vs EE2 checks (`test_nonlinear.py`, NL1-NL2) <a name="halofit_ee2"></a>
@@ -238,18 +243,19 @@ how much of the statistical error budget the Halofit-vs-emulator
 difference consumes under the chosen scale cuts. The `--mask`
 option of the comparison sweeps applies (`frozen` and `ones`).
 
-On 2026-09-23 check NL1 measured, under the frozen mask,
-per-cosmology $\Delta\chi^2$ between 8.8 and 491.2 (median 64.4),
-largest at the high-omegam draws; check NL2 measured between 375.0
-and 3,092.8 (median 911.8).
+Measured on 2026-09-23 (the figure below, frozen mask):
 
-The 3x2pt frozen mask is already the all-ones mask, so NL2 under
-`--mask=ones` reproduces the frozen numbers by construction; the
-2026-09-23 run printed identical digits. NL1 under `--mask=ones`
-weights the difference with the full 3,300-dimension inverse
-covariance (every row unmasked) and also reproduced the frozen
-numbers at the printed four decimals: max $\Delta\chi^2 =
-491.2244$, median 64.4280.
+- NL1 (cosmic shear): per-cosmology $\Delta\chi^2$ between 8.8 and
+  491.2 (median 64.4), largest at the high-omegam draws; under
+  `--mask=ones` (the full 3,300-dimension inverse covariance, every
+  row unmasked) the run reproduced the frozen numbers at the printed
+  four decimals: max $\Delta\chi^2 = 491.2244$, median 64.4280.
+- NL2 (3x2pt): between 375.0 and 3,092.8 (median 911.8); the frozen
+  3x2pt mask is already the all-ones mask, so `--mask=ones`
+  reproduces the frozen numbers by construction; the run printed
+  identical digits.
+
+![The ten cosmologies, colored by the Halofit-vs-EE2 difference](halofit_vs_ee2_points.png)
 
 ### Advisory checks (`test_emul2.py`, E1-E4) <a name="advisory_checks"></a>
 
