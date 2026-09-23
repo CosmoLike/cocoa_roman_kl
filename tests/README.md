@@ -157,8 +157,9 @@ terms also enter galaxy-galaxy lensing and the difference is
 weighted by the 3x2pt masked inverse covariance. The frozen
 configuration fixes the one-loop bias amplitudes (`ROMAN_KL_B2_*`,
 `ROMAN_KL_B3NL_*`) at zero, so the sweep compares the
-intrinsic-alignment tables only, on the wider data vector. On
-2026-09-23 it measured max $\Delta\chi^2 = 0.174298$ at the default
+intrinsic-alignment tables only, on the wider data vector.
+
+On 2026-09-23 it measured max $\Delta\chi^2 = 0.174298$ at the default
 camb/cosmolike settings and 0.077547 with `--high=1` (advisory
 doubled-grid columns 0.165475 and 0.051343).
 
@@ -323,14 +324,18 @@ The file `test_accuracy_baryons.py` repeats the default-versus-high
 accuracy comparison with the `bfmt` theory block switched on: one
 advisory check per feedback method (the three SP(k) fb relations,
 BCEmu, Flamingo, BACCOemu, and BCemu2025), at a fixed parameter
-point per method. Each check creates its data vector on the fly, by
+point per method.
+
+Each check creates its data vector on the fly, by
 the same mechanism as the N-random-models check: the
 default-settings model writes its own theory vector during
 evaluation, that vector becomes the data of a temporary dataset, and
 the pushed-settings model evaluates at the same point against it.
 The fiducial $\chi^2$ is therefore zero by construction, nothing is
 stored in the snapshot, and the single reported number,
-$\Delta\chi^2$, is a pure numerics response. The check BF0
+$\Delta\chi^2$, is a pure numerics response.
+
+The check BF0
 additionally runs the one-setting-at-a-time scan with the Akino
 SP(k) feedback on, so a large delta names the setting causing it.
 
@@ -365,6 +370,7 @@ theory prediction was stored at freeze time
 today's prediction against that stored vector: zero at freeze time
 by construction, so a $\chi^2$ above the tolerance means cosmolike
 or the `bfmt` theory block changed its prediction since the freeze.
+
 These tests complement the accuracy checks above: the accuracy
 checks regenerate their vector on the fly per run, so they measure
 the numerical settings and can never see drift; the drift tests hold
