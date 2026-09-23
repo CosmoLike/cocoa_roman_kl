@@ -141,6 +141,12 @@ model).
 > For the sampled parameters of each model, their validity ranges, and the `bfmt`
 > options, see `Cocoa/external_modules/code/baryon_suppression/README.md`.
 
+# Table of contents <a name="table_of_contents"></a>
+
+1. [Baryonic feedback on EXAMPLE_EVALUATE1](#roman_kl_baryonic_feedback)
+2. [Running Hybrid Cosmolike-ML emulators](#roman_kl_examples_emul2)
+3. [Unit tests](#unit_tests)
+
 # Running Hybrid Cosmolike-ML emulators <a name="roman_kl_examples_emul2"></a>
 
 > [!Warning]
@@ -244,7 +250,7 @@ Now, users must follow all the steps below.
 - The fix is to parse table values with `std::strtod` and only treat range errors as fatal when the parsed result is non-finite. Finite underflowed values are accepted.
 - If you see this error, switch `Cocoa/external_modules/code/cosmolike_core` to branch `nonlimber-dev` or apply the same `generic_interface.cpp` patch, then rebuild `projects/roman_kl/interface/cosmolike_roman_kl_interface.so`.
 
-# Unit tests
+# Unit tests <a name="unit_tests"></a>
 
 The `tests/` folder holds unit tests for the likelihoods of this
 project: they compare each likelihood against stored reference

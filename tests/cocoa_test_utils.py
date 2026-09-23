@@ -1,75 +1,31 @@
-"""Shared harness for the roman_kl unit tests.
+"""Shared harness for the roman_kl unit tests: the project's data
+bound to the shared Cocoa test machinery.
 
-The tests answer two questions about the roman_kl likelihoods:
+The machinery itself (frozen-state verification, the chi2 pipeline,
+worker-subprocess isolation, the race and baryon checks, the
+CFASTPT-vs-FASTPT comparison, and the terminal reports) lives in
+external_modules/code/cosmolike_core/cocoa_testing.py. This file
+carries what is roman_kl's alone - the examples table (the exact
+configurations plus their EMUL2 emulator twins, each naming its
+synthetic NLA dataset), the TATT point, the accuracy knobs, the
+CFASTPT-vs-FASTPT comparison contract, and the two EMUL2-only
+report printers kept at the end of this file -
+and binds it to ONE cocoa_testing.CocoaTestHarness instance whose
+methods are re-exported under the historical names, so the test
+modules and generate_frozen_reference.py import everything from this
+module exactly as before.
 
-  1. Does the chi2 at a fixed reference point still match the value
-     recorded when the tests were created (tests 1, 3, 5, 7)?
-  2. Does evaluating several cosmologies in a row on one model change
-     the answer for a point, compared to evaluating that point alone
-     (tests 2, 4, 6, 8)? Cosmolike keeps internal state in C between
-     evaluations, and OpenMP splits loops across threads; a bug in
-     either would make the 10th evaluation of a sequence differ from a
-     fresh evaluation of the same point. That class of bug is called a
-     race condition or a state leak.
-
-Beyond the twelve pass/fail tests, the suite carries ADVISORY checks:
-the accuracy file (test_accuracy.py: the same physics with the
-numerical knobs pushed beyond the defaults) and the EMUL2 examples
-(machine-learning emulators in place of the Boltzmann code; see
-test_emul2.py: no pass/fail, only the measured accuracy and a
-recommendation).
-
-Everything a test evaluates is FROZEN: stored under tests/frozen/ and
-pinned by a SHA-256 hash (a 64-character fingerprint that changes when
-any byte of the file changes) in tests/manifest_sha256.json. The live
-project configuration is never read, so a user can edit the examples,
-the likelihood default yaml files, or ../data without touching these
-tests. The frozen state has three parts:
-
-  - frozen/frozen_config_*.py: one auto-generated module per
-    configuration in EXAMPLES, holding (a) the complete cobaya
-    configuration as a yaml string, with every likelihood option and
-    every parameter written out, including the ones that normally come
-    from the likelihood default files (cosmic_shear.yaml,
-    combo_3x2pt.yaml, params_source.yaml, params_lens.yaml), and
-    (b) the exact sampled-parameter point the reference chi2 was
-    evaluated at. Because every default is materialized in the frozen
-    copy, a later edit to a live default file is shadowed and cannot
-    reach the test.
-  - frozen/data/: the tests' own copy of the data vectors, covariance,
-    n(z), and masks. (The EMUL2 trained-network files are NOT copied:
-    they live in external_modules/data/emultrf, pinned by the EMULTRF
-    keys in set_installation_options.sh. When a retrained network
-    replaces them the emulator chi2 changes, and measuring that
-    change is part of the advisory checks' job.)
-  - frozen/EXAMPLE_*.yaml: snapshots of the example yaml files at
-    freeze time, kept only so a human can see what changed
-    in the live examples since the freeze; no test reads them.
-
-UNIQUE TO THIS PROJECT: example1 (roman_kl_mcmc.dataset) and example2
-(roman_kl_3x2.dataset) use different data sets with different mask and
-covariance dimensions, and the cosmolike C layer ABORTS THE WHOLE
-PROCESS when a second configuration with different dimensions
-initializes after the first ("IP::set_mask: inconsistent mask"). Every
-model build here therefore runs in its own worker subprocess: the
-public single_model_chi2 and ten_in_a_row_chi2 spawn a fresh python
-that imports this module, evaluates, and hands the numbers back
-through a temporary json file, while its progress lines stream to the
-same terminal. One pytest run can then cover every configuration.
-
-Every test first verifies the manifest and refuses to run when any
-frozen file changed. Refreshing the frozen state is a deliberate
-maintainer action: generate_frozen_reference.py --overwrite.
-
-To run the tests: activate the cocoa conda environment, source
-start_cocoa.sh from the Cocoa/ folder (this exports ROOTDIR), then
-
-    python -m pytest ./projects/roman_kl/tests
+The frozen-state doctrine is unchanged: everything a test evaluates
+lives under tests/frozen/, pinned byte for byte by
+tests/manifest_sha256.json and verified before any model is built;
+refreshing the frozen state stays a deliberate maintainer action
+(generate_frozen_reference.py --overwrite).
 """
 
-import hashlib
-import json
 import os
+import sys
+
+# ---- tests/ paths -----------------------------------------------------------
 
 # Everything the tests read or write lives relative to this folder, so
 # the suite works no matter which directory pytest is launched from
@@ -79,20 +35,19 @@ FROZEN_DIR = os.path.join(TESTS_DIR, "frozen")
 MANIFEST_FILE = os.path.join(TESTS_DIR, "manifest_sha256.json")
 REFERENCE_FILE = os.path.join(FROZEN_DIR, "reference_chi2.json")
 
-# The race tests must run multi-threaded: with one thread there is no
-# thread scheduling, so an OpenMP race could never show up. The value
-# is a string, not a number: environment variables only carry text.
-REQUIRED_OMP_THREADS = "4"
+# ---- the shared machinery ---------------------------------------------------
 
-# Tests 1, 3, 5, 7: |chi2(now) - chi2(frozen reference)| must stay
-# below this. The bound tolerates compiler and library-version noise
-# but catches a real physics change.
-CHI2_TOLERANCE = 0.2
+# The import is path-based (tests/ is three levels below Cocoa/, which
+# holds external_modules/code/cosmolike_core) so it works before
+# start_cocoa.sh's python-path setup runs.
+_CORE_DIR = os.path.abspath(os.path.join(
+    TESTS_DIR, "..", "..", "..", "external_modules", "code",
+    "cosmolike_core"))
+if _CORE_DIR not in sys.path:
+    sys.path.insert(0, _CORE_DIR)
+import cocoa_testing as _cct
 
-# Tests 2, 4, 6, 8: |chi2(10th of a row) - chi2(fresh model)|. The two
-# numbers come from the same code on the same inputs, so only float
-# noise is allowed; a state leak produces a much larger shift.
-RACE_TOLERANCE = 1.0e-4
+# ---- the project data ------------------------------------------------------
 
 # The TATT (Tidal Alignment and Tidal Torquing, an intrinsic-alignment
 # model with tidal second-order terms) tests replace these values in
@@ -145,14 +100,6 @@ HIGH_ACCURACY_LIKELIHOOD = {
     "accuracyboost": 3.0,       # default 1.0
     "integration_accuracy": 10,  # default 0
     "kmax_boltzmann": 40.0,     # default 7.5
-}
-HIGH_ACCURACY_CAMB_EXTRA_ARGS = {
-    "halofit_version": "takahashi",
-    "AccuracyBoost": 2.0,       # default 1.05
-    "dark_energy_model": "ppf",
-    "accurate_massive_neutrino_transfers": False,
-    "k_per_logint": 50,         # default 10
-    "kmax": 50.0,               # default 5.0-7.5
 }
 
 # The one-at-a-time scan of test_accuracy.py: each entry is (label,
@@ -237,286 +184,119 @@ EXAMPLES = {
     },
 }
 
-# The nine cosmologies evaluated before the fiducial point in a race
-# test. Each entry replaces the named parameters in the frozen point.
-# They stay inside the priors of the frozen configuration (an
-# out-of-prior point would evaluate to -inf and abort the test), and
-# they change the chi2 by orders of magnitude, so state leaked from
-# any of them would visibly move the final fiducial evaluation.
-RACE_PERTURBATIONS = [
-    {"As_1e9": 1.95},
-    {"As_1e9": 2.25},
-    {"omegam": 0.28},
-    {"omegam": 0.33},
-    {"H0": 64.0},
-    {"H0": 71.0},
-    {"ns": 0.95},
-    {"w": -1.1, "w0pwa": -1.1},
-    {"omegab": 0.052, "mnu": 0.15},
-]
+# Pass limit on the covariance-weighted difference of the two
+# implementations at FASTPT_LOW_SETTINGS: at each point both blocks
+# print their theory data vector, and the tested number is
+# delta^T C^-1 delta - the chi2 OF the implementation difference,
+# zero when the vectors agree. 0.2 is the house comfort band of the
+# other checks, in reach since the two-grid fastpt block made the
+# output-table density cheap (this project's own sweep: max delta
+# chi2 0.188561 at the converged defaults; the historical
+# single-grid default reached 26409 across the prior). The sweep
+# also measured a residual floor near 0.175 that further density
+# does not move (0.175 at eight times the density) - the one
+# project where a difference beyond table density is visible,
+# safely inside the band.
+FASTPT_COMPARISON_TOLERANCE = 0.2
 
+# The python FAST-PT side has numerical settings of its own, read by
+# the fastpt theory block from its extra_args block
+# (external_modules/code/PyFAST-PT/fastpt.py, symlinked into cobaya
+# as theories/fastpt). The block computes on two grids: accuracyboost
+# multiplies the density of the output table cosmolike reads with
+# linear interpolation (the accuracy driver), and
+# internal_accuracyboost the density of the internal grid the FFTLog
+# convolutions run on; a cubic spline in log k upsamples the terms
+# from one grid onto the other. Both boosts default to 1.0 = the
+# converged configuration, so low IS the default; it is hard-coded
+# here so the test keeps evaluating this exact configuration even if
+# the defaults later move. High doubles both boosts, so the advisory
+# column shows the residual grid response of low.
+FASTPT_LOW_SETTINGS = {
+    "accuracyboost": 1.0,
+    "internal_accuracyboost": 1.0,
+    "kmax_boltzmann": 7.5,
+    "extrap_kmax": 250.0,
+}
 
-# -----------------------------------------------------------------------------
-# Environment
-# -----------------------------------------------------------------------------
-def require_cocoa_environment():
-    """Refuse to run outside a started Cocoa shell, then move to ROOTDIR.
+FASTPT_HIGH_SETTINGS = {
+    "accuracyboost": 2.0,
+    "internal_accuracyboost": 2.0,
+    "kmax_boltzmann": 7.5,
+    "extrap_kmax": 250.0,
+}
 
-    start_cocoa.sh exports ROOTDIR (the absolute path of the Cocoa/
-    folder) and prepares the library paths the compiled cosmolike
-    interface needs. Without it, importing the likelihood would fail
-    with a confusing linker error, so this check turns that failure
-    into an instruction. The chdir matters because component paths in
-    the frozen configuration (for example CAMB's
-    ./external_modules/code/CAMB) are relative to ROOTDIR.
+# ---- project-independent constants ------------------------------------------
 
-    Returns:
-      nothing; on success the process working directory is ROOTDIR.
+# These are identical in every project and live in the core module.
+REQUIRED_OMP_THREADS = _cct.REQUIRED_OMP_THREADS
+CHI2_TOLERANCE = _cct.CHI2_TOLERANCE
+RACE_TOLERANCE = _cct.RACE_TOLERANCE
+RACE_PERTURBATIONS = _cct.RACE_PERTURBATIONS
+HIGH_ACCURACY_CAMB_EXTRA_ARGS = _cct.HIGH_ACCURACY_CAMB_EXTRA_ARGS
+BARYON_METHODS = _cct.BARYON_METHODS
+BARYON_POINT_OVERRIDES = _cct.BARYON_POINT_OVERRIDES
 
-    Raises:
-      RuntimeError telling the user to activate the cocoa environment
-      and source start_cocoa.sh when ROOTDIR is not exported.
-    """
-    if "ROOTDIR" not in os.environ:
-        raise RuntimeError(
-            "ROOTDIR is not set. Activate the cocoa conda environment and run "
-            "`source start_cocoa.sh` from the Cocoa/ folder before running "
-            "these tests."
-        )
-    os.chdir(os.environ["ROOTDIR"])
+# The 30 CFASTPT-vs-FASTPT comparison points under this project's
+# sampled-parameter prefix; the values are identical in every project.
+FASTPT_COMPARISON_POINTS = _cct.fastpt_comparison_points("ROMAN_KL")
 
+# ---- the harness -----------------------------------------------------------
 
-def assert_omp_threads():
-    """Refuse a race test that would not actually run multi-threaded.
+# ONE instance binds the shared machinery to this project's data;
+# everything below re-exports its surface under the historical names.
+_H = _cct.CocoaTestHarness(
+    worker_file=__file__,
+    interface_module="cosmolike_roman_kl_interface",
+    examples=EXAMPLES,
+    tatt_point=TATT_POINT,
+    accuracy_knobs=ACCURACY_KNOBS,
+    high_accuracy_likelihood=HIGH_ACCURACY_LIKELIHOOD,
+    fastpt_low_settings=FASTPT_LOW_SETTINGS,
+    fastpt_high_settings=FASTPT_HIGH_SETTINGS,
+    fastpt_points=FASTPT_COMPARISON_POINTS,
+)
 
-    OpenMP reads OMP_NUM_THREADS once, when the compiled library is
-    first loaded, so the value must be in the environment before any
-    cobaya or cosmolike import. The test modules set it at their first
-    line; this check catches a run that imported the stack some other
-    way first (for example from an interactive session).
+# ---- module functions re-exported from the core (no project state) ----------
+require_cocoa_environment = _cct.require_cocoa_environment
+assert_omp_threads = _cct.assert_omp_threads
+sha256_of = _cct.sha256_of
+make_model = _cct.make_model
+evaluate_chi2 = _cct.evaluate_chi2
+_evaluate_cached = _cct._evaluate_cached
+_load_datavector = _cct._load_datavector
+_baryon_method = _cct._baryon_method
+_baryon_dataset = _cct._baryon_dataset
+report_chi2_test = _cct.report_chi2_test
+report_race_test = _cct.report_race_test
+report_accuracy = _cct.report_accuracy
+report_knob = _cct.report_knob
+report_fastpt_comparison = _cct.report_fastpt_comparison
 
-    Returns:
-      nothing when OMP_NUM_THREADS equals REQUIRED_OMP_THREADS.
+# ---- bound methods of the harness (the machinery, project-bound) ------------
+compute_manifest = _H.compute_manifest
+verify_frozen = _H.verify_frozen
+load_reference = _H.load_reference
+_frozen_module = _H._frozen_module
+load_frozen_info = _H.load_frozen_info
+load_frozen_point = _H.load_frozen_point
+build_point = _H.build_point
+_single_model_chi2_impl = _H._single_model_chi2_impl
+_ten_in_a_row_impl = _H._ten_in_a_row_impl
+_baryon_accuracy_delta_impl = _H._baryon_accuracy_delta_impl
+_baryon_drift_chi2_impl = _H._baryon_drift_chi2_impl
+single_model_chi2 = _H.single_model_chi2
+ten_in_a_row_chi2 = _H.ten_in_a_row_chi2
+baryon_accuracy_delta = _H.baryon_accuracy_delta
+baryon_drift_chi2 = _H.baryon_drift_chi2
+_worker = _H._worker
+_run_isolated = _H._run_isolated
+_fastpt_comparison_info = _H._fastpt_comparison_info
+_fastpt_comparison_block = _H._fastpt_comparison_block
+_run_fastpt_comparison_worker = _H._run_fastpt_comparison_worker
+cfastpt_vs_fastpt_chi2s = _H.cfastpt_vs_fastpt_chi2s
 
-    Raises:
-      RuntimeError naming the observed value and the required one.
-    """
-    # .get returns None when the variable is unset, so the error can
-    # show "None" rather than crash on a missing key
-    observed = os.environ.get("OMP_NUM_THREADS")
-    if observed != REQUIRED_OMP_THREADS:
-        # !r prints the value in its python literal form: None and
-        # the text '4' stay distinguishable in the message
-        raise RuntimeError(
-            f"OMP_NUM_THREADS={observed!r}; the race-condition tests require "
-            f"OMP_NUM_THREADS={REQUIRED_OMP_THREADS} and it must be set "
-            "before cobaya/cosmolike are imported."
-        )
-
-
-# -----------------------------------------------------------------------------
-# Frozen-state integrity
-# -----------------------------------------------------------------------------
-def sha256_of(path):
-    """Fingerprint one file with SHA-256.
-
-    Arguments:
-      path = absolute path of the file to hash.
-
-    Returns:
-      the 64-character lowercase hexadecimal SHA-256 digest of the
-      file's bytes. Reading happens in 1 MiB blocks so the 80 MB
-      covariance never sits in memory at once.
-    """
-    hasher = hashlib.sha256()
-    # "rb" reads raw bytes (hashing is byte-level); the with block
-    # closes the file on every exit, an exception included
-    with open(path, "rb") as f:
-        # the lambda is an unnamed one-line function wrapping f.read;
-        # two-argument iter calls it again and again until it returns
-        # b"" (end of file); 1 << 20 is 2**20 bytes = 1 MiB per read
-        for block in iter(lambda: f.read(1 << 20), b""):
-            hasher.update(block)
-    return hasher.hexdigest()
-
-
-def compute_manifest():
-    """Hash every file currently under tests/frozen/.
-
-    __pycache__ folders and .pyc files are skipped: Python writes them
-    as a side effect of importing the frozen modules, so hashing them
-    would make the manifest fail after the first run. .DS_Store files
-    (macOS Finder metadata) are skipped for the same reason.
-
-    Returns:
-      a dictionary {relative path: sha256 digest}, with paths relative
-      to the tests/ folder using "/" separators, sorted by path so the
-      manifest file is stable across platforms.
-    """
-    files = {}
-    # os.walk visits every folder under frozen/, handing back the
-    # folder path, its subfolder names, and its file names
-    for base, dirs, names in os.walk(FROZEN_DIR):
-        # the comprehension keeps every subfolder name except
-        # __pycache__; assigning through dirs[:] rewrites os.walk's
-        # own list in place, which stops the walk from entering the
-        # dropped folders (a plain dirs = ... would not)
-        dirs[:] = [d for d in dirs if d != "__pycache__"]
-        for name in sorted(names):
-            if name == ".DS_Store" or name.endswith(".pyc"):
-                continue
-            full = os.path.join(base, name)
-            rel = os.path.relpath(full, TESTS_DIR).replace(os.sep, "/")
-            files[rel] = sha256_of(full)
-    # sorted(files.items()) orders the (path, digest) pairs by path;
-    # dict() rebuilds the table in that order, so the manifest json
-    # written from it never reshuffles between runs
-    return dict(sorted(files.items()))
-
-
-def verify_frozen():
-    """Fail every test up front when the frozen state was edited.
-
-    Compares the stored manifest with a fresh hash of tests/frozen/ in
-    both directions, so an edited file (CHANGED), a deleted file
-    (MISSING), and a new file (EXTRA) are all reported. This runs
-    before any model is built: a tampered frozen state must not
-    produce a plausible-looking chi2.
-
-    Returns:
-      nothing when every frozen file matches the manifest.
-
-    Raises:
-      AssertionError listing every mismatched path and pointing to
-      generate_frozen_reference.py --overwrite for a deliberate
-      refresh; AssertionError also when the manifest file itself is
-      absent (the frozen state was never generated).
-    """
-    if not os.path.isfile(MANIFEST_FILE):
-        raise AssertionError(
-            "tests/manifest_sha256.json is missing; run "
-            "generate_frozen_reference.py --overwrite to create the frozen "
-            "test state."
-        )
-    # expected = the {relative path: sha256 digest} table written at
-    # freeze time; it is the definition of "untouched" (json.load
-    # parses the file into nested dictionaries and lists)
-    with open(MANIFEST_FILE) as f:
-        expected = json.load(f)["files"]
-    # actual = the same table computed from the files on disk right now
-    # (compute_manifest walks frozen/ and fingerprints each file)
-    actual = compute_manifest()
-    # collect every discrepancy before raising: a report naming all
-    # problem files at once beats failing on the first one
-    problems = []
-    # .items() hands back each (path, digest) pair, and the loop
-    # unpacks the pair into the two names
-    for rel, digest in expected.items():
-        if rel not in actual:
-            # the manifest lists it but the file is gone from disk
-            problems.append(f"MISSING  {rel}")
-        elif actual[rel] != digest:
-            # the file exists but at least one byte differs
-            problems.append(f"CHANGED  {rel}")
-    # both directions matter: a file ADDED to frozen/ is as suspicious
-    # as an edited one, so the reverse scan runs too (iterating a
-    # dictionary yields its keys: here, the paths)
-    for rel in actual:
-        if rel not in expected:
-            problems.append(f"EXTRA    {rel}")
-    if problems:
-        # "\n  ".join(problems) glues the collected lines into one
-        # indented list, one problem file per line
-        raise AssertionError(
-            "Frozen test data does not match tests/manifest_sha256.json "
-            "(someone edited the frozen copies; the tests refuse to run):\n  "
-            + "\n  ".join(problems)
-            + "\nIf the change is deliberate, regenerate with "
-            "generate_frozen_reference.py --overwrite."
-        )
-
-
-def load_reference():
-    """Read the frozen reference chi2 values.
-
-    Returns:
-      the dictionary stored in frozen/reference_chi2.json: one entry
-      per configuration and variant ("example1_nla", "example1_tatt",
-      ..., "emul2_example1_nla"; the EMUL2 entries have no TATT
-      variant) plus a "_meta" entry recording when and how the
-      references were generated. The file sits inside frozen/, so
-      verify_frozen() also protects it from editing.
-    """
-    # json.load turns the file's json text back into the dictionary
-    # json.dump wrote; the with block closes the file either way
-    with open(REFERENCE_FILE) as f:
-        return json.load(f)
-
-
-# -----------------------------------------------------------------------------
-# Terminal reports
-# -----------------------------------------------------------------------------
-def report_chi2_test(number, label, chi2, ref, tol):
-    """Print one reference-comparison test as a readable block.
-
-    A bare pytest PASSED does not say what was compared, so each test
-    prints its own numbers: the freshly computed chi2, the frozen
-    reference, their absolute difference, and the limit the assertion
-    uses. flush=True makes the block appear immediately (pytest runs
-    with -s, so nothing buffers it).
-
-    Arguments:
-      number = the test number (1-8) shown in the header.
-      label  = one line naming the example, probe, and IA model.
-      chi2   = the chi2 computed in this run.
-      ref    = the frozen reference chi2.
-      tol    = the pass limit on |chi2 - ref| (CHI2_TOLERANCE).
-
-    Returns:
-      |chi2 - ref|, the printed difference.
-    """
-    delta = abs(chi2 - ref)
-    # one multi-line f-string: '-' * 66 repeats the dash 66 times (a
-    # rule), :.6f prints a fixed six decimals, and the a-if-else
-    # inside the last braces picks the verdict word
-    print(f"""
-{'-' * 66}
-TEST {number}: {label}
-  chi2 (this run)     = {chi2:.6f}
-  frozen reference    = {ref:.6f}
-  |delta chi2|        = {delta:.6f}   (limit: < {tol})
-  -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
-{'-' * 66}""", flush=True)
-    return delta
-
-
-def report_race_test(number, label, fresh, tenth, tol):
-    """Print one race-condition test as a readable block.
-
-    Arguments:
-      number = the test number (1-8) shown in the header.
-      label  = one line naming the example, probe, and IA model.
-      fresh  = chi2 of the fiducial point evaluated first on the model.
-      tenth  = chi2 of the same point evaluated as the 10th of a row.
-      tol    = the pass limit on |tenth - fresh| (RACE_TOLERANCE).
-
-    Returns:
-      |tenth - fresh|, the printed difference.
-    """
-    delta = abs(tenth - fresh)
-    # the same construct as report_chi2_test's block, at :.8f (a
-    # fixed eight decimals: the race limit is 1e-4)
-    print(f"""
-{'-' * 66}
-TEST {number}: {label}
-  fresh-model chi2    = {fresh:.8f}
-  10th of 10 in a row = {tenth:.8f}
-  |delta chi2|        = {delta:.8f}   (limit: < {tol})
-  OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
-  -> {'OK' if delta < tol else 'EXCEEDS LIMIT'}
-{'-' * 66}""", flush=True)
-    return delta
-
+# ---- project-only reports ---------------------------------------------------
 
 def report_emul2_advisory(label, chi2, frozen_ref, exact_ref, limit):
     """Print one EMUL2 accuracy check: measurements and a recommendation.
@@ -565,7 +345,6 @@ EMUL2 ADVISORY: {label}
 {'-' * 66}""", flush=True)
     return delta_exact
 
-
 def report_emul2_race(label, fresh, tenth):
     """Print one EMUL2 race check, advisory only.
 
@@ -592,641 +371,3 @@ EMUL2 ADVISORY: {label}
   OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
 {'-' * 66}""", flush=True)
     return delta
-
-
-def report_accuracy(label, chi2_high, default_ref):
-    """Print one default-vs-high-accuracy check. Advisory only.
-
-    The default-settings chi2 is the frozen reference (recorded at
-    freeze time); the high-accuracy chi2 is computed in this run. The
-    difference is the numerical error of the default settings at this
-    point: there is no pass/fail because how much numerical error an
-    analysis tolerates is a judgment call, not a fixed bound.
-
-    Arguments:
-      label       = one line naming the probe and IA model.
-      chi2_high   = chi2 with HIGH_ACCURACY settings, this run.
-      default_ref = the frozen default-settings reference chi2.
-
-    Returns:
-      chi2_high - default_ref, the printed difference.
-    """
-    delta = chi2_high - default_ref
-    # :+.6f = fixed six decimals with the sign ALWAYS printed, so an
-    # accuracy shift reads as +0.01 or -0.01 at a glance
-    print(f"""
-{'-' * 66}
-ACCURACY: {label}
-  chi2 (high accuracy)      = {chi2_high:.6f}
-  chi2 (default, frozen)    = {default_ref:.6f}
-  delta chi2 (high-default) = {delta:+.6f}
-{'-' * 66}""", flush=True)
-    return delta
-
-
-def report_knob(label, chi2, default_ref):
-    """Print one entry of the one-knob-at-a-time scan. Advisory only.
-
-    Arguments:
-      label       = the ACCURACY_KNOBS entry evaluated.
-      chi2        = chi2 with only that knob changed, this run.
-      default_ref = the frozen default-settings reference chi2.
-
-    Returns:
-      chi2 - default_ref, the printed difference.
-    """
-    delta = chi2 - default_ref
-    # :30s pads the label to 30 characters so the columns line up;
-    # :12.6f = width 12 with six decimals; the + forces the sign
-    print(f"  KNOB {label:30s} chi2 = {chi2:12.6f}  "
-          f"delta = {delta:+12.6f}", flush=True)
-    return delta
-
-
-# -----------------------------------------------------------------------------
-# Model construction and evaluation
-# -----------------------------------------------------------------------------
-# cobaya and numpy are imported inside the functions below, not at the
-# top of this module. The reason is OpenMP: OMP_NUM_THREADS must be in
-# the environment before the compiled libraries load, and it is the
-# TEST modules that set it, on their first line, before importing this
-# module's callers.
-def _frozen_module(example):
-    """Load one frozen configuration module from its file path.
-
-    importlib is used instead of a plain import statement because the
-    frozen modules live inside frozen/, which is data, not a package:
-    it has no __init__.py and is never on sys.path. Loading by path
-    also guarantees the file that verify_frozen() hashed is exactly
-    the file being executed.
-
-    Arguments:
-      example = "example1" or "example2" (a key of EXAMPLES).
-
-    Returns:
-      the loaded module, carrying the attributes `yaml_string` (the
-      complete configuration) and `point` (the frozen evaluation
-      point).
-    """
-    import importlib.util
-
-    path = os.path.join(FROZEN_DIR, EXAMPLES[example]["frozen_module"])
-    # the importlib three-step: describe the file (spec), create an
-    # empty module object from the description, then run the file's
-    # code inside that object to fill in its attributes
-    spec = importlib.util.spec_from_file_location(f"frozen_{example}", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def load_frozen_info(example, tatt, high_accuracy=False,
-                     overrides=None):
-    """Build the cobaya input dictionary for one frozen configuration.
-
-    Starts from the frozen module's yaml string and applies the only
-    three run-time adjustments the tests need:
-
-      - the likelihood `path` is pointed at the absolute location of
-        frozen/data on this machine (the frozen string stores the
-        ROOTDIR-relative form, which would also resolve, but the
-        absolute path is independent of the working directory);
-      - `IA_model` selects the intrinsic-alignment model: 0 keeps NLA,
-        1 selects TATT;
-      - cobaya's log level is raised to WARNING (debug: 30) so the
-        component-loading chatter does not bury the test reports.
-
-    An EMUL2 entry (the "emulator" flag in EXAMPLES) gets two more
-    adjustments, both serving the accuracy measurement of
-    test_emul2.py. First, its data_file becomes the SAME synthetic
-    NLA vector its exact counterpart evaluates (the counterpart's
-    "nla_dataset", where the exact reference chi2 is 0.000000 by
-    construction): the shipped EMUL2 examples point at the shipped
-    modelvectors, which sit off the current-code minimum, and a chi2
-    difference taken against different data would mix that mismatch
-    with the emulator error, while against the same data
-    |emulator - exact| is the emulator error and nothing else.
-    Second, the counterpart's ggl_exclude is copied in: a dataset's
-    mask length must equal the data-vector layout cosmolike computes
-    from ggl_exclude, and the two differ between the shipped EMUL2
-    example1 (55 excluded GGL pairs, the 2200-row ones.mask) and the
-    exact example1 (no exclusions, the 3300-row roman_kl.mask);
-    without the copy cosmolike aborts with "IP::set_mask:
-    inconsistent mask". For cosmic shear the layout carries no
-    physics: the mask selects the shear entries either way.
-
-    Arguments:
-      example = a key of EXAMPLES.
-      tatt    = True selects the TATT IA model, False keeps NLA; the
-                data_file then switches to the configuration's
-                TATT-generated dataset (see TATT_GENERATORS).
-      high_accuracy = True applies HIGH_ACCURACY_LIKELIHOOD and
-                HIGH_ACCURACY_CAMB_EXTRA_ARGS on top of the frozen
-                configuration (accuracy advisory checks only; not
-                available for the emulator configurations, which have
-                no camb block).
-
-    Returns:
-      the input dictionary ready for cobaya's get_model.
-
-    Raises:
-      ValueError when tatt or high_accuracy is requested for an
-      EMUL2 entry (the emulators were trained for the shipped IA
-      settings and carry no camb accuracy knobs to push).
-    """
-    from cobaya.yaml import yaml_load
-
-    cfg = EXAMPLES[example]
-    # cfg.get("emulator") is None (falsy) for the exact-physics
-    # entries, which do not carry the flag at all
-    if cfg.get("emulator") and (tatt or high_accuracy):
-        raise ValueError(
-            f"{example}: the EMUL2 configurations run only at their "
-            "shipped IA settings (no TATT variant) and carry no camb "
-            "accuracy knobs (no high_accuracy variant)")
-    # _frozen_module loads frozen/<frozen_module>.py by path and hands
-    # back its yaml_string attribute: the complete configuration with
-    # every option and parameter written out at freeze time
-    info = yaml_load(_frozen_module(example).yaml_string)
-    # the tests drive the model directly, so a sampler or output block
-    # left in the info would only confuse cobaya; pop's second
-    # argument makes the removal a no-op instead of an error when the
-    # key is absent
-    info.pop("sampler", None)
-    info.pop("output", None)
-    # log level WARNING (30): component-loading chatter would bury the
-    # test reports
-    info["debug"] = 30
-    info["timing"] = False
-    likelihood_block = info["likelihood"][cfg["likelihood"]]
-    # the frozen string stores the ROOTDIR-relative data path; the
-    # absolute path is independent of the working directory
-    likelihood_block["path"] = os.path.join(FROZEN_DIR, "data")
-    # tests must not write files as a side effect: this project's
-    # example1 ships print_datavector: True aimed at chains/, which
-    # does not exist in a fresh clone (the TATT-vector generator
-    # re-enables printing deliberately, into frozen/data)
-    likelihood_block["print_datavector"] = False
-    # intrinsic-alignment model selection: 0 = NLA, 1 = TATT (the
-    # `1 if tatt else 0` form yields 1 when tatt is True, else 0)
-    likelihood_block["IA_model"] = 1 if tatt else 0
-    if tatt:
-        # TATT evaluates against its own generated data vector so the
-        # chi2 sits at a minimum (see the TATT_GENERATORS comment)
-        likelihood_block["data_file"] = cfg["tatt_dataset"]
-    else:
-        # NLA does the same against its synthetic vector: the shipped
-        # modelvectors sit off the current-code minimum (see the
-        # SYNTHETIC_VECTORS comment). For an EMUL2 entry "nla_dataset"
-        # is the exact counterpart's synthetic vector, so the emulated
-        # chi2 and the exact reference are measured at the same data
-        likelihood_block["data_file"] = cfg["nla_dataset"]
-    if cfg.get("emulator"):
-        # the dataset just selected belongs to the exact counterpart,
-        # and cosmolike only accepts a mask whose length equals the
-        # data-vector layout it computes from ggl_exclude (see the
-        # docstring); copy the counterpart's frozen layout so the two
-        # configurations describe the same data vector
-        exact_cfg = EXAMPLES[cfg["exact_example"]]
-        exact_module = _frozen_module(cfg["exact_example"])
-        exact_info = yaml_load(exact_module.yaml_string)
-        exact_block = exact_info["likelihood"][exact_cfg["likelihood"]]
-        likelihood_block["ggl_exclude"] = exact_block["ggl_exclude"]
-    if high_accuracy:
-        # dict.update merges the pushed settings into the block in
-        # place, overwriting any key both sides carry
-        likelihood_block.update(HIGH_ACCURACY_LIKELIHOOD)
-        info["theory"]["camb"]["extra_args"].update(
-            HIGH_ACCURACY_CAMB_EXTRA_ARGS)
-    if overrides is not None:
-        # one knob at a time (an ACCURACY_KNOBS entry): the same
-        # mechanism as high_accuracy, restricted to a single setting;
-        # the overrides pair unpacks into its two dictionaries
-        like_over, camb_over = overrides
-        likelihood_block.update(like_over)
-        info["theory"]["camb"]["extra_args"].update(camb_over)
-    if tatt:
-        # a TATT parameter can be SAMPLED in the frozen configuration
-        # (it has a prior; build_point then sets its value in the
-        # evaluation point) or FIXED (a plain value; it must be
-        # replaced here, before the model is built, because a fixed
-        # parameter cannot change per evaluation)
-        for name, value in TATT_POINT.items():
-            # .get returns None instead of raising when the name is
-            # missing, so the error below can name the parameter
-            block = info["params"].get(name)
-            if block is None:
-                raise ValueError(
-                    f"TATT parameter {name} is not in the frozen "
-                    "configuration")
-            if isinstance(block, dict) and "prior" not in block:
-                block["value"] = value
-    return info
-
-
-def make_model(info):
-    """Build a cobaya model (theory plus likelihood, ready to evaluate).
-
-    Arguments:
-      info = a cobaya input dictionary from load_frozen_info.
-
-    Returns:
-      the cobaya Model. Building one loads CAMB and the compiled
-      cosmolike interface and reads the frozen data files, which takes
-      a few seconds; the callers print a progress line first.
-    """
-    from cobaya.model import get_model
-
-    return get_model(info)
-
-
-def load_frozen_point(example):
-    """Read the frozen evaluation point of one example.
-
-    Arguments:
-      example = "example1" or "example2" (a key of EXAMPLES).
-
-    Returns:
-      a fresh {parameter name: value} dictionary (copied, so a caller
-      may modify it without affecting later calls).
-    """
-    # dict(...) builds a COPY of the module's point table: the edits
-    # a caller makes stay in its copy, never in the module
-    return dict(_frozen_module(example).point)
-
-
-def build_point(model, example, tatt):
-    """Assemble the exact point a test evaluates, with a safety check.
-
-    The frozen point must cover the model's sampled parameters one to
-    one. When likelihood or theory code changes its parameter set (a
-    new nuisance parameter appears, or one is removed), evaluating
-    would either fail cryptically or silently pick up a new default,
-    so the mismatch is reported here by name instead.
-
-    Arguments:
-      model   = the cobaya Model the point will be evaluated on.
-      example = "example1" or "example2" (a key of EXAMPLES).
-      tatt    = True replaces the TATT_POINT values (nonzero A2/BTA)
-                in the frozen point; False evaluates it unchanged.
-
-    Returns:
-      a {parameter name: value} dictionary covering every sampled
-      parameter of the model.
-
-    Raises:
-      AssertionError listing the parameters that appeared or vanished
-      when the model's sampled set differs from the frozen point;
-      ValueError when a TATT parameter is not sampled by the model.
-    """
-    # load_frozen_point returns a copy of the frozen module's point:
-    # the exact {parameter: value} table the references were computed at
-    point = load_frozen_point(example)
-    # sampled = the parameters THIS model, built from today's code,
-    # expects to receive; the frozen point must cover them exactly.
-    # set() turns the name list into a set so the two sides can be
-    # compared and subtracted; set(point) takes the dictionary's KEYS
-    sampled = set(model.parameterization.sampled_params())
-    if sampled != set(point):
-        # sampled - set(point) = names only the model has; the
-        # reversed difference = names only the point has; sorted()
-        # fixes the order so the message is reproducible
-        raise AssertionError(
-            "sampled-parameter set differs from the frozen point (the "
-            "likelihood/theory code changed its parameters):\n"
-            f"  new since freeze: {sorted(sampled - set(point))}\n"
-            f"  gone since freeze: {sorted(set(point) - sampled)}"
-        )
-    if tatt:
-        # only SAMPLED TATT parameters appear in the point; the fixed
-        # ones were already replaced inside the configuration by
-        # load_frozen_info (which also catches unknown names)
-        for name, value in TATT_POINT.items():
-            if name in point:
-                point[name] = value
-    return point
-
-
-def evaluate_chi2(model, point):
-    """Evaluate one point and return the likelihood chi2.
-
-    cached=False forces a full recomputation: the race tests evaluate
-    the same point twice on one model, and letting cobaya return a
-    cached value would compare a number with itself.
-
-    Arguments:
-      model = the cobaya Model to evaluate on.
-      point = {parameter name: value} covering the sampled parameters.
-
-    Returns:
-      chi2 = -2 ln L of the single likelihood, as a plain float.
-
-    Raises:
-      RuntimeError when the model holds more than one likelihood
-      (the -2*loglikes[0] extraction would then be ambiguous);
-      AssertionError when the chi2 is not finite, which is how an
-      out-of-prior or rejected point shows up.
-    """
-    import numpy as np
-
-    # logposterior runs the full pipeline (theory + likelihood) at the
-    # point; cached=False forces recomputation (see docstring)
-    posterior = model.logposterior(point, cached=False)
-    # loglikes = one ln L per likelihood component, in model order
-    if len(posterior.loglikes) != 1:
-        raise RuntimeError(
-            f"expected exactly one likelihood: {posterior.loglikes}")
-    chi2 = -2.0 * posterior.loglikes[0]
-    if not np.isfinite(chi2):
-        raise AssertionError(f"non-finite chi2 at point {point}")
-    # float() converts the numpy scalar into a plain python float,
-    # which json can store and print cleanly
-    return float(chi2)
-
-
-def _single_model_chi2_impl(example, tatt, high_accuracy=False,
-                            knob=None):
-    """In-process body of single_model_chi2 (worker side).
-
-    Runs inside the worker subprocess only: building a model here,
-    next to a model of different dimensions, would abort the process
-    (see the module docstring).
-
-    Arguments:
-      example = a key of EXAMPLES.
-      tatt    = True evaluates the TATT variant, False the NLA one.
-      high_accuracy = True evaluates with the pushed numerical
-                settings (see load_frozen_info).
-
-    Returns:
-      the chi2 as a float.
-    """
-    # `"TATT" if tatt else "NLA"` picks the first name when tatt is
-    # True, the second otherwise
-    ia_label = "TATT" if tatt else "NLA"
-    if high_accuracy:
-        ia_label += ", high accuracy"
-    overrides = None
-    if knob is not None:
-        # knob = a label from ACCURACY_KNOBS; the comprehension keeps
-        # only the entries whose first field k[0] equals it, so
-        # matches is a list with one member (or none: unknown label)
-        matches = [k for k in ACCURACY_KNOBS if k[0] == knob]
-        if len(matches) != 1:
-            raise ValueError(f"unknown accuracy knob {knob!r}")
-        overrides = (matches[0][1], matches[0][2])
-        ia_label += f", knob: {knob}"
-    print(f"  building model ({example}, {ia_label}) ...", flush=True)
-    # load_frozen_info returns the frozen configuration dictionary with
-    # the run-time adjustments applied; make_model turns it into an
-    # evaluable cobaya Model (loads CAMB and the cosmolike interface)
-    info = load_frozen_info(example, tatt, high_accuracy=high_accuracy,
-                            overrides=overrides)
-    model = make_model(info)
-    # build_point returns the frozen evaluation point after checking
-    # that the point and the model name the same sampled parameters:
-    # if the likelihood or theory code gained or lost a sampled
-    # parameter since the freeze, the mismatch is reported by name
-    # instead of failing deep inside cobaya
-    point = build_point(model, example, tatt)
-    print("  evaluating the fiducial point ...", flush=True)
-    return evaluate_chi2(model, point)
-
-
-def _ten_in_a_row_impl(example, tatt):
-    """In-process body of ten_in_a_row_chi2 (worker side).
-
-    Race check: the fiducial evaluated fresh and as 10th of a row.
-
-    On ONE model instance, in order: the fiducial point (the fresh
-    value), then the nine RACE_PERTURBATIONS cosmologies, then the
-    fiducial again as the 10th point of the row. State leaked between
-    evaluations, or an OpenMP race under REQUIRED_OMP_THREADS threads,
-    shifts the second fiducial value away from the first; correct
-    code reproduces it to float noise. Each evaluation prints its
-    chi2, so a stuck or slow run is visible line by line.
-
-    Arguments:
-      example = "example1" or "example2" (a key of EXAMPLES).
-      tatt    = True runs the TATT variant, False the NLA one.
-
-    Returns:
-      (fresh, tenth): chi2 of the first fiducial evaluation and chi2
-      of the fiducial as the 10th point of the row, both floats.
-    """
-    # `"TATT" if tatt else "NLA"` picks the first name when tatt is
-    # True, the second otherwise
-    ia_label = "TATT" if tatt else "NLA"
-    print(f"  building model ({example}, {ia_label}) ...", flush=True)
-    # one model instance for the whole sequence: sharing the instance
-    # is the point, since leaked state lives inside it
-    info = load_frozen_info(example, tatt)
-    model = make_model(info)
-    point = build_point(model, example, tatt)
-    # the fresh value: the fiducial evaluated before anything else
-    # touched this model instance
-    fresh = evaluate_chi2(model, point)
-    # :.8f prints the value with a fixed eight decimals (:.4f below:
-    # four); :2d pads the row counter to a width of two
-    print(f"  fresh model, fiducial point:  chi2 = {fresh:.8f}", flush=True)
-    # enumerate yields (counter, entry) pairs; start=1 makes the
-    # printed row numbers begin at 1 instead of 0
-    for i, perturbation in enumerate(RACE_PERTURBATIONS, start=1):
-        # the EMUL2 configurations sample fewer parameters than the
-        # exact ones (mnu is fixed inside the emulator training), so a
-        # perturbation key the model does not sample is dropped rather
-        # than kept in a separate perturbation table per configuration.
-        # The comprehension builds a new dictionary from the (name,
-        # value) pairs whose name the point carries
-        applied = {k: v for k, v in perturbation.items() if k in point}
-        # {**point, **applied} is a NEW dictionary: point's entries
-        # with the applied ones written over them; point itself stays
-        # untouched for the final fiducial evaluation
-        chi2 = evaluate_chi2(model, {**point, **applied})
-        # one "name=value" text per changed parameter, glued with
-        # ", " into the progress line
-        changed = ", ".join(f"{k}={v}" for k, v in applied.items())
-        print(f"  row {i:2d}/10 ({changed}):  chi2 = {chi2:.4f}", flush=True)
-    tenth = evaluate_chi2(model, point)
-    print(f"  row 10/10 (fiducial again):  chi2 = {tenth:.8f}", flush=True)
-    return fresh, tenth
-
-
-# -----------------------------------------------------------------------------
-# Worker-subprocess isolation
-# -----------------------------------------------------------------------------
-# The absolute path of this file (__file__ is the module's own path):
-# the worker driver imports the module by path, so the child executes
-# exactly the code the parent runs.
-_THIS_FILE = os.path.abspath(__file__)
-
-# One flag separates the two roles: the parent process (pytest or the
-# generator) spawns workers; a process carrying this environment
-# variable IS a worker and runs the physics in-process.
-_WORKER_FLAG = "COCOA_TESTS_WORKER"
-
-# The driver handed to `python -c` inside the worker: load this module
-# from its file path and call _worker with the six command-line
-# arguments (function name, example, two booleans, a reserved slot,
-# and the result path). The * in _worker(*sys.argv[2:8]) spreads the
-# six-element slice into six separate arguments.
-_WORKER_DRIVER = (
-    "import importlib.util, sys\n"
-    "spec = importlib.util.spec_from_file_location("
-    "'cocoa_test_utils_worker', sys.argv[1])\n"
-    "module = importlib.util.module_from_spec(spec)\n"
-    "spec.loader.exec_module(module)\n"
-    "module._worker(*sys.argv[2:8])\n"
-)
-
-
-def _worker(function, example, tatt, high_accuracy, knob, result_path):
-    """Worker-side entry: run one evaluation and save the numbers.
-
-    Arguments:
-      function      = "single" (one chi2) or "race" (fresh, tenth).
-      example       = a key of EXAMPLES.
-      tatt          = "1" for the TATT variant, "0" for NLA.
-      high_accuracy = "1" for the pushed numerical settings, "0" not.
-      knob          = an ACCURACY_KNOBS label evaluated alone, or the
-                      empty string for none.
-      result_path   = file the result is written into as json; the
-                      parent reads it back. Progress prints go to the
-                      inherited stdout, so the terminal streams them.
-
-    Returns:
-      nothing; the result lands in result_path.
-    """
-    require_cocoa_environment()
-    # the flags arrive as text (command-line arguments are strings);
-    # comparing against "1" turns them back into booleans
-    tatt = tatt == "1"
-    high_accuracy = high_accuracy == "1"
-    if function == "single":
-        # `knob or None` turns the empty string (no knob) into None:
-        # `or` hands back its second operand when the first is empty
-        value = _single_model_chi2_impl(example, tatt,
-                                        high_accuracy=high_accuracy,
-                                        knob=knob or None)
-    else:
-        value = list(_ten_in_a_row_impl(example, tatt))
-    # json.dump writes the value into the file as json text; the
-    # parent reads it back with json.load. The with block closes the
-    # file even when the dump fails
-    with open(result_path, "w") as f:
-        json.dump(value, f)
-
-
-def _run_isolated(function, example, tatt, high_accuracy=False, knob=None):
-    """Spawn one worker subprocess and hand back its result.
-
-    Arguments:
-      function      = "single" or "race" (see _worker).
-      example       = a key of EXAMPLES.
-      tatt          = True for the TATT variant.
-      high_accuracy = True for the pushed numerical settings.
-
-    Returns:
-      the json value the worker wrote: a float for "single", a
-      two-element list [fresh, tenth] for "race".
-
-    Raises:
-      RuntimeError naming the configuration when the worker dies
-      without writing a result (the cosmolike C layer aborts the
-      process on an internal inconsistency instead of raising).
-    """
-    import subprocess
-    import sys
-    import tempfile
-
-    # delete=False keeps the file when the with block closes it: only
-    # a fresh unique NAME is needed here; the worker writes the file
-    # and the finally below removes it
-    with tempfile.NamedTemporaryFile("w", suffix=".json",
-                                     delete=False) as tmp:
-        result_path = tmp.name
-    # dict(os.environ) is a COPY of the environment: the edits below
-    # reach only the worker subprocess, never this process
-    environment = dict(os.environ)
-    environment[_WORKER_FLAG] = "1"
-    # OpenMP reads this at library load inside the fresh worker, so
-    # the requirement holds for every spawned evaluation
-    environment["OMP_NUM_THREADS"] = REQUIRED_OMP_THREADS
-    # subprocess.run starts the worker and BLOCKS until it exits;
-    # env=environment hands the child the edited environment copy.
-    # The booleans travel as "1"/"0" text (command-line arguments are
-    # strings; _worker decodes them), and `knob or ""` turns None
-    # into the empty string the same way
-    completed = subprocess.run(
-        [sys.executable, "-c", _WORKER_DRIVER, _THIS_FILE, function,
-         example, "1" if tatt else "0", "1" if high_accuracy else "0",
-         knob or "", result_path],
-        env=environment)
-    # the finally below runs on EVERY exit from the try, an exception
-    # included, so the temporary file never outlives this call
-    try:
-        if completed.returncode != 0:
-            raise RuntimeError(
-                f"worker for ({function}, {example}, tatt={tatt}) "
-                f"exited with code {completed.returncode} before "
-                "writing a result; a cosmolike-level abort prints its "
-                "reason (e.g. IP::set_mask) just above")
-        # json.load parses the worker's file back into the value the
-        # worker json.dump-ed (a float, or a two-element list)
-        with open(result_path) as f:
-            return json.load(f)
-    finally:
-        if os.path.exists(result_path):
-            os.unlink(result_path)
-
-
-def single_model_chi2(example, tatt, high_accuracy=False, knob=None):
-    """chi2 of the frozen fiducial point, evaluated in a fresh worker.
-
-    This is the quantity the reference tests compare against the
-    frozen reference and the quantity the generator stores as that
-    reference. The evaluation runs in a subprocess (see the module
-    docstring for why isolation is mandatory in this project).
-
-    Arguments:
-      example = a key of EXAMPLES.
-      tatt    = True evaluates the TATT variant, False the NLA one.
-      high_accuracy = True evaluates with the pushed numerical
-                settings; expect minutes instead of seconds.
-
-    Returns:
-      the chi2 as a float.
-    """
-    # .get returns None when the variable is absent, so a normal
-    # (parent) process fails this test and spawns a worker instead
-    if os.environ.get(_WORKER_FLAG) == "1":
-        return _single_model_chi2_impl(example, tatt,
-                                       high_accuracy=high_accuracy,
-                                       knob=knob)
-    return float(_run_isolated("single", example, tatt,
-                               high_accuracy=high_accuracy, knob=knob))
-
-
-def ten_in_a_row_chi2(example, tatt):
-    """Race check, evaluated in one fresh worker subprocess.
-
-    The whole 11-evaluation sequence runs inside ONE worker: the race
-    check needs the evaluations to share a model instance, and the
-    worker boundary only isolates this configuration from the other
-    configurations' dimensions.
-
-    Arguments:
-      example = a key of EXAMPLES.
-      tatt    = True runs the TATT variant, False the NLA one.
-
-    Returns:
-      (fresh, tenth): chi2 of the first fiducial evaluation and chi2
-      of the fiducial as the 10th point of the row, both floats.
-    """
-    # .get returns None when the variable is absent, so a normal
-    # (parent) process fails this test and spawns a worker instead
-    if os.environ.get(_WORKER_FLAG) == "1":
-        return _ten_in_a_row_impl(example, tatt)
-    # the worker's two-element json list unpacks into the two names
-    fresh, tenth = _run_isolated("race", example, tatt)
-    return float(fresh), float(tenth)
