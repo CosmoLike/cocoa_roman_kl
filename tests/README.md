@@ -95,15 +95,18 @@ The test files and the configurations they cover:
 | 13 | `test_example2_2x2pt.py` | 2x2pt (`roman_kl.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: TATT | $\Delta\chi^2$ against the stored reference at the fiducial point |
 | 14 | `test_example2_2x2pt.py` | 2x2pt (`roman_kl.combo_2x2pt`: the 3x2pt configuration reduced to galaxy clustering plus galaxy-galaxy lensing); IA modeling: TATT | race condition (OpenMP threading): fiducial alone vs after nine other cosmologies |
 | 15 | `test_fastpt.py` | cosmic shear; IA modeling: TATT; the C cfastpt (`IA_code: 0`) vs the python FAST-PT package (`IA_code: 1`) at 30 fixed points (20 across the intrinsic-alignment prior plus a one-parameter-at-a-time family), cosmology at the fiducial | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point; the cfastpt vector is that point's fiducial, so agreement means zero |
+| 16 | `test_fastpt.py` | 3x2pt; IA modeling: TATT; the same 30-point cfastpt-vs-FAST-PT sweep as test 15 on the 3x2pt likelihood (the one-loop bias amplitudes stay fixed at zero) | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point, under the 3x2pt masked inverse covariance |
+| 17 | `test_fastpt.py` | 2x2pt (`roman_kl.combo_2x2pt`); IA modeling: TATT; the same 30-point sweep with cosmic shear dropped | $\Delta\chi^2$ of the FAST-PT data vector against the cfastpt data vector at the same point, under the 2x2pt masked inverse covariance |
 
-### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, test 15) <a name="cfastpt_fastpt"></a>
+### The CFASTPT vs FASTPT comparison (`test_fastpt.py`, tests 15-17) <a name="cfastpt_fastpt"></a>
 
 Cosmolike computes the TATT perturbation-theory integrals with two
 implementations: cfastpt, the C code built into the interface
 (`IA_code: 0`), and the python FAST-PT package through the fastpt
-theory block (`IA_code: 1`). Test 15 evaluates both at 30
-fixed points across the intrinsic-alignment prior and checks
-their agreement.
+theory block (`IA_code: 1`). Tests 15-17 evaluate both at 30
+fixed points across the intrinsic-alignment prior and check
+their agreement: on cosmic shear (test 15), on 3x2pt (test 16),
+and on 2x2pt (test 17).
 
 At every point the cfastpt data vector is the fiducial: the reported
 quantity is the $\Delta\chi^2$ of the FAST-PT vector against it,
@@ -149,6 +152,24 @@ the table below is this project's own measurement:
 > density is visible, safely inside the band. cfastpt
 > (`IA_code: 0`) remains the reference implementation.
 
+Test 16 runs the sweep on the 3x2pt likelihood, where the TATT
+terms also enter galaxy-galaxy lensing and the difference is
+weighted by the 3x2pt masked inverse covariance. The frozen
+configuration fixes the one-loop bias amplitudes (`ROMAN_KL_B2_*`,
+`ROMAN_KL_B3NL_*`) at zero, so the sweep compares the
+intrinsic-alignment tables only, on the wider data vector. On
+2026-09-23 it measured max $\Delta\chi^2 = 0.174298$ at the default
+camb/cosmolike settings and 0.077547 with `--high=1` (advisory
+doubled-grid columns 0.165475 and 0.051343).
+
+Test 17 runs it on the 2x2pt likelihood (galaxy clustering plus
+galaxy-galaxy lensing, cosmic shear dropped). Clustering carries no
+intrinsic alignment, so the TATT tables are scored through
+galaxy-galaxy lensing alone. On 2026-09-23 it measured max
+$\Delta\chi^2 = 0.000012$ at the default settings and 0.000004 with
+`--high=1`: next to tests 15 and 16, essentially all of the
+implementation difference sits in the cosmic-shear block.
+
 #### Running the comparison <a name="run_cfastpt_fastpt"></a>
 
 We assume users are in the Conda cocoa environment from a previous
@@ -171,8 +192,30 @@ settings
 
 > [!NOTE]
 > `--high=1`: applies the pushed camb/cosmolike settings of the
-> accuracy checks to every block of test 15 (the other tests do not
-> read it). The full comparison is both invocations.
+> accuracy checks to every block of tests 15-17 (the other tests do
+> not read it). The full comparison is both invocations.
+
+**Step :four:**: repeat it with every data point kept (no scale cuts)
+
+    python -m pytest ./projects/roman_kl/tests/test_fastpt.py --mask=ones
+
+> [!NOTE]
+> `--mask`: selects the scale-cut mask of tests 15-17; the choices
+> are `frozen` (each example's contract mask, the default) and
+> `ones` (every data point kept), and the 0.2 pass rule applies
+> unchanged. The 3x2pt frozen mask is already the all-ones mask
+> (all 2,200 entries 1.0), so `--mask=ones` reproduces the frozen
+> numbers in tests 16 and 17 by construction. In test 15
+> `--mask=ones` weights the deviation with the full 3,300-dimension
+> inverse covariance (every row unmasked) instead of the shear-block
+> masked inverse.
+
+On 2026-09-23 every `--mask=ones` sweep passed and reproduced its
+frozen-mask numbers at the printed six decimals: test 15 measured
+max $\Delta\chi^2 = 0.188561$ at the default settings (0.076974
+with `--high=1`), and at the all-zero IA point the two
+implementations printed identical data vectors on every unmasked
+row ($\Delta\chi^2 = 0.000000$).
 
 
 ### Advisory checks (`test_emul2.py`, E1-E4) <a name="advisory_checks"></a>

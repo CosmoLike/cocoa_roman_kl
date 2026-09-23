@@ -255,6 +255,7 @@ _H = _cct.CocoaTestHarness(
     fastpt_low_settings=FASTPT_LOW_SETTINGS,
     fastpt_high_settings=FASTPT_HIGH_SETTINGS,
     fastpt_points=FASTPT_COMPARISON_POINTS,
+    fastpt_masks=("frozen", "ones"),
 )
 
 # ---- module functions re-exported from the core (no project state) ----------
