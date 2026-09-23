@@ -280,7 +280,9 @@ The advisory checks in `tests/test_accuracy.py` measure the
 numerical error of the default accuracy settings: each setting is
 raised one at a time on the 3x2pt configuration, so a large
 $\Delta\chi^2$ can be attributed to the setting causing it, and
-then every setting at once. Each check prints the $\Delta\chi^2$
+then every setting at once.
+
+Each check prints the $\Delta\chi^2$
 between the high-accuracy and the default evaluations, to compare
 against the 0.2 band the reference tests allow. No measured values
 are quoted here: rerun the checks to measure them on the current
