@@ -80,6 +80,13 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       (py::arg("adopt_limber_gs") = 1).none(false)
     );
 
+  m.def("init_adopt_limber_gg",
+      &cosmolike_interface::init_adopt_limber_gg,
+      "Galaxy clustering: 0 = non-Limber below limits.LMAX_NOLIMBER, "
+      "1 = Limber at every multipole",
+      (py::arg("adopt_limber_gg") = 1).none(false)
+    );
+
   m.def("init_baryons_contamination",
       py::overload_cast<std::string, std::string>(
          &cosmolike_interface::init_baryons_contamination),

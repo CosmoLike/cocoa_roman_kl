@@ -27,6 +27,7 @@ The isolation is internal; the commands below stay the same.
     7. [Baryonic feedback drift tests](#baryon_drift_tests)
     8. [The photo-z convention checks](#photoz_conventions)
     9. [The non-Limber galaxy-galaxy lensing check](#nonlimber_ggl)
+    10. [The non-Limber galaxy clustering check](#nonlimber_gg)
 3. [Appendix](#appendix)
     1. [FAQ: Do the tests keep their own data?](#frozen_copy)
     2. [FAQ: Why do the tests use their own data vectors?](#synthetic_vectors)
@@ -521,9 +522,9 @@ MacCrann (arXiv:1911.11947): an FFTLog integral of the linear power
 spectrum plus, in Limber, what linear theory misses. In this project's
 Fourier-space data vector each band center takes its Limber value plus
 the non-Limber correction interpolated linearly between the two
-integer multipoles around it. Galaxy clustering always runs non-Limber
-in real space; galaxy-galaxy lensing defaults to Limber because its
-lensing kernel is broad.
+integer multipoles around it. Galaxy-galaxy lensing defaults to Limber
+because its lensing kernel is broad; galaxy clustering has its own
+key, `adopt_limber_gg` (next section).
 
 The test evaluates the frozen 3x2pt fiducial with Limber,
 non-Limber, and Limber again in one process and reports
@@ -543,6 +544,36 @@ Measured on 2026-09-27:
   (6,9), (2,8), (6,8), (7,9) with 2.73, 1.92, 1.77, 1.60; they exceed
   the total because the cross terms between pairs in
   $\delta^T C^{-1} \delta$ are negative.
+
+### The non-Limber galaxy clustering check (`test_nonlimber_gg.py`) <a name="nonlimber_gg"></a>
+
+The likelihood yaml key `adopt_limber_gg` chooses how the galaxy
+clustering spectrum $C_\ell^{gg}$ is computed: `0` takes the
+multipoles below $\ell = 150$ from the exact projection (cosmolike's
+`C_cl_tomo`, the same FFTLog split as the galaxy-galaxy lensing check
+above), `1` uses the Limber approximation at every multipole; `1`
+(Limber at every multipole) is this project's default. In this
+project's Fourier-space data vector each band center takes its Limber
+value plus the non-Limber correction interpolated linearly between the
+two integer multipoles around it. The lens galaxy redshift
+distributions are narrow, so the Limber approximation fails at low
+$\ell$ for the clustering auto spectra.
+
+The test evaluates the frozen 3x2pt fiducial with the default, the
+other setting, and the default again in one process and reports
+$\Delta\chi^2 = \delta^T C^{-1} \delta$, with $\delta$ the non-Limber
+minus the Limber data vector, and the contribution of each lens bin.
+The assertions are the frozen-reference check on the default
+evaluation, a dead-flag floor on $\Delta\chi^2$, that only clustering
+entries change, a bit-identical round trip back to the default, and
+agreement with the measured $\Delta\chi^2$ to 5%.
+
+Measured on 2026-09-28:
+
+- $\Delta\chi^2 = 57.4$ for the 3x2pt data vector, against 1.63 for
+  the same comparison in galaxy-galaxy lensing.
+- The largest contributions are lens bins 7, 5, 2, 3 with 15.3, 7.8,
+  7.0, 6.9 (each bin's block alone).
 
 # Appendix <a name="appendix"></a>
 
