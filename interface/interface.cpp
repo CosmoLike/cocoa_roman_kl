@@ -58,6 +58,13 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       (py::arg("integration_accuracy") = 0).none(false)
     );
 
+  m.def("init_ntable_ell_internal",
+      &cosmolike_interface::init_ntable_ell_internal,
+      "Coarse exact-quadrature ell nodes of the C_ss/C_gs tables, "
+      "cubic-spline upsampled to N_ell; 0 = exact per-node quadrature",
+      (py::arg("nell_internal") = 192).none(false)
+    );
+
   m.def("init_photoz_conventions",
       &cosmolike_interface::init_photoz_conventions,
       "Set the n(z) interpolation type (0: cspline, 1: linear, 2+: steffen) "
