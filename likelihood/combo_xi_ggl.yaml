@@ -11,8 +11,8 @@ integration_accuracy: 0
 photoz_interpolation_type: 0
 # n(z) file z column: 0 = Z_LOW (left bin edges), 1 = Z_MID (sample points)
 photoz_zmid_convention: 0
-# galaxy-galaxy lensing: 1 = Limber at every multipole, 0 = non-Limber below l = 150
-adopt_limber_gs: 1
+# galaxy-galaxy lensing: 0 = non-Limber below l = 150, 1 = Limber at every multipole
+adopt_limber_gs: 0
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2

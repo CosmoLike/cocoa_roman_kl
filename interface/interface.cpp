@@ -75,9 +75,9 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
 
   m.def("init_adopt_limber_gs",
       &cosmolike_interface::init_adopt_limber_gs,
-      "Galaxy-galaxy lensing: 1 = Limber at every multipole (default), "
-      "0 = non-Limber below limits.LMAX_NOLIMBER",
-      (py::arg("adopt_limber_gs") = 1).none(false)
+      "Galaxy-galaxy lensing: 0 = non-Limber below limits.LMAX_NOLIMBER "
+      "(default), 1 = Limber at every multipole",
+      (py::arg("adopt_limber_gs") = 0).none(false)
     );
 
   m.def("init_adopt_limber_gg",

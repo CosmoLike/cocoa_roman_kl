@@ -126,7 +126,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         internal_boost=float(getattr(self, "internal_accuracyboost", 1.0)))
 
     ci.init_adopt_limber_gs(
-        adopt_limber_gs=int(getattr(self, "adopt_limber_gs", 1)))
+        adopt_limber_gs=int(getattr(self, "adopt_limber_gs", 0)))
 
     ci.init_adopt_limber_gg(
         adopt_limber_gg=int(getattr(self, "adopt_limber_gg", 1)))

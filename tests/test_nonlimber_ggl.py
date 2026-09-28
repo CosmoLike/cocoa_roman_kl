@@ -4,24 +4,25 @@ The galaxy-galaxy lensing (ggl) spectrum C_l^gs enters the data vector
 through gamma_t(theta) in real space and directly in Fourier space. The
 likelihood yaml key adopt_limber_gs chooses how it is computed:
 
-  adopt_limber_gs: 1 (the default) - Limber approximation at every
-      multipole.
-  adopt_limber_gs: 0 - below l = 150 the exact projection, computed by
-      cosmolike's C_gs_tomo with the split of Fang, Krause, Eifler &
-      MacCrann (arXiv:1911.11947): an FFTLog integral of the linear
-      power spectrum plus, in Limber, what linear theory misses. In
-      Fourier space each band center takes the Limber value plus the
-      non-Limber correction interpolated between integer multipoles.
+  adopt_limber_gs: 0 (the default) - below l = 150 the exact
+      projection, computed by cosmolike's C_gs_tomo with the split of
+      Fang, Krause, Eifler & MacCrann (arXiv:1911.11947): an FFTLog
+      integral of the linear power spectrum plus, in Limber, what
+      linear theory misses. In Fourier space each band center takes
+      the Limber value plus the non-Limber correction interpolated
+      between integer multipoles.
+  adopt_limber_gs: 1 - Limber approximation at every multipole.
 
-ggl defaults to Limber because its lensing kernel is broad (galaxy
-clustering has its own key, adopt_limber_gg; see test_nonlimber_gg.py). The Limber approximation
-fails at low l for the lens-source pairs whose kernels overlap in
-redshift (lens bin = source bin, or the source bin in front of the lens
-bin, where the signal is the intrinsic alignment of the sources times
-the lens density). This test measures what the Limber default costs.
+The Limber approximation fails at low l for the lens-source pairs
+whose kernels overlap in redshift (lens bin = source bin, or the
+source bin in front of the lens bin, where the signal is the intrinsic
+alignment of the sources times the lens density); this project defaults
+to the exact projection because the delta chi2 below is too large to
+absorb (galaxy clustering has its own key, adopt_limber_gg; see
+test_nonlimber_gg.py). This test measures what Limber would cost.
 
 It evaluates the frozen 3x2pt fiducial (NLA) three times IN
-ONE PROCESS: Limber, non-Limber, Limber again, and computes
+ONE PROCESS: non-Limber, Limber, non-Limber again, and computes
 
     delta chi2 = delta^T C^-1 delta,
     delta = dv(non-Limber) - dv(Limber),
@@ -36,12 +37,14 @@ Assertions:
      and the ggl cache notices the change (a stale cache gives zero);
   2. only ggl entries change: cosmic shear, clustering, and every other
      block are bitwise equal between the two evaluations;
-  3. switching back to Limber reproduces the first data vector bitwise;
+  3. switching back to the default reproduces the first data vector
+     bitwise;
   4. delta chi2 matches the value measured for this project
      (DCHI2_MEASURED below) to 5%: a change in the non-Limber code, the
      kernels, or the covariance shows up here;
-  5. the Limber evaluation reproduces the frozen reference chi2
-     (checked last, so a stale snapshot cannot hide checks 1-4).
+  5. the default (non-Limber) evaluation reproduces the frozen
+     reference chi2 (checked last, so a stale snapshot cannot hide
+     checks 1-4).
 
 To run (from the Cocoa/ folder, cocoa environment active,
 start_cocoa.sh sourced):
@@ -69,9 +72,9 @@ REFERENCE_KEY = "example2_nla"
 
 # (report tag, adopt_limber_gs)
 SETTINGS = (
-    ("Limber (default)", 1),
-    ("non-Limber", 0),
-    ("Limber again (round trip)", 1),
+    ("non-Limber (default)", 0),
+    ("Limber", 1),
+    ("non-Limber again (round trip)", 0),
 )
 
 # A stale ggl cache gives delta chi2 = 0 exactly; the floor is orders of
@@ -79,7 +82,7 @@ SETTINGS = (
 DCHI2_FLOOR = 1.0e-6
 
 # delta chi2 measured on 2026-09-27 (macOS, arm64), and the relative band
-# assertion 5 allows around it.
+# assertion 4 allows around it.
 DCHI2_MEASURED = 1.628
 DCHI2_RTOL = 0.05
 
@@ -137,9 +140,8 @@ class TestNonLimberGGL(unittest.TestCase):
                                   for zs in range(int(like.source_ntomo))
                                   if (zl, zs) not in excluded]
 
-        dv_limber = vectors[SETTINGS[0][0]]
-        dv_nonlimber = vectors[SETTINGS[1][0]]
-        delta = dv_nonlimber - dv_limber
+        dv_default = vectors[SETTINGS[0][0]]
+        delta = dv_default - vectors[SETTINGS[1][0]]
         dchi2 = float(delta @ icov @ delta)
 
         # the ggl block follows the cosmic shear block in every probe
@@ -149,9 +151,9 @@ class TestNonLimberGGL(unittest.TestCase):
         npairs = int(sizes[1]) // nlen
 
         print(f"\n  delta chi2 report ({EXAMPLE}, NLA):")
-        print(f"    Limber:     chi2 = {chi2s[SETTINGS[0][0]]:.6f} "
+        print(f"    {SETTINGS[0][0]}: chi2 = {chi2s[SETTINGS[0][0]]:.6f} "
               f"(frozen reference {self.reference[REFERENCE_KEY]:.6f})")
-        print(f"    non-Limber: chi2 = {chi2s[SETTINGS[1][0]]:.6f}")
+        print(f"    {SETTINGS[1][0]}: chi2 = {chi2s[SETTINGS[1][0]]:.6f}")
         print(f"    delta^T C^-1 delta = {dchi2:.4f} "
               f"(measured {DCHI2_MEASURED:.4f})")
         print("    per lens-source pair (the pair's block alone):")
@@ -180,9 +182,9 @@ class TestNonLimberGGL(unittest.TestCase):
             "entries outside the ggl block changed with adopt_limber_gs")
 
         self.assertTrue(
-            np.array_equal(vectors[SETTINGS[-1][0]], dv_limber),
-            "returning to Limber did not reproduce the first data vector "
-            "bit for bit; the ggl cache did not rebuild cleanly")
+            np.array_equal(vectors[SETTINGS[-1][0]], dv_default),
+            "returning to the default did not reproduce the first data "
+            "vector bit for bit; the ggl cache did not rebuild cleanly")
 
         self.assertLess(
             abs(dchi2/DCHI2_MEASURED - 1.0), DCHI2_RTOL,
