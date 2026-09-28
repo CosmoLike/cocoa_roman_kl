@@ -125,6 +125,9 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     ci.init_fpt_internal_boost(
         internal_boost=float(getattr(self, "internal_accuracyboost", 1.0)))
 
+    ci.init_adopt_limber_gs(
+        adopt_limber_gs=int(getattr(self, "adopt_limber_gs", 1)))
+
     if self.use_emulator == 1:
       ci.init_redshift_distributions_from_files(
           lens_multihisto_file=self.lens_file,
