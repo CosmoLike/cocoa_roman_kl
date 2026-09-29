@@ -636,13 +636,6 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       py::arg("a").none(false)
     );
 
-  m.def("bias_norm_nointerp",
-      &cosmolike_interface::bias_norm_nointerp_cpp,
-      "Direct bias_norm integral at one a, table-free (the point "
-      "diagnostic of bias_norm)",
-      py::arg("a").none(false)
-    );
-
   m.def("u_nfw_c",
       &cosmolike_interface::u_nfw_c_cpp,
       "Fourier transform of the NFW profile, normalized to 1 at k = 0; "
