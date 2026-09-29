@@ -298,11 +298,12 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
          arma::Col<double> io_lnP_nonlinear,
          arma::Col<double> io_G,
          arma::Col<double> io_z_1D,
-         arma::Col<double> io_chi)
+         arma::Col<double> io_chi,
+         const double omega_baryon)
       {
         spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "set_cosmology");
         using namespace cosmolike_interface;
-        set_cosmological_parameters(omega_matter, hubble);
+        set_cosmological_parameters(omega_matter, omega_baryon, hubble);
         set_linear_power_spectrum(io_log10k_2D,io_z_2D,io_lnP_linear);
         set_non_linear_power_spectrum(io_log10k_2D,io_z_2D,io_lnP_nonlinear);
         set_growth(io_z_2D,io_G);
@@ -319,6 +320,7 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
        py::arg("G").none(false),
        py::arg("z_1D").none(false),
        py::arg("chi").none(false),
+       py::arg("omegab") = 0.0,
        py::return_value_policy::move
     );
 
