@@ -252,6 +252,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         "As": None,
         "H0": None,
         "omegam": None,
+        "omegab": None,
         "Pk_interpolator": {
           "z": self.z_interp_2D_camb,
           "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -277,6 +278,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
         "As": None,
         "H0": None,
         "omegam": None,
+        "omegab": None,
         "Pk_interpolator": {
           "z": self.z_interp_2D_camb,
           "k_max": self.kmax_boltzmann * self.accuracyboost,
@@ -412,6 +414,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
       ci.set_cosmology(
         omegam=self.provider.get_param("omegam"),
+        omegab=self.provider.get_param("omegab"),
         H0=self.provider.get_param("H0"),
         log10k_2D=self.log10k_interp_2D-np.log10(h), #h/Mpc
         z_2D=self.z_interp_2D,
