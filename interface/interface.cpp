@@ -90,14 +90,6 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       (py::arg("M")).none(false)
     );
 
-  m.def("sigma2_nointerp",
-      &cosmolike_interface::compute_sigma2_nointerp,
-      "Direct lobe-summed sigma^2 at one mass, table-free (the point "
-      "diagnostic; vs sigma2 = the table's upsampling + interpolation "
-      "error); M in M_sun/h",
-      (py::arg("M")).none(false), (py::arg("a") = 1.0).none(false)
-    );
-
   m.def("init_photoz_conventions",
       &cosmolike_interface::init_photoz_conventions,
       "Set the n(z) interpolation type (0: cspline, 1: linear, 2+: steffen) "
