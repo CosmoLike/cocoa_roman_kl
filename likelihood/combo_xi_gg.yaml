@@ -5,7 +5,25 @@ data_file: roman_kl_3x2.dataset
 # raising it is a true refinement: the tests/ boost scan is monotone with
 # chi2 differences below 0.007 through boost 5.
 accuracyboost: 1.0
+internal_accuracyboost: 1.0 # C-FAST-PT convolution grid / output grid
 integration_accuracy: 0
+# n(z) interpolation: 0 = cubic spline, 1 = linear, 2+ = Steffen (monotone)
+photoz_interpolation_type: 0
+# n(z) file z column: 0 = Z_LOW (left bin edges), 1 = Z_MID (sample points)
+photoz_zmid_convention: 0
+# galaxy clustering: 0 = non-Limber below l = 150, 1 = Limber at every multipole
+adopt_limber_gg: 1
+# galaxy probes: 0 = perturbative galaxy bias, 1 = halo-model (HOD) galaxy
+# power (Limber only: needs adopt_limber_gg = adopt_limber_gs = 1)
+include_HOD_GX: 0
+# shear and ggl IA: 0 = the IA_model above, 1 = halo-model IA
+# (Fortuna et al. 2021; NLA only, Limber gs, include_HOD_GX = 0)
+include_halo_IA: 0
+# halo model: density field of sigma(M) and dn/dM. 0 = total matter;
+# 1 = cold dark matter + baryons, as the massive neutrinos free-stream
+# out of halos (sigma(M) from CAMB's delta_nonu P(k); the emulator path
+# approximates it; p_mm, p_my, p_yy stop under 1)
+halo_matter_field: 0
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
