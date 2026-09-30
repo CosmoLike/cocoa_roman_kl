@@ -16,6 +16,9 @@ adopt_limber_gg: 1
 # galaxy probes: 0 = perturbative galaxy bias, 1 = halo-model (HOD) galaxy
 # power (Limber only: needs adopt_limber_gg = adopt_limber_gs = 1)
 include_HOD_GX: 0
+# shear and ggl IA: 0 = the IA_model above, 1 = halo-model IA
+# (Fortuna et al. 2021; NLA only, Limber gs, include_HOD_GX = 0)
+include_halo_IA: 0
 kmax_boltzmann: 7.5
 speed: 1
 non_linear_emul: 2
