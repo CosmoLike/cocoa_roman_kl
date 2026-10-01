@@ -6,6 +6,12 @@ data_file: roman_kl_3x2.dataset
 # chi2 differences below 0.007 through boost 5.
 accuracyboost: 1.0
 internal_accuracyboost: 1.0 # C-FAST-PT convolution grid / output grid
+# refinements on top of accuracyboost (which multiplies them too):
+# the non-Limber FFTLog chi grid, and the z nodes of the P(k) tables
+# 4: the narrow lens bins need NL_Nchi = 2048 (3x2pt chi2 moves by 8.4,
+# 0.09, 1e-5 from NL_Nchi 512 to 1024, 2048, 4096; 2026-10-01)
+nonlimber_accuracyboost: 4.0
+pk_z_refinement: 1
 integration_accuracy: 0
 # n(z) interpolation: 0 = cubic spline, 1 = linear, 2+ = Steffen (monotone)
 photoz_interpolation_type: 0
