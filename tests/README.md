@@ -540,18 +540,24 @@ entries change, a bit-identical round trip back to the default,
 agreement with the measured $\Delta\chi^2$ to 5%, and, last, the
 frozen-reference check on the default evaluation.
 
-Measured on 2026-09-27:
+Measured on 2026-10-01 (`nonlimber_accuracyboost: 4`):
 
-- $\Delta\chi^2 = 1.63$ for the 3x2pt data vector.
+- $\Delta\chi^2 = 0.103$ for the 3x2pt data vector.
 - The largest single-pair contributions (each pair's block alone) are
-  (6,9), (2,8), (6,8), (7,9) with 2.73, 1.92, 1.77, 1.60; they exceed
-  the total because the cross terms between pairs in
-  $\delta^T C^{-1} \delta$ are negative.
+  (5,6), (4,5), (6,7), (3,4) with 0.024, 0.024, 0.022, 0.020: each
+  lens bin with the source bin right behind it.
 
 On 2026-09-28 the default switched from Limber to the exact
-projection: the measured $\Delta\chi^2$ was judged too large to
-absorb. The shipped data vector was regenerated with the non-Limber
-default and the frozen references were refrozen from it.
+projection: the $\Delta\chi^2 = 1.63$ measured on 2026-09-27 was
+judged too large to absorb. The shipped data vector was regenerated
+with the non-Limber default and the frozen references were refrozen
+from it.
+
+That 1.63 was mostly the numerical error of the exact projection, not
+the Limber error: the non-Limber chi grid had 512 points
+(`nonlimber_accuracyboost: 1`), too few for the narrow lens bins.
+With today's code the same comparison gives 1.42, 0.100 and 0.103 at
+512, 1024 and 2048 points (measured 2026-10-01).
 
 ### The non-Limber galaxy clustering check (`test_nonlimber_gg.py`) <a name="nonlimber_gg"></a>
 
@@ -559,13 +565,13 @@ The likelihood yaml key `adopt_limber_gg` chooses how the galaxy
 clustering spectrum $C_\ell^{gg}$ is computed: `0` takes the
 multipoles below $\ell = 150$ from the exact projection (cosmolike's
 `C_cl_tomo`, the same FFTLog split as the galaxy-galaxy lensing check
-above), `1` uses the Limber approximation at every multipole; `1`
-(Limber at every multipole) is this project's default. In this
-project's Fourier-space data vector each band center takes its Limber
-value plus the non-Limber correction interpolated linearly between the
-two integer multipoles around it. The lens galaxy redshift
-distributions are narrow, so the Limber approximation fails at low
-$\ell$ for the clustering auto spectra.
+above), `1` uses the Limber approximation at every multipole; `0`
+(the exact projection) is this project's default. In this project's
+Fourier-space data vector each band center takes its Limber value plus
+the non-Limber correction interpolated linearly between the two integer
+multipoles around it. The lens galaxy redshift distributions are
+narrow, so the Limber approximation fails at low $\ell$ for the
+clustering auto spectra.
 
 The test evaluates the frozen 3x2pt fiducial with the default, the
 other setting, and the default again in one process and reports
@@ -576,12 +582,26 @@ clustering entries change, a bit-identical round trip back to the
 default, agreement with the measured $\Delta\chi^2$ to 5%, and, last,
 the frozen-reference check on the default evaluation.
 
-Measured on 2026-09-28:
+Measured on 2026-10-01 (`nonlimber_accuracyboost: 4`):
 
-- $\Delta\chi^2 = 57.4$ for the 3x2pt data vector, against 1.63 for
+- $\Delta\chi^2 = 47.1$ for the 3x2pt data vector, against 0.103 for
   the same comparison in galaxy-galaxy lensing.
-- The largest contributions are lens bins 7, 5, 2, 3 with 15.3, 7.8,
-  7.0, 6.9 (each bin's block alone).
+- The largest contributions are lens bins 6, 7, 5, 4 with 7.6, 7.5,
+  7.1, 6.2 (each bin's block alone).
+- 57.4 on 2026-09-28, when the non-Limber chi grid had 512 points
+  (`nonlimber_accuracyboost: 1`) and cosmolike's 1% early exit
+  truncated the correction: the narrow lens bins need 2048 points (the
+  3x2pt $\chi^2$ moves by 8.4, 0.09, $10^{-5}$ from 512 to 1024,
+  2048, 4096).
+
+On 2026-10-01 the default switched from Limber to the exact
+projection: clustering had stayed Limber only because the key
+preserved the old behavior when it was introduced. The shipped data
+vector `roman_kl_3x2.modelvector` was regenerated with the non-Limber
+default and the frozen references were refrozen from it;
+`roman_kl_2.modelvector` (the `roman_kl_mcmc.dataset` vector of the
+cosmic-shear configuration) does not depend on the clustering spectra
+and is unchanged.
 
 
 ### The sector-ladder cache check (`test_cache_consistency.py`) <a name="cache_ladder"></a>

@@ -4,18 +4,20 @@ The galaxy clustering (gg) spectrum C_l^gg enters the data vector
 through w(theta) in real space and directly in Fourier space. The
 likelihood yaml key adopt_limber_gg chooses how it is computed:
 
-  adopt_limber_gg: 0 - below l = 150 the exact projection, computed by
-      cosmolike's C_cl_tomo with the split of Fang, Krause, Eifler &
-      MacCrann (arXiv:1911.11947): an FFTLog integral of the linear
-      power spectrum plus, in Limber, what linear theory misses. In
-      Fourier space each band center takes the Limber value plus the
-      non-Limber correction interpolated between integer multipoles.
+  adopt_limber_gg: 0 (the default) - below l = 150 the exact
+      projection, computed by cosmolike's C_cl_tomo with the split of
+      Fang, Krause, Eifler & MacCrann (arXiv:1911.11947): an FFTLog
+      integral of the linear power spectrum plus, in Limber, what
+      linear theory misses. In Fourier space each band center takes
+      the Limber value plus the non-Limber correction interpolated
+      between integer multipoles.
   adopt_limber_gg: 1 - Limber approximation at every multipole.
 
-This project's default is adopt_limber_gg: 1 (Limber). The
-lens galaxy redshift distributions are narrow, so the Limber
+The lens galaxy redshift distributions are narrow, so the Limber
 approximation fails at low l for the clustering auto spectra; this
-test measures by how much.
+project defaults to the exact projection (since 2026-10-01) because
+the delta chi2 below is too large to absorb. This test measures what
+Limber would cost.
 
 It evaluates the frozen 3x2pt fiducial (NLA) three times IN ONE
 PROCESS: the default, the other setting, the default again, and
@@ -69,7 +71,7 @@ EXAMPLE = "example2"
 REFERENCE_KEY = "example2_nla"
 
 # adopt_limber_gg of the likelihood yamls of this project
-DEFAULT = 1
+DEFAULT = 0
 
 # (report tag, adopt_limber_gg): the default, the other setting, the
 # default again
@@ -85,9 +87,9 @@ SETTINGS = (
 # dead flag.
 DCHI2_FLOOR = 1.0e-6
 
-# delta chi2 measured on 2026-09-28 (macOS, arm64), and the relative band
-# assertion 5 allows around it.
-DCHI2_MEASURED = 57.38
+# delta chi2 measured on 2026-10-01 (macOS, arm64), and the relative band
+# assertion 4 allows around it.
+DCHI2_MEASURED = 47.09
 DCHI2_RTOL = 0.05
 
 
