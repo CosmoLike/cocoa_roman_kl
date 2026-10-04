@@ -1,5 +1,11 @@
 # Covariance tests
 
+These tests require the optional covariance build. Follow the
+[project build instructions](../../README.md#computing_covariances): unset
+`IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE` after activating Cocoa and rebuild.
+With the default data-vector-only build this sector reports skips; the
+separate `tests/data_vector` suite remains available.
+
 These checks exercise this project's galaxy/shear forecast adapter and
 compiled covariance bindings. They use the project's redshift files and
 catalog inputs, with small numerical grids and three measured rows.
@@ -14,6 +20,7 @@ shell is Bash and the current folder is `cocoa/Cocoa`.
 **Step :two:**: compile this project's interface.
 
     unset IGNORE_COSMOLIKE_ROMAN_KL_CODE
+    unset IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE
     source projects/roman_kl/scripts/compile_roman_kl.sh
 
 **Step :three:**: run the covariance checks.
