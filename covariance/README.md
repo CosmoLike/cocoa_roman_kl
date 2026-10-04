@@ -112,8 +112,11 @@ panel for radial, mass and angular integrals. Wide angular bins are split
 into panels to resolve high-multipole oscillations. No rule below 64 nodes
 is supported, including in low-level calls. To check quadrature alone, use
 `survey.configuration(accuracy_boost=1, integration_accuracy=1)` and compare
-with level zero. The defaults are being checked against refined full matrices;
-a higher level alone is not a convergence certificate.
+with level zero. A convergence scan should include levels 2, 3 and 4:
+compare the default directly with level 4, then check that the final 3-to-4
+refinement is small. Keep interpolation settings fixed in this scan and
+check them separately. The defaults are being checked against refined full
+matrices; a higher level alone is not a convergence certificate.
 
 `accuracy_boost` controls interpolation and cutoffs. Supported values are
 1, 2, 4 and 8. It raises the covariance multipole cutoffs and refines the non-Gaussian,
