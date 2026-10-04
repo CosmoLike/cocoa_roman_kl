@@ -299,9 +299,26 @@ sampling was raised.
 # Computing covariances <a name="computing_covariances"></a>
 
 [EXAMPLE_EVALUATE_COVARIANCE.ipynb](EXAMPLE_EVALUATE_COVARIANCE.ipynb)
-computes real-space and Fourier-space galaxy/shear covariances, with
-separate Gaussian, super-sample and connected components. It compares
-accuracy boosts, checks eigenvalues and plots the changes.
+computes a covariance with this project's 3×2pt measurement layout.
+It keeps G, SSC and cNG separately, applies the supplied likelihood mask,
+and plots the computed and supplied totals together.
+
+| Measurement choice | Notebook example |
+| --- | --- |
+| Dataset | [data/roman_kl_3x2.dataset](data/roman_kl_3x2.dataset) |
+| Primary space | Fourier-space 3×2pt |
+| Lens bins | 10 |
+| Source bins | 10 |
+| Bins per two-point observable | 20, multipoles 20–4000 |
+| Generated entries before cuts | 2,200 |
+| Entries after the dataset mask | 2,200 |
+
+The primary example is the 20-band Fourier 3×2pt configuration in
+`roman_kl_3x2.dataset`, also used by `EXAMPLE_EVALUATE2.yaml`. It has ten lens
+and ten source bins and retains only galaxy–shear pairs with source index
+greater than lens index. The low shape dispersion is the kinematic-lensing
+forecast choice. The cosmic-shear-only `roman_kl_mcmc.dataset` is a different
+configuration.
 
 We assume Cocoa and this project are installed, users have run
 `conda activate cocoa`, the shell is Bash, and the current folder is
@@ -323,20 +340,23 @@ We assume Cocoa and this project are installed, users have run
 **Step :four:**: open the printed URL and select
 `projects/roman_kl/EXAMPLE_EVALUATE_COVARIANCE.ipynb`.
 
-**Step :five:**: inspect the survey settings, choose `boosts`, then select
-**Kernel → Restart Kernel and Run All Cells**.
+**Step :five:**: inspect the survey inputs and keep `boosts = [1]` for the
+first calculation, then select **Kernel → Restart Kernel and Run All Cells**.
+Set `boosts = [1, 2]` to add the accuracy comparison.
 
-The final cell writes `covariance/forecast_real.npz`,
-`covariance/forecast_fourier.npz` and `covariance/forecast_camb.npz`.
-The [covariance guide](covariance/README.md) explains the settings, output
-arrays, physical approximations and separate covariance test command.
+The notebook writes `covariance/forecast_fourier.npz`,
+`covariance/forecast_camb.npz` and
+`covariance/forecast_likelihood_selection.npz`. The last archive retains
+both cut totals and the original data-vector indices.
+Set `spaces = ["real", "fourier"]` to compute both transformations; only the native space is compared with the supplied likelihood.
+The [covariance guide](covariance/README.md) describes the physical inputs,
+component plots, accuracy controls and covariance-only tests.
 
 > [!NOTE]
-> This is a massless-neutrino, Limber forecast with linear galaxy bias,
-> zero IA, magnification and RSD, and a spherical-cap footprint.
-> The notebook uses eight OpenMP threads and one BLAS thread.
-> `accuracy_boost` refines interpolation tables and multipole cutoffs.
-> `integration_accuracy` independently selects precomputed GSL quadrature
-> rules from the baseline in [`covariance/default.yaml`](covariance/default.yaml).
-> Increasing either control does not certify
-> parameter-error convergence or replace the likelihood's supplied matrix.
+> The generated matrix is an analogous forecast, not a reproduction of the
+> supplied likelihood covariance. It uses massless neutrinos, Limber,
+> linear bias, zero IA/magnification/RSD and a spherical-cap footprint.
+> Numerical defaults still need convergence validation. The notebook uses
+> eight OpenMP threads and one BLAS thread. `accuracy_boost` refines
+> tables and cutoffs; `integration_accuracy` separately selects precomputed
+> GSL rules from [covariance/default.yaml](covariance/default.yaml).
