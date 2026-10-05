@@ -19,3 +19,6 @@ data/.DS_Store
 data/cov_dc1
 data/Roman_cov_Ncl20_Ntomo10
 data/Roman_3x2pt_cov_Ncl20_Ntomo10
+
+# Covariance notebook outputs; the survey settings remain tracked.
+covariance/forecast_*.npz
