@@ -106,6 +106,16 @@ using the optimized production interface. It saves G, SSC, cNG and their
 sum without plotting or opening a notebook. Numerical kernels and survey
 settings are shared with the notebook calculation.
 
+The supplied evaluate YAML constructs the full **2,200 × 2,200**
+galaxy/shear covariance in **41.95 seconds** on an Apple M2 Pro
+with eight OpenMP threads (mean of three fresh, sequential CLI runs
+on 2026-10-05). Gaussian clustering and galaxy–shear spectra include
+non-Limber corrections; the example uses zero IA.
+
+This interval includes first-use CosmoLike tables, spectra, halo
+calculations, transforms and complete G + SSC + cNG matrix assembly.
+Initial survey/CAMB setup, diagnostics and file writing are excluded.
+
 From Bash in `cocoa/Cocoa`, with `conda activate cocoa`:
 
 **Step :one:**: activate Cocoa and enable covariance generation.
