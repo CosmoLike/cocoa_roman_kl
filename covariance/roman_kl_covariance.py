@@ -77,7 +77,7 @@ def configuration(accuracy_boost=None, gaussian=None, **accuracy_overrides):
         "excluded_gammat": excluded_gammat,
         "band_first": band_edges[:-1],
         "band_last": band_edges[1:]-1,
-        "lnm_edges": np.linspace(np.log(1.e6), np.log(1.e17), 9),
+        "lnm_edges": cov.halo_mass_edges(),
 
         # Densities are per square arcminute. Shape noise is per component.
         "area_deg2": 2000.0,
