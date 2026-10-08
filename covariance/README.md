@@ -277,7 +277,7 @@ plots and variance-ratio table.
 
 | Figure | What it teaches |
 | --- | --- |
-| Split-triangle correlation matrix | Compare the generated native-space covariance in the lower triangle with the supplied likelihood covariance in the upper triangle, after the same cuts. Each uses its own diagonal normalization. |
+| Split-triangle correlation matrix | Compare the generated native-space covariance, drawn above the diagonal, with the supplied likelihood covariance, drawn below it, after the same cuts. Index 0 sits at the bottom left, so the title's "Lower" and "Upper" name matrix triangles (row > column and row < column), not screen positions. Each uses its own diagonal normalization. |
 | G, SSC and cNG maps and histograms | Compare each component after normalization by the total diagonal variances. |
 | Halo trispectrum diagonal | See 1h, combined 2h, 3h, 4h and their sum at a chosen redshift, before survey projection. The signed axis retains negative terms. |
 | Error changes | With multiple boosts, compare first-source-bin standard deviations with the highest tested boost, in percent, for the native measurement. |
