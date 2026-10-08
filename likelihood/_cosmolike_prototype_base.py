@@ -659,7 +659,7 @@ class _cosmolike_prototype_base(DataSetLikelihood):
           extrap_kmax=2.5e2*self.accuracyboost).logP(self.z_interp_2D,
           np.power(10.0,self.log10k_interp_2D)).flatten(order='F')+np.log(h**3)   
       else:
-        raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", non_linear_emul)
+        raise LoggedError(self.log, "non_linear_emul = %d is an invalid option", self.non_linear_emul)
 
       # G on the dense 1D z grid (clipped to the P(k) interpolator range):
       # cosmolike reads G linearly in z, and on the coarse 2D grid
@@ -984,12 +984,15 @@ class _cosmolike_prototype_base(DataSetLikelihood):
 
     Returns:
       a 1D float64 numpy array at full length, masked entries 0
-      (internal_get_datavector). For use_emulator = 1 the emulator path
-      is not connected and the result is the 0-d array 0.0.
+      (internal_get_datavector). use_emulator = 1 raises LoggedError:
+      the emulator data-vector path is not implemented in this project.
     """
     if self.use_emulator == 1:
-      #dv = self.internal_get_datavector_emulator(**params)
-      dv = 0.0
+      # The emulator data-vector path was never ported to this project:
+      # returning a placeholder here would feed a zero data vector to the
+      # likelihood, so refuse the mode instead.
+      raise LoggedError(self.log,
+                        "use_emulator = 1 is not implemented in this project")
     else:
       dv = self.internal_get_datavector(**params)
     return np.array(dv,dtype='float64')
