@@ -7,6 +7,19 @@ The Roman KL tests are divided into two sectors.
 - [Covariance checks](covariance/README.md) cover forecast assembly and its
   documented component checks. Covariance generation must be compiled.
 
+Read this page, then the guide of each sector. The stored snapshot under
+`frozen/` feeds the data-vector checks; the covariance checks need the
+covariance build:
+
+```mermaid
+flowchart TD
+  A["tests/README.md: both sectors"] --> B["data_vector/README.md: likelihood checks"]
+  A --> C["covariance/README.md: forecast checks"]
+  G["generate_frozen_reference.py"] --> F["frozen/ and manifest_sha256.json"]
+  F --> B
+  K["Covariance build"] --> C
+```
+
 We assume Cocoa and this project are installed, the Cocoa Conda environment
 is active, the shell is Bash, and the current folder is `cocoa/Cocoa/`.
 

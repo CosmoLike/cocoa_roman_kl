@@ -13,6 +13,7 @@
    3. [FAQ: How can users check convergence?](#convergence)
    4. [FAQ: How can users reuse the calculation?](#reuse)
    5. [FAQ: Which accuracy settings are available?](#accuracy-settings)
+   6. [Choosing the Gaussian spectra](#gaussian_spectra)
 
 # Overview <a name="overview"></a>
 
@@ -64,9 +65,9 @@ using the optimized production interface. It saves G, SSC, cNG and their
 sum without plotting or opening a notebook. Numerical kernels and survey
 settings are shared with the notebook calculation.
 
-The current [production timing table](https://github.com/CosmoLike/cocoa)
+The [production timing table](https://github.com/CosmoLike/cocoa)
 reports **35.3 seconds** for this project on an Apple M2 Pro with
-eight OpenMP threads (mean of three sequential CLI runs, 2026-10-07).
+eight OpenMP threads (mean of three sequential CLI runs).
 
 This interval includes first-use CosmoLike tables, spectra, halo
 calculations, transforms and complete G + SSC + cNG matrix assembly.
@@ -110,9 +111,11 @@ The [evaluate YAML](../EXAMPLE_EVALUATE_COVARIANCE.yaml) uses Cobaya's YAML read
 values specify one cosmology; a parameter with a prior must be supplied
 explicitly in `sampler.evaluate.override`. No MCMC or random prior draw runs.
 
-In its `covariance` block, `accuracy_boost: 2` refines the project's
-`default.yaml` baseline. `integration_accuracy: 1` changes the quadrature
-level independently. Internal accuracy controls can also be set there.
+Its `covariance` block keeps the project's `default.yaml` baseline,
+`accuracy_boost: 1` and `integration_accuracy: 0`. A larger
+`accuracy_boost`, such as 2, refines that baseline; `integration_accuracy`
+changes the quadrature level independently. Internal accuracy controls can
+also be set there.
 Use `space` for the measurement space. Set the OpenMP team with
 `OMP_NUM_THREADS` in the shell; no thread count belongs in the YAML.
 
@@ -390,7 +393,7 @@ On the M2 Pro laptop, stop Roman integration tests at level 3; reserve level
 
 ## FAQ: Which survey does the example use? <a name="survey"></a>
 
-The redshift files are `Roman_tomo_Ntomo10_src.nz` and `Roman_tomo_Ntomo10_src.nz` in `data/`.
+Lenses and sources read the same redshift file, `Roman_tomo_Ntomo10_src.nz` in `data/`.
 Each column supplies a bin's radial shape. The catalog densities are
 specified separately in [roman_kl_covariance.py](roman_kl_covariance.py).
 
@@ -501,7 +504,7 @@ The C routines use OpenMP inside one process and never start MPI work.
 A future Python dispatcher can distribute those subblocks while keeping
 all cross correlations in the assembled matrix.
 
-## Choosing the Gaussian spectra
+## Choosing the Gaussian spectra <a name="gaussian_spectra"></a>
 
 The `gaussian` block selects the physics used in Gaussian covariance.
 `nonlimber: true` retains radial mode coupling for every galaxy–galaxy and

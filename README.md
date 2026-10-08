@@ -26,31 +26,23 @@
 From `Cocoa/Readme` instructions:
 
 > [!Note]
-> We provide several cosmolike projects that can be loaded and compiled using `setup_cocoa.sh` and `compile_cocoa.sh` scripts. To activate them, comment the following lines on `set_installation_options.sh` 
+> `setup_cocoa.sh` and `compile_cocoa.sh` install the cosmolike projects that `set_installation_options.sh` selects: a commented `IGNORE_*_CODE` key enables a project, and an active key skips it. The shipped file skips roman_kl; comment out its `export IGNORE_COSMOLIKE_ROMAN_KL_CODE=1` line to enable it:
 > 
 >     [Adapted from Cocoa/set_installation_options.sh shell script]
->     (...)
->
->     # ------------------------------------------------------------------------------
->     # The keys below control which cosmolike projects will be installed and compiled
->     # ------------------------------------------------------------------------------
 >     #export IGNORE_COSMOLIKE_LSST_Y1_CODE=1
->     #export IGNORE_COSMOLIKE_DES_Y3_CODE=1
+>     export IGNORE_COSMOLIKE_DES_Y3_CODE=1
+>     #export IGNORE_COSMOLIKE_DESXPLANCK_CODE=1
+>     export IGNORE_COSMOLIKE_ROMAN_FOURIER_CODE=1
+>     #export IGNORE_COSMOLIKE_ROMAN_REAL_CODE=1
 >     export IGNORE_COSMOLIKE_ROMAN_KL_CODE=1
->
->     (...)
->     # ------------------------------------------------------------------------------
->     # Cosmolike projects below -------------------------------------------
->     # ------------------------------------------------------------------------------
 >     (...)
 >     export ROMAN_KL_URL="https://github.com/CosmoLike/cocoa_roman_kl.git"
 >     export ROMAN_KL_NAME="roman_kl"
->     #Pin the project version with at most one of the keys below (COMMIT, BRANCH, or TAG).
->     #If more than one is set, COMMIT wins over BRANCH, and BRANCH wins over TAG.
->     #If none is set, Cocoa loads the latest commit on the repository default branch.
->     #export ROMAN_KL_GIT_BRANCH="main"
->     #export ROMAN_KL_GIT_COMMIT="abc"
->     export ROMAN_KL_GIT_TAG="v4.11.0"
+>     export ROMAN_KL_GIT_TAG="v5.05"
+>
+> Each released project is pinned to a tag. To select another revision, set
+> only one of its `GIT_COMMIT`, `GIT_BRANCH` or `GIT_TAG` keys: a commit takes
+> precedence over a branch, and a branch over a tag.
 
 > [!NOTE]
 > If users want to recompile cosmolike, there is no need to rerun the Cocoa general scripts. Instead, run the following three commands:
@@ -174,6 +166,13 @@ model).
 > [!TIP]
 > For the sampled parameters of each model, their validity ranges, and the `bfmt`
 > options, see `Cocoa/external_modules/code/baryon_suppression/README.md`.
+
+> [!NOTE]
+> Section 5 of [EXAMPLE_EVALUATE1.ipynb](EXAMPLE_EVALUATE1.ipynb),
+> **Baryonic feedback from the `bfmt` theory block**, runs six of these methods
+> (the three SP(k) relations, BCEmu, Flamingo and BCemu2025) through the `bfmt`
+> block at the fiducial point of `EXAMPLE_EVALUATE1.yaml`. It needs the packages
+> of the first step above; see [Exploring notebooks](#notebooks).
 
 # Running Hybrid Cosmolike-ML emulators <a name="roman_kl_examples_emul2"></a>
 
@@ -480,10 +479,27 @@ jupyter notebook --no-browser --port=8888
 
 | Notebook | Contents |
 |---|---|
+| [EXAMPLE_EVALUATE1.ipynb](EXAMPLE_EVALUATE1.ipynb) | Kinematic-lensing cosmic shear with the settings of `EXAMPLE_EVALUATE1.yaml`: the 20 band powers of each of the 55 source-bin pairs and their $`\chi^2`$ over the 1,100 entries the mask keeps (sections 1-4), then six `bfmt` feedback methods with a table of $`\chi^2`$, $`\Delta\chi^2`$ and the $`\chi^2`$ of each shift (section 5). |
 | [EXAMPLE_EVALUATE_COVARIANCE.ipynb](EXAMPLE_EVALUATE_COVARIANCE.ipynb) | G, SSC, cNG, total, separate 1h–4h matter trispectra and matrix diagnostics. |
 
-This repository currently ships a covariance notebook. Its data-vector
-examples are YAML commands; a data-vector notebook is not supplied.
+> [!NOTE]
+> Section 5 of `EXAMPLE_EVALUATE1.ipynb` needs the `bfmt` packages of the
+> [baryonic feedback section](#roman_kl_baryonic_feedback). Its figures set
+> `text.usetex = True`, which needs a LaTeX installation.
+
+The data-vector notebook reads `data/roman_kl_mcmc.dataset`, the
+`data_file` of `EXAMPLE_EVALUATE1.yaml`; the default of
+`likelihood/cosmic_shear.yaml`, `roman_kl.dataset`, is not shipped. The
+covariance notebook calls the survey adapter
+`covariance/roman_kl_covariance.py`. Read the notebooks in this order:
+
+```mermaid
+flowchart TD
+  A["EXAMPLE_EVALUATE1, sections 1-4: KL band powers"] --> B["Section 5: bfmt feedback"]
+  A --> C["EXAMPLE_EVALUATE_COVARIANCE: G, SSC, cNG"]
+  Y["EXAMPLE_EVALUATE1.yaml"] --> A
+  S["roman_kl_covariance.py"] --> C
+```
 
 Choose the Python kernel from the activated Cocoa environment and restart it
 after recompiling. The [covariance guide](covariance/README.md) explains the
@@ -578,6 +594,6 @@ Check interpolation, quadrature, input-power sampling and transform cutoffs
 separately at fixed cosmology and measurement bins. Narrow n(z) overlaps
 particularly require a quadrature check; increasing `accuracyboost` alone
 is not that check. The [data-vector test guide](tests/data_vector/README.md)
-and [covariance test guide](tests/covariance/README.md) state what each suite
-actually verifies. A passing regression or a larger boost is not a general
+and [covariance test guide](tests/covariance/README.md) state what each set of
+tests actually verifies. A passing regression or a larger boost is not a general
 claim of survey or Fisher convergence.
