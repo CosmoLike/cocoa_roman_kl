@@ -1,14 +1,16 @@
 """Regenerate the photo-z convention figures the tests README shows.
 
-Evaluates the frozen cosmic-shear fiducial under the four runtime
-photo-z settings (cspline/Z_LOW default, linear, Steffen, Z_MID; see
-test_photoz_conventions.py for what they mean) and plots the
-fractional data-vector differences against the default,
+Evaluates the frozen cosmic-shear fiducial (example1, NLA) under the
+four runtime photo-z settings (cspline/Z_LOW default, linear, Steffen,
+Z_MID; see test_photoz_conventions.py for what they mean), one model
+per setting in one process, and plots the fractional differences of
+the shear spectra against the default,
 
     delta C_ell / C_ell = C_ell(setting)/C_ell(default) - 1,
 
-per tomographic pair and per band power. Masked bands are left out.
-Two figures, because the two knobs live on different scales:
+per tomographic pair and per band. Masked bands are left out. Two
+figures, written next to this script, because the two knobs live on
+different scales:
 
     photoz_zmid_dcl.png   - the Z_LOW vs Z_MID reading of the n(z)
                             file z column (percent level),
@@ -23,6 +25,8 @@ start_cocoa.sh sourced):
 
 import os
 
+# OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so this
+# must run before any cobaya/cosmolike import; 4 threads, as in the tests
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
@@ -30,13 +34,21 @@ import shutil
 import tempfile
 
 import matplotlib
+# Agg is matplotlib's file-only backend: no window opens, so the script
+# runs without a display; it must be chosen before pyplot is imported
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
+# the shim cocoa_test_utils.py sits in this folder (tests/); insert(0,
+# ...) puts the folder first on the module search path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cocoa_test_utils as u
 
+# example1 is the cosmic-shear configuration. NTOMO, NCL, L_MIN and L_MAX
+# repeat its binning (10 source bins, 20 bands log-spaced between l = 20
+# and 4000, as in tests/frozen/data/*.dataset), and MASK_FILE is the mask
+# of its dataset (the 55 shear blocks kept).
 EXAMPLE = "example1"
 NTOMO = 10
 NCL = 20
@@ -44,12 +56,24 @@ L_MIN, L_MAX = 20.0, 4000.0
 MASK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          "frozen", "data", "roman_kl.mask")
 
+# (report tag, photoz_interpolation_type, photoz_zmid_convention), the
+# default first
 SETTINGS = (("cspline/Z_LOW (default)", 0, 0), ("linear", 1, 0),
             ("steffen", 2, 0), ("Z_MID", 0, 1))
 
 
 def datavectors():
-    """The printed theory vector under each setting, keyed by tag."""
+    """Return the printed theory vector under each setting, keyed by tag.
+
+    Each setting builds its own model from the frozen example1
+    configuration and evaluates the fiducial point once; the evaluation
+    prints the theory vector (print_datavector) into a temporary folder,
+    which is deleted at the end (the finally block runs even on error).
+
+    Returns:
+      {report tag: 1D array of the full-length theory vector, masked
+      entries 0}.
+    """
     vectors_dir = tempfile.mkdtemp(prefix="photoz_conventions_fig_")
     out = {}
     try:
@@ -72,12 +96,29 @@ def datavectors():
 
 
 def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
-    """One 6x6 per-pair panel grid in the notebook-plotter layout.
+    """Draw one grid of panels, one panel per shear pair, and save it.
 
-    curves = {label: dcl}, each a (npair, NCL) fractional-difference
-    array with NaN at masked bands.
+    The grid has 8 x 7 panels for the 55 pairs (i <= j) of the 10 source
+    bins; the 56th panel is switched off. The panels share both axes and
+    touch each other (no space between them), as in the notebook
+    plotters; the bin labels inside the panels count from 1.
+
+    Arguments:
+      curves = {label: dcl}, each dcl an array [npair, NCL] of fractional
+               differences with NaN at masked bands; one color per label.
+      fname  = output file name, written next to this script.
+      title  = figure title.
+      scale  = factor applied to dcl before plotting (100 gives percent).
+      unit   = the unit shown in the y-axis label.
+      ylim   = None, or the half-height of the symmetric y range, in the
+               plotted unit.
+
+    Returns:
+      nothing; the PNG file is written (dpi 120) and the figure closed.
     """
     edges = np.geomspace(L_MIN, L_MAX, NCL + 1)
+    # the band centers where cosmolike evaluates C_l
+    # (init_binning_fourier): geometric means of the log-spaced band edges
     ell = np.sqrt(edges[1:] * edges[:-1])  # geometric band centers
     pairs = [(i, j) for i in range(NTOMO) for j in range(i, NTOMO)]
     fig, axes = plt.subplots(nrows=8, ncols=7, figsize=(21, 21),
@@ -109,17 +150,37 @@ def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
 
 
 def main():
+    """Evaluate the four settings and write the two figures.
+
+    Raises:
+      RuntimeError from require_cocoa_environment outside a started
+      Cocoa shell; AssertionError from verify_frozen when a frozen file
+      changed.
+    """
     u.require_cocoa_environment()
     u.verify_frozen()
     dv = datavectors()
 
+    # the mask file holds "index value" lines; keep the values
     mask = np.loadtxt(MASK_FILE)
     mask = mask[:, 1] if mask.ndim == 2 else mask
     npair = NTOMO * (NTOMO + 1) // 2
     ncs = npair * NCL  # the cosmic-shear block leads the data vector
 
     def frac(tag):
+        """Return the fractional shear-spectrum difference of one setting.
+
+        Arguments:
+          tag = a SETTINGS report tag.
+
+        Returns:
+          an array [npair, NCL] of C_ell(setting)/C_ell(default) - 1 over
+          the cosmic-shear block, NaN where the mask is 0.
+        """
         ref, cur = dv[SETTINGS[0][0]], dv[tag]
+        # np.errstate silences numpy's divide-by-zero and invalid-value
+        # warnings inside the block: masked entries are 0/0, and np.where
+        # replaces them by NaN anyway
         with np.errstate(divide="ignore", invalid="ignore"):
             d = np.where(mask[:ncs] > 0, cur[:ncs] / ref[:ncs] - 1.0,
                          np.nan)

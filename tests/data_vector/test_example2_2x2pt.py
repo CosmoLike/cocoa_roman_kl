@@ -1,11 +1,13 @@
 """Unit tests 11-14: the 2x2pt likelihood on the frozen test data.
 
 2x2pt combines two of example2's three two-point correlations: galaxy
-clustering and galaxy-galaxy lensing (cosmic shear is dropped). The
-frozen configuration is example2's with the likelihood renamed to
-roman_kl.combo_2x2pt: same options, same data files, same evaluation
-point; only the probe selection inside cosmolike changes. The four
-tests mirror tests 5-8 (see cocoa_test_utils for what "frozen" means):
+clustering (C_l^gg) and galaxy-galaxy lensing (C_l^gs, the 45
+lens-source pairs whose source bin is behind its lens bin); cosmic shear
+is dropped. The frozen configuration is example2's with the likelihood
+renamed to roman_kl.combo_2x2pt: same options, same data files, same
+evaluation point; only the probe selection inside cosmolike changes.
+The four tests mirror tests 5-8 (see cocoa_test_utils.py for the frozen
+state):
 
  11. chi2 at the frozen fiducial point, within CHI2_TOLERANCE (0.2) of
      the frozen reference value.
@@ -14,7 +16,9 @@ tests mirror tests 5-8 (see cocoa_test_utils for what "frozen" means):
      RACE_TOLERANCE (1e-4).
  13. the same comparison as test 11 with the TATT intrinsic-alignment
      model (IA_model: 1) and ROMAN_KL_A2_1 = 0.05, ROMAN_KL_BTA_1 = 0.05,
-     ROMAN_KL_A2_2 = -1.51541.
+     ROMAN_KL_A2_2 = -1.51541 (A1 stays 0, so only the tidal-torquing
+     A2 terms contribute; clustering carries no intrinsic alignment, so
+     they enter through galaxy-galaxy lensing).
  14. the same race check as test 12 with the TATT model.
 
 To run (from the Cocoa/ folder, cocoa environment active,
@@ -26,14 +30,18 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
+# "4" is cocoa_test_utils.REQUIRED_OMP_THREADS: the race checks need
+# several threads, and the frozen references were computed with four.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py (this project's data bound to the shared
+# test machinery) lives one folder up, in tests/; insert(0, ...) puts
+# that folder first on the module search path, so a direct run of this
+# file and the worker subprocesses import this project's shim.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -49,21 +57,20 @@ class TestExample2TwoXTwo(unittest.TestCase):
     the frozen reference chi2 values.
     """
 
-    # @classmethod hands the class itself in as cls; unittest calls
-    # this once, before the first test of the class
     @classmethod
     def setUpClass(cls):
+        """Check the Cocoa shell, verify the frozen files, load the references.
+
+        unittest calls this once, before the first test of the class;
+        @classmethod passes the class itself as cls, so cls.reference
+        (the frozen reference chi2 values) is shared by every test.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()
 
     def test_x11_chi2_matches_frozen_reference(self):
-        """chi2 at the frozen NLA point stays within 0.2 of the reference.
-
-        The x prefix on tests 11-14 only keeps unittest's alphabetical
-        ordering aligned with the numbering (test_11 would sort before
-        test_2).
-        """
+        """chi2 at the frozen NLA point stays within 0.2 of the reference."""
         chi2 = u.single_model_chi2(EXAMPLE, tatt=False)
         ref = self.reference[f"{EXAMPLE}_nla"]
         u.report_chi2_test(
@@ -112,5 +119,9 @@ class TestExample2TwoXTwo(unittest.TestCase):
             msg=f"TATT 10th-in-a-row chi2 = {tenth:.8f} vs fresh {fresh:.8f}")
 
 
+# __name__ is "__main__" only when this file runs directly as a
+# script; pytest imports the module instead, so this block stays
+# idle under pytest. unittest.main runs every test method of the
+# classes above and prints one line per method (verbosity=2).
 if __name__ == "__main__":
     unittest.main(verbosity=2)

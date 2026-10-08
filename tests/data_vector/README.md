@@ -341,7 +341,7 @@ once:
 
 | setting | raised to | what it controls |
 |---------|-----------|------------------|
-| `accuracyboost` (cosmolike) | 5 | sizes of cosmolike's internal lookup tables, including the dyadic z grid of the power-spectrum tables |
+| `accuracyboost` (cosmolike) | 3 | sizes of cosmolike's internal lookup tables, including the dyadic z grid of the power-spectrum tables |
 | `integration_accuracy` (cosmolike) | 10 | extra refinement passes of cosmolike's numerical integrals |
 | `internal_accuracyboost` (cosmolike) | 2 | density of the C-FAST-PT convolution grid relative to the output table the likelihood interpolates; 1 is the legacy single-grid path |
 | `kmax_boltzmann` (cosmolike) | 40 | the k cutoff of the power spectrum the likelihood requests from CAMB |
@@ -350,6 +350,8 @@ once:
 | `kmax` (CAMB) | 50 | highest k of CAMB's matter power spectrum; one physical cutoff with `kmax_boltzmann`, seen from the CAMB side |
 
 There is no `lmax` entry here: the ell range lives in the dataset.
+Check A0, which runs first, raises one setting at a time on the 3x2pt
+NLA configuration and also stresses `accuracyboost: 5` on its own.
 
 `accuracyboost` refines a nested z grid in the power-spectrum
 tables: every coarser grid's nodes are a subset of every finer
@@ -359,11 +361,11 @@ moving the nodes (the construction is commented in
 
 `internal_accuracyboost` scales only the C-FAST-PT convolution
 grid; the output table the likelihood interpolates is unchanged.
-
-- 2026-09-25: the 0.5 default is converged. The lsst_y1 scan
-  measured $\Delta^T C^{-1} \Delta \le 10^{-9}$ against the
-  single-grid path down to 0.27, and `internal_accuracyboost: 1`
-  recovers that path exactly.
+The likelihood yamls set `internal_accuracyboost: 1`, which keeps the
+convolution grid equal to the output table: the exact single-grid
+path. Coarser grids also hold: the lsst_y1 scan of this setting
+measured $`\Delta^T C^{-1} \Delta \le 10^{-9}`$ against the single-grid
+path down to `internal_accuracyboost: 0.27`.
 
 When several settings move the $\chi^2$, settle them in cost order:
 raise cosmolike `accuracyboost` first (cheap), then CAMB
@@ -406,8 +408,7 @@ advisory check per feedback method (the three SP(k) fb relations,
 BCEmu, Flamingo, BACCOemu, and BCemu2025), at a fixed parameter
 point per method.
 
-Each check creates its data vector on the fly, by
-the same mechanism as the N-random-models check: the
+Each check creates its data vector on the fly: the
 default-settings model writes its own theory vector during
 evaluation, that vector becomes the data of a temporary dataset, and
 the pushed-settings model evaluates at the same point against it.
@@ -660,10 +661,11 @@ fiducial point when the snapshot was created, one pair per data set, under
 | cosmic shear | `synthetic_roman_kl_shear` | `tatt_roman_kl_shear` |
 | 3x2pt | `synthetic_roman_kl_3x2` | `tatt_roman_kl_3x2` |
 
-The shipped modelvectors sit off the current-code minimum ($\chi^2$ 10-12
-at the fiducial), and away from a minimum the $\chi^2$ responds linearly
-to tiny numerical changes; at its own minimum the response is
-quadratic and the drift and accuracy numbers stay meaningful. The
+Each vector is the prediction of its own frozen configuration, so every
+exact-physics variant evaluates at its own $\chi^2$ minimum. Away from a minimum the
+$\chi^2$ responds linearly to tiny numerical changes; at the minimum the
+response is quadratic and the drift and accuracy numbers stay
+meaningful. The
 accuracy file also changes one accuracy parameter at a time before
 the raised-at-once checks, so a large $\Delta\chi^2$ can be
 attributed to the parameter causing it.
@@ -686,7 +688,14 @@ the script `start_cocoa.sh`
 
     python ./projects/roman_kl/tests/generate_frozen_reference.py --overwrite
 
-It rebuilds `frozen/` from the current project, prints the eight new
-reference $\chi^2$ values, and rewrites the manifest. Review the printed
-$\chi^2$ values against the old references before committing: they define
-what every later test run compares against.
+**Step :three:**: add the feedback vectors of the drift tests
+
+    python ./projects/roman_kl/tests/generate_frozen_reference.py --baryons
+
+The first command deletes and rebuilds `frozen/` from the current
+project, prints the eight new reference $\chi^2$ values, and rewrites the
+manifest. It does not write the per-method feedback vectors of
+`test_baryons.py`; the second command adds them and rewrites the
+manifest again. Review the printed $\chi^2$ values against the old
+references before committing: they define what every later test run
+compares against.

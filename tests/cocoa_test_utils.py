@@ -1,25 +1,37 @@
-"""Shared harness for the roman_kl unit tests: the project's data
-bound to the shared Cocoa test machinery.
+"""Project data of the roman_kl tests, bound to the shared Cocoa test machinery.
 
-The machinery itself (frozen-state verification, the chi2 pipeline,
-worker-subprocess isolation, the race and baryon checks, the
-CFASTPT-vs-FASTPT comparison, and the terminal reports) lives in
-external_modules/code/cosmolike_core/cocoa_testing.py. This file
-carries what is roman_kl's alone - the examples table (the exact
-configurations plus their EMUL2 emulator twins, each naming its
-synthetic NLA dataset), the TATT point, the accuracy knobs, the
-CFASTPT-vs-FASTPT comparison contract, and the two EMUL2-only
-report printers kept at the end of this file -
-and binds it to ONE cocoa_testing.CocoaTestHarness instance whose
-methods are re-exported under the historical names, so the test
-modules and generate_frozen_reference.py import everything from this
-module exactly as before.
+The machinery lives in external_modules/code/cosmolike_core/cocoa_testing.py:
+frozen-state verification, the chi2 pipeline, the worker subprocesses
+(each test quantity is computed in a fresh Python process, because the
+compiled cosmolike interface keeps the data-vector dimensions in C
+global variables), the race and baryon checks, the CFASTPT-vs-FASTPT
+and Halofit-vs-EE2 comparisons and the terminal reports. Its module
+docstring explains each of them.
 
-The frozen-state doctrine is unchanged: everything a test evaluates
-lives under tests/frozen/, pinned byte for byte by
-tests/manifest_sha256.json and verified before any model is built;
-refreshing the frozen state stays a deliberate maintainer action
-(generate_frozen_reference.py --overwrite).
+This file is the project "shim", a thin module that adapts the shared
+code to one project. It holds what belongs to roman_kl alone: the
+EXAMPLES table (the exact-physics configurations, their EMUL2 emulator
+versions, and the synthetic NLA dataset each of them evaluates), the
+TATT point, the accuracy knobs, the CFASTPT-vs-FASTPT comparison
+settings, and two report printers used only by test_emul2.py. It builds
+one cocoa_testing.CocoaTestHarness from that data and gives the
+harness methods module-level names, which the test modules, conftest.py,
+the worker subprocesses and generate_frozen_reference.py import from
+here.
+
+The frozen state: everything a test evaluates lives under tests/frozen/
+(complete cobaya configurations, data files, reference chi2 values),
+pinned byte for byte by the SHA-256 digests in
+tests/manifest_sha256.json and verified before any model is built.
+Refreshing it is a deliberate maintainer step:
+generate_frozen_reference.py --overwrite.
+
+roman_kl specifics: the data vectors hold Fourier-space spectra C_l in
+20 bands from l = 20 to 4000. example1 is cosmic shear; example2 is the
+3x2pt analysis, whose galaxy-galaxy lensing keeps only the 45
+lens-source pairs with the source bin behind the lens bin (the first
+pair, [0, 0], is excluded). Both frozen configurations fix the
+intrinsic-alignment amplitude A1 to 0 (see TATT_POINT).
 """
 
 import os
@@ -28,7 +40,7 @@ import sys
 # ---- tests/ paths -----------------------------------------------------------
 
 # Everything the tests read or write lives relative to this folder, so
-# the suite works no matter which directory pytest is launched from
+# the tests work no matter which directory pytest is launched from
 # (__file__ is this module's own path; dirname strips the file name).
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 FROZEN_DIR = os.path.join(TESTS_DIR, "frozen")
@@ -39,7 +51,8 @@ REFERENCE_FILE = os.path.join(FROZEN_DIR, "reference_chi2.json")
 
 # The import is path-based (tests/ is three levels below Cocoa/, which
 # holds external_modules/code/cosmolike_core) so it works before
-# start_cocoa.sh's python-path setup runs.
+# start_cocoa.sh's python-path setup runs; insert(0, ...) puts the folder
+# first on Python's module search path.
 _CORE_DIR = os.path.abspath(os.path.join(
     TESTS_DIR, "..", "..", "..", "external_modules", "code",
     "cosmolike_core"))
@@ -50,37 +63,41 @@ import cocoa_testing as _cct
 # ---- the project data ------------------------------------------------------
 
 # The TATT (Tidal Alignment and Tidal Torquing, an intrinsic-alignment
-# model with tidal second-order terms) tests replace these values in
-# the frozen point. In the NLA reference point A2 and BTA are zero, so
-# the nonzero values here make the TATT reference genuinely exercise
-# the second-order terms.
+# model with second-order tidal terms) tests replace these values in the
+# frozen point. With the power-law redshift evolution of the frozen
+# configurations (IA_redshift_evolution 3), A2_1 is the tidal-torquing
+# amplitude A2, A2_2 its redshift exponent, and BTA_1 the density
+# weighting b_TA. Both frozen configurations fix A1 = 0: their NLA tests
+# carry no intrinsic alignment at all, and under TATT only the A2 terms
+# carry signal, because every b_TA term is multiplied by A1.
 TATT_POINT = {
     "ROMAN_KL_A2_1": 0.05,
     "ROMAN_KL_BTA_1": 0.05,
     "ROMAN_KL_A2_2": -1.51541,
 }
 
-# The two frozen configurations. "likelihood" is the cobaya component
-# name, needed to reach that block inside the loaded info dictionary;
-# "provenance" names the human-readable snapshot (never loaded).
-# The TATT variants evaluate against data vectors GENERATED WITH TATT
-# at the fiducial point. Reason: against an NLA-based vector the TATT
-# chi2 sits away from its minimum, where it responds linearly (not
-# quadratically) to tiny numerical changes: harmless
-# rounding-level shifts would then eat much of the 0.2 chi2 band the
-# reference tests allow. The two examples use different data sets, so each gets its
-# own generated vector; the 2x2pt configuration shares example2's.
+# Which example generated each TATT data vector. The TATT variants
+# evaluate against data vectors generated with TATT at the fiducial
+# point. Reason: against an NLA-based vector the TATT chi2 sits away from
+# its minimum, where it responds linearly (not quadratically) to tiny
+# numerical changes, and harmless rounding-level shifts would then eat
+# much of the 0.2 chi2 band the reference tests allow. The two examples
+# use different data sets, so each gets its own generated vector; the
+# 2x2pt configuration shares example2's. No code reads this table
+# (SYNTHETIC_VECTORS below drives the generator); it records the pairing.
 TATT_GENERATORS = {
     "tatt_roman_kl_shear.dataset": "example1",
     "tatt_roman_kl_3x2.dataset": "example2",
 }
 
-# The shipped roman_kl modelvectors sit away from the current code's
-# minimum (chi2 10-12 at the fiducial), where the chi2 responds
-# linearly to tiny numerical changes, and every chi2 comparison
-# (reference or accuracy alike) comes out inflated. The NLA variants therefore evaluate against SYNTHETIC
-# data vectors generated with the default (NLA) model at the fiducial
-# during the freeze, one per data set, exactly like the TATT vectors.
+# The shipped roman_kl modelvectors sit away from the minimum of the
+# current code (chi2 10-12 at the fiducial), where the chi2 responds
+# linearly to tiny numerical changes and every chi2 comparison (reference
+# or accuracy alike) comes out inflated. The NLA variants therefore
+# evaluate against synthetic data vectors generated with the default
+# (NLA) model at the fiducial during the freeze, one per data set, like
+# the TATT vectors. Each entry maps a dataset file the generator writes
+# to (the example that generates it, True for the TATT model).
 SYNTHETIC_VECTORS = {
     "synthetic_roman_kl_shear.dataset": ("example1", False),
     "synthetic_roman_kl_3x2.dataset": ("example2", False),
@@ -107,16 +124,16 @@ HIGH_ACCURACY_LIKELIHOOD = {
 # likelihood overrides, camb extra_args overrides), evaluated alone on
 # the example2 NLA configuration before the all-knobs checks, so a
 # large all-knobs delta can be attributed to the knob causing it. The
-# accuracyboost=5 entry is a stress knob: it exceeds what measuring
-# the default numerics needs, and it is kept because it exposed an
-# interface breakdown (a suspected fixed-size table) in desy1xplanck.
+# accuracyboost=5 entry is a stress knob: it goes beyond what measuring
+# the default numerics needs and exposes tables whose size a large boost
+# overflows (desy1xplanck breaks down above boost 3).
 # Investigation order when several knobs move the chi2: raise the
 # cosmolike accuracyboost first (cheap), then camb k_per_logint, and
 # only then camb AccuracyBoost (expensive at run time): an apparent
-# CAMB sensitivity can masquerade as unresolved cosmolike-side
-# resolution, so the cheap knobs must be settled before the expensive
-# one is blamed. kmax_boltzmann and camb kmax are one physical cutoff
-# seen from the two sides, so the scan moves them together.
+# CAMB sensitivity can come from unresolved cosmolike-side resolution,
+# so the cheap knobs are settled before the expensive one is blamed.
+# kmax_boltzmann and camb kmax are one physical cutoff seen from the two
+# sides, so the scan moves them together.
 ACCURACY_KNOBS = [
     ("accuracyboost -> 3", {"accuracyboost": 3.0}, {}),
     ("accuracyboost -> 5 (stress)", {"accuracyboost": 5.0}, {}),
@@ -128,21 +145,34 @@ ACCURACY_KNOBS = [
     ("camb k_per_logint -> 50", {}, {"k_per_logint": 50}),
 ]
 
-# The EMUL2 entries below carry three extra fields:
-#   "emulator"        = an EMUL2 configuration: machine-learning
-#                       emulators (the emulrdrag, emulbaosn, and
-#                       emulmps theory blocks) replace the Boltzmann
-#                       code. These are ADVISORY (no pass/fail; see
-#                       test_emul2.py) and have no TATT variant;
-#   "exact_example"   = the exact-physics configuration this entry is
-#                       the emulated version of; its "nla_dataset" is
-#                       reused, so the emulated chi2 and the exact
-#                       reference are computed against the SAME
-#                       synthetic NLA vector (against different data
-#                       their difference would mix data mismatch with
-#                       emulator error);
-#   "exact_reference" = the exact-physics reference chi2 key the
-#                       emulator's accuracy is judged against.
+# Keys of each EXAMPLES entry:
+#   "frozen_module"     = the configuration's file in tests/frozen/;
+#   "provenance"        = the example yaml the configuration was frozen
+#                         from (a human-readable snapshot in frozen/,
+#                         never loaded);
+#   "likelihood"        = the cobaya likelihood component name, needed to
+#                         reach that block inside the loaded configuration;
+#   "source_likelihood" = (2x2pt only) the likelihood name in the
+#                         provenance yaml; freeze_example renames that
+#                         block to the "likelihood" name;
+#   "tatt_dataset"      = the dataset file of the TATT variant;
+#   "nla_dataset"       = the synthetic NLA dataset file the NLA variant
+#                         evaluates (see SYNTHETIC_VECTORS).
+# The EMUL2 entries carry three more:
+#   "emulator"          = an EMUL2 configuration: machine-learning
+#                         emulators (the emulrdrag, emulbaosn, and emulmps
+#                         theory blocks) replace the Boltzmann code.
+#                         These are advisory (no pass/fail; see
+#                         test_emul2.py) and have no TATT variant;
+#   "exact_example"     = the exact-physics configuration this entry is
+#                         the emulated version of; its "nla_dataset" is
+#                         reused, so the emulated chi2 and the exact
+#                         reference are computed against the same
+#                         synthetic NLA vector (against different data
+#                         their difference would mix data mismatch with
+#                         emulator error);
+#   "exact_reference"   = the exact-physics reference chi2 key the
+#                         emulator's accuracy is judged against.
 EXAMPLES = {
     "example1": {
         "frozen_module": "frozen_config_example1.py",
@@ -189,16 +219,13 @@ EXAMPLES = {
 # Pass limit on the covariance-weighted difference of the two
 # implementations at FASTPT_LOW_SETTINGS: at each point both blocks
 # print their theory data vector, and the tested number is
-# delta^T C^-1 delta - the chi2 OF the implementation difference,
-# zero when the vectors agree. 0.2 is the house comfort band of the
-# other checks, in reach since the two-grid fastpt block made the
-# output-table density cheap (this project's own sweep: max delta
-# chi2 0.188561 at the converged defaults; the historical
-# single-grid default reached 26409 across the prior). The sweep
-# also measured a residual floor near 0.175 that further density
-# does not move (0.175 at eight times the density) - the one
-# project where a difference beyond table density is visible,
-# safely inside the band.
+# delta^T C^-1 delta, the chi2 of the implementation difference
+# (zero when the vectors agree). 0.2 is the comfort band of the other
+# chi2 checks. This project's sweep measured max delta chi2 = 0.188561
+# at the default settings, with a residual floor near 0.175 that a
+# denser FAST-PT table does not move (0.175 at eight times the density):
+# the one project where a difference beyond table density is visible,
+# and it stays inside the band.
 FASTPT_COMPARISON_TOLERANCE = 0.2
 
 # The python FAST-PT side has numerical settings of its own, read by
@@ -209,11 +236,13 @@ FASTPT_COMPARISON_TOLERANCE = 0.2
 # linear interpolation (the accuracy driver), and
 # internal_accuracyboost the density of the internal grid the FFTLog
 # convolutions run on; a cubic spline in log k upsamples the terms
-# from one grid onto the other. Both boosts default to 1.0 = the
-# converged configuration, so low IS the default; it is hard-coded
+# from one grid onto the other. Both boosts default to 1.0, the
+# converged configuration, so low is the default; it is written out
 # here so the test keeps evaluating this exact configuration even if
-# the defaults later move. High doubles both boosts, so the advisory
-# column shows the residual grid response of low.
+# the defaults move. High doubles both boosts, so the advisory column
+# shows the residual grid response of low. kmax_boltzmann [1/Mpc] is the
+# k_max the block requests from CAMB and extrap_kmax [1/Mpc] the end of
+# its log-extrapolation of P(k); both repeat the likelihood's defaults.
 FASTPT_LOW_SETTINGS = {
     "accuracyboost": 1.0,
     "internal_accuracyboost": 1.0,
@@ -249,8 +278,13 @@ NONLINEAR_COMPARISON_POINTS = _cct.NONLINEAR_COMPARISON_POINTS
 
 # ---- the harness -----------------------------------------------------------
 
-# ONE instance binds the shared machinery to this project's data;
-# everything below re-exports its surface under the historical names.
+# One harness instance binds the shared machinery to this project's
+# data. The assignments below give its methods module-level names
+# (verify_frozen = _H.verify_frozen, so u.verify_frozen() runs the method
+# on _H). Some names are looked up by their spelling from other processes
+# or files and must keep it: _worker (the worker subprocesses),
+# _fastpt_comparison_block and _nonlinear_comparison_block (the child
+# programs of the comparison sweeps), _cct and _H (conftest.py).
 _H = _cct.CocoaTestHarness(
     worker_file=__file__,
     interface_module="cosmolike_roman_kl_interface",

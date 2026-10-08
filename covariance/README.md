@@ -1,8 +1,8 @@
 # Table of contents
 
 1. [Overview](#overview)
-2. [Running the covariance notebook](#running)
-   - [Running from the command line](#command_line)
+2. [Running from the command line](#command_line)
+   - [Running the covariance notebook](#running)
 3. [Changing the covariance accuracy](#accuracy)
 4. [Reading the figures](#figures)
 5. [Running the tests](#tests)
@@ -12,8 +12,15 @@
    2. [FAQ: What does the calculation include?](#gaussian)
    3. [FAQ: How can users check convergence?](#convergence)
    4. [FAQ: How can users reuse the calculation?](#reuse)
+   5. [FAQ: Which accuracy settings are available?](#accuracy-settings)
+   6. [Choosing the Gaussian spectra](#gaussian_spectra)
 
 # Overview <a name="overview"></a>
+
+> [!WARNING]
+> **CLI for production; notebook wrappers for exploration.** Both routes
+> share the same C kernels and survey inputs. Notebook array conversion and
+> rearrangement add overhead; use the CLI for production and HPC runs.
 
 [EXAMPLE_EVALUATE_COVARIANCE.ipynb](../EXAMPLE_EVALUATE_COVARIANCE.ipynb)
 computes an analogous Fourier-space 3×2pt covariance for
@@ -51,6 +58,76 @@ zero wavenumber. Higher moments use their converged direct integrals.
 The fitted halo bias and multiplicity conventions are unchanged. See the
 [core halo-moment explanation](https://github.com/CosmoLike/cocoa-cosmolike-core/tree/bugfix/cosmolike/covariances#why-only-i11-uses-wynn-extrapolation).
 
+# Running from the command line <a name="command_line"></a>
+
+The Python runner computes the full galaxy–shear covariance in Fourier space,
+using the optimized production interface. It saves G, SSC, cNG and their
+sum without plotting or opening a notebook. Numerical kernels and survey
+settings are shared with the notebook calculation.
+
+The [production timing table](https://github.com/CosmoLike/cocoa)
+reports **35.3 seconds** for this project on an Apple M2 Pro with
+eight OpenMP threads (mean of three sequential CLI runs).
+
+This interval includes first-use CosmoLike tables, spectra, halo
+calculations, transforms and complete G + SSC + cNG matrix assembly.
+Initial survey/CAMB setup, diagnostics and file writing are excluded.
+
+From Bash in `cocoa/Cocoa`, with `conda activate cocoa`:
+
+**Step :one:**: activate Cocoa.
+
+    source start_cocoa.sh
+
+**Step :two:**: enable the installed project.
+
+    unset IGNORE_COSMOLIKE_ROMAN_KL_CODE
+
+**Step :three:**: enable covariance generation.
+
+    unset IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE
+
+**Step :four:**: compile the project interface.
+
+    source ./projects/roman_kl/scripts/compile_roman_kl.sh
+
+**Step :five:**: select the OpenMP team size.
+
+    export OMP_NUM_THREADS=8
+
+**Step :six:**: run the CLI.
+
+    python ./projects/roman_kl/covariance/compute_covariance.py \
+        ./projects/roman_kl/EXAMPLE_EVALUATE_COVARIANCE.yaml
+
+The `.npz` archive contains the full matrix before likelihood scale cuts,
+its components, measurement ordering, resolved settings and stage timings.
+Existing output files require `--overwrite`; likelihood inputs are separate.
+
+Set `covariance.space` to `real` or `fourier` to select the measurement.
+
+The [evaluate YAML](../EXAMPLE_EVALUATE_COVARIANCE.yaml) uses Cobaya's YAML reader, with familiar
+`theory`, `params`, `sampler: evaluate` and `output` blocks. Fixed parameter
+values specify one cosmology; a parameter with a prior must be supplied
+explicitly in `sampler.evaluate.override`. No MCMC or random prior draw runs.
+
+Its `covariance` block keeps the project's `default.yaml` baseline,
+`accuracy_boost: 1` and `integration_accuracy: 0`. A larger
+`accuracy_boost`, such as 2, refines that baseline; `integration_accuracy`
+changes the quadrature level independently. Internal accuracy controls can
+also be set there.
+Use `space` for the measurement space. Set the OpenMP team with
+`OMP_NUM_THREADS` in the shell; no thread count belongs in the YAML.
+
+`theory.camb.extra_args` supports `AccuracyBoost`, `kmax`, `k_per_logint`,
+`lens_potential_accuracy` and `halofit_version`. CAMB's boost controls
+CAMB; the covariance boost controls its own tables and cutoffs.
+
+Paths in the YAML are relative to the working directory, `cocoa/Cocoa`.
+`output` names the `.npz` archive; `--output` can override it for an HPC
+job. Set `OMP_NUM_THREADS` in that job’s environment. `--help` lists the
+command options.
+
 # Running the covariance notebook <a name="running"></a>
 
 The default build omits covariance generation. Unset
@@ -58,7 +135,7 @@ The default build omits covariance generation. Unset
 as below. Likelihood evaluation with a supplied covariance remains available
 in either build. Restart the Jupyter kernel after a rebuild. To retain this
 choice across sessions, comment out the matching export in
-[`set_installation_options.sh`](../../../set_installation_options.sh).
+[`set_installation_options.sh`](https://github.com/CosmoLike/cocoa/blob/main/Cocoa/set_installation_options.sh).
 
 We assume Cocoa and the Roman kinematic lensing project are installed, users have run
 `conda activate cocoa`, the shell is Bash, and the current folder is
@@ -68,20 +145,26 @@ We assume Cocoa and the Roman kinematic lensing project are installed, users hav
 
     source start_cocoa.sh
 
-**Step :two:**: compile the Roman kinematic lensing interface, including the covariance components.
+**Step :two:**: enable the installed project.
 
     unset IGNORE_COSMOLIKE_ROMAN_KL_CODE
+
+**Step :three:**: enable covariance generation.
+
     unset IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE
+
+**Step :four:**: compile the interface.
+
     source ./projects/roman_kl/scripts/compile_roman_kl.sh
 
-**Step :three:**: start Jupyter.
+**Step :five:**: start Jupyter.
 
     jupyter notebook --no-browser --port=8888
 
-**Step :four:**: open the URL printed by Jupyter and select
+**Step :six:**: open the URL printed by Jupyter and select
 `projects/roman_kl/EXAMPLE_EVALUATE_COVARIANCE.ipynb`.
 
-**Step :five:**: select **Kernel → Restart Kernel and Run All Cells**.
+**Step :seven:**: select **Kernel → Restart Kernel and Run All Cells**.
 
 The notebook starts with `boosts = [1]` and `spaces = ["fourier"]`.
 It computes the native matrix, applies the selected dataset's mask, reports
@@ -112,67 +195,6 @@ Rerunning the final cell replaces these computed output files.
 > [!TIP]
 > To inspect the forecast inputs before running CAMB, see
 > [which survey the example uses](#survey).
-
-# Running from the command line <a name="command_line"></a>
-
-The Python runner computes the full galaxy–shear covariance in Fourier space,
-using the optimized production interface. It saves G, SSC, cNG and their
-sum without plotting or opening a notebook. Numerical kernels and survey
-settings are shared with the notebook calculation.
-
-The supplied evaluate YAML constructs the full **2,200 × 2,200**
-galaxy/shear covariance in **31.79 seconds** on an Apple M2 Pro
-with eight OpenMP threads (mean of three fresh, sequential CLI runs
-on 2026-10-05). Gaussian clustering and galaxy–shear spectra include
-non-Limber corrections; the example uses zero IA.
-
-This interval includes first-use CosmoLike tables, spectra, halo
-calculations, transforms and complete G + SSC + cNG matrix assembly.
-Initial survey/CAMB setup, diagnostics and file writing are excluded.
-
-From Bash in `cocoa/Cocoa`, with `conda activate cocoa`:
-
-**Step :one:**: activate Cocoa and enable covariance generation.
-
-    source start_cocoa.sh
-    unset IGNORE_COSMOLIKE_ROMAN_KL_CODE
-    unset IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE
-
-**Step :two:**: compile the project interface.
-
-    source ./projects/roman_kl/scripts/compile_roman_kl.sh
-
-**Step :three:**: inspect the YAML cosmology and compute the matrix components.
-
-    export OMP_NUM_THREADS=8
-    python ./projects/roman_kl/covariance/compute_covariance.py \
-        ./projects/roman_kl/EXAMPLE_EVALUATE_COVARIANCE.yaml
-
-The `.npz` archive contains the full matrix before likelihood scale cuts,
-its components, measurement ordering, resolved settings and stage timings.
-Existing output files require `--overwrite`; likelihood inputs are separate.
-
-Set `covariance.space` to `real` or `fourier` to select the measurement.
-
-The [evaluate YAML](../EXAMPLE_EVALUATE_COVARIANCE.yaml) uses Cobaya's YAML reader, with familiar
-`theory`, `params`, `sampler: evaluate` and `output` blocks. Fixed parameter
-values specify one cosmology; a parameter with a prior must be supplied
-explicitly in `sampler.evaluate.override`. No MCMC or random prior draw runs.
-
-In its `covariance` block, `accuracy_boost: 2` refines the project's
-`default.yaml` baseline. `integration_accuracy: 1` changes the quadrature
-level independently. Internal accuracy controls can also be set there.
-Use `space` for the measurement space. Set the OpenMP team with
-`OMP_NUM_THREADS` in the shell; no thread count belongs in the YAML.
-
-`theory.camb.extra_args` supports `AccuracyBoost`, `kmax`, `k_per_logint`,
-`lens_potential_accuracy` and `halofit_version`. CAMB's boost controls
-CAMB; the covariance boost controls its own tables and cutoffs.
-
-Paths in the YAML are relative to the working directory, `cocoa/Cocoa`.
-`output` names the `.npz` archive; `--output` can override it for an HPC
-job. Set `OMP_NUM_THREADS` in that job’s environment. `--help` lists the
-command options.
 
 # Changing the covariance accuracy <a name="accuracy"></a>
 
@@ -255,7 +277,7 @@ plots and variance-ratio table.
 
 | Figure | What it teaches |
 | --- | --- |
-| Split-triangle correlation matrix | Compare the generated native-space covariance in the lower triangle with the supplied likelihood covariance in the upper triangle, after the same cuts. Each uses its own diagonal normalization. |
+| Split-triangle correlation matrix | Compare the generated native-space covariance, drawn above the diagonal, with the supplied likelihood covariance, drawn below it, after the same cuts. Index 0 sits at the bottom left, so the title's "Lower" and "Upper" name matrix triangles (row > column and row < column), not screen positions. Each uses its own diagonal normalization. |
 | G, SSC and cNG maps and histograms | Compare each component after normalization by the total diagonal variances. |
 | Halo trispectrum diagonal | See 1h, combined 2h, 3h, 4h and their sum at a chosen redshift, before survey projection. The signed axis retains negative terms. |
 | Error changes | With multiple boosts, compare first-source-bin standard deviations with the highest tested boost, in percent, for the native measurement. |
@@ -281,13 +303,19 @@ We assume users have run `conda activate cocoa`, use Bash, and are in
 
     source start_cocoa.sh
 
-**Step :two:**: enable and compile the covariance interface.
+**Step :two:**: enable the installed project.
 
     unset IGNORE_COSMOLIKE_ROMAN_KL_CODE
+
+**Step :three:**: enable covariance generation.
+
     unset IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE
+
+**Step :four:**: compile the interface.
+
     source ./projects/roman_kl/scripts/compile_roman_kl.sh
 
-**Step :three:**: run the covariance tests.
+**Step :five:**: run the covariance tests.
 
     python -m pytest projects/roman_kl/tests/covariance
 
@@ -315,15 +343,57 @@ The [data-vector test guide](../tests/data_vector/README.md) explains them.
 | --- | --- |
 | [EXAMPLE_EVALUATE_COVARIANCE.ipynb](../EXAMPLE_EVALUATE_COVARIANCE.ipynb) | Run, refine and plot real/Fourier G, SSC and cNG matrices. |
 | [roman_kl_covariance.py](roman_kl_covariance.py) | Specify survey inputs, initialize this project's interface and call the shared calculation. |
-| [Shared covariance package](../../../external_modules/code/cosmolike_core/cosmolike_notebook_utils/covariance/README.md) | Reuse integration preparation, Gaussian assembly, halo inputs, accuracy settings and diagnostics. |
-| [Shared plotting script](../../../external_modules/code/cosmolike_core/cosmolike_notebook_utils/plot_covariances.py) | Plot covariance arrays from any project. |
-| [Covariance C files](../../../external_modules/code/cosmolike_core/cosmolike/covariances/README.md) | Read the physics and each compiled component's role. |
+| [Shared covariance package](https://github.com/CosmoLike/cocoa-cosmolike-core/blob/main/cosmolike_notebook_utils/covariance/README.md) | Reuse integration preparation, Gaussian assembly, halo inputs, accuracy settings and diagnostics. |
+| [Shared plotting script](https://github.com/CosmoLike/cocoa-cosmolike-core/blob/main/cosmolike_notebook_utils/plot_covariances.py) | Plot covariance arrays from any project. |
+| [Covariance C files](https://github.com/CosmoLike/cocoa-cosmolike-core/blob/main/cosmolike/covariances/README.md) | Read the physics and each compiled component's role. |
 
 # Appendix <a name="appendix"></a>
 
+## FAQ: Which accuracy settings are available? <a name="accuracy-settings"></a>
+
+Baseline values come from [`default.yaml`](default.yaml). Override them in
+the evaluate YAML's `covariance` block or pass them to `survey.configuration`.
+Reinitialize notebook inputs after changing the settings.
+
+| Control | Baseline | Purpose |
+|---|---:|---|
+| `accuracy_boost` | `1` | Overall table and cutoff refinement; 1, 2, 4 or 8. |
+| `integration_accuracy` | `0` | Independent quadrature level, 0 through 4. |
+| `power_accuracyboost` | `8` | Subdivisions of input log-k intervals; multiplied by the global boost. |
+| `ell_max` | `100000` | Real-space transform cutoff; Fourier measurement bands stay fixed. |
+| `mask_ell_max` | `32768` | Survey-footprint spectrum cutoff. |
+| `ng_ell_intervals` | `127` | Base log-multipole intervals for non-Gaussian interpolation. |
+| `non_gaussian_accuracyboost` | `1` | Refinement of the non-Gaussian multipole grid. |
+| `window_accuracyboost` | `1` | Lensing-window interpolation refinement. |
+| `core_accuracyboost` | `1` | Shared core interpolation refinement for this calculation. |
+| `response_step` | `5e-05` | Half-width of the log-k response derivative; divided by the global boost. |
+| `nonlimber_lmax` | `4000` | Gaussian gg/gs non-Limber correction cutoff. |
+| `nonlimber_accuracyboost` | `2` | Gaussian non-Limber distance-grid refinement. |
+
+| `integration_accuracy` | Ordinary nodes per panel | Wynn-tail nodes per panel |
+|---|---:|---:|
+| 0 | 96 | 32 |
+| 1 | 128 | 64 |
+| 2 | 256 | 128 |
+| 3 | 512 | 256 |
+| 4 | 1024 | 512 |
+
+The default power refinement prepares 11,993 samples from 1,500 inputs for
+linear, nonlinear and cold-matter power. It refines interpolation, not the
+Boltzmann solution itself, and does not affect ordinary data-vector runs.
+Thread counts are environment settings, not accuracy or YAML keys.
+
+Compare G, SSC, cNG and total, including off-diagonal elements, positivity
+and generalized variance ratios. Keep the cosmology, catalog and measured
+bins fixed while testing one control at a time. Integration, interpolation,
+cutoff and parameter-error convergence are separate questions.
+
+On the M2 Pro laptop, stop Roman integration tests at level 3; reserve level
+4 for a server. No integration level above 4 is supported.
+
 ## FAQ: Which survey does the example use? <a name="survey"></a>
 
-The redshift files are `Roman_tomo_Ntomo10_src.nz` and `Roman_tomo_Ntomo10_src.nz` in `data/`.
+Lenses and sources read the same redshift file, `Roman_tomo_Ntomo10_src.nz` in `data/`.
 Each column supplies a bin's radial shape. The catalog densities are
 specified separately in [roman_kl_covariance.py](roman_kl_covariance.py).
 
@@ -434,7 +504,7 @@ The C routines use OpenMP inside one process and never start MPI work.
 A future Python dispatcher can distribute those subblocks while keeping
 all cross correlations in the assembled matrix.
 
-## Choosing the Gaussian spectra
+## Choosing the Gaussian spectra <a name="gaussian_spectra"></a>
 
 The `gaussian` block selects the physics used in Gaussian covariance.
 `nonlimber: true` retains radial mode coupling for every galaxy–galaxy and
