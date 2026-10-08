@@ -1,11 +1,21 @@
-"""Command line options for these tests (bound from cosmolike_core).
+"""Command-line options of these tests (the shared code in cosmolike_core).
 
-pytest requires a conftest.py inside each project's tests folder (it
-discovers the file by walking up from the collected tests), so this
-file cannot move; its content is the shared implementation in
-cosmolike_core/cocoa_testing.py, bound here the same way
-cocoa_test_utils.py binds the test harness. The --mask choices come
-from this project's harness (its fastpt_masks tuple).
+pytest reads a file named conftest.py from the folders above the tests
+it collects, so this file must stay in tests/. It registers two options
+of the comparison sweeps:
+
+  --high=1        repeats the CFASTPT-vs-FASTPT sweep (test_fastpt.py) at
+                  the high-accuracy settings instead of the frozen
+                  defaults (--high=0, the default);
+  --mask=<name>   runs the CFASTPT-vs-FASTPT and Halofit-vs-EE2 sweeps
+                  (test_fastpt.py, test_nonlinear.py) under another
+                  scale-cut mask: "frozen" (the default) keeps the mask
+                  of each frozen configuration, "ones" keeps every entry.
+
+The implementation lives in cosmolike_core/cocoa_testing.py
+(conftest_addoption, conftest_configure), bound here the same way
+cocoa_test_utils.py binds the test harness; the --mask choices come from
+this project's harness (its fastpt_masks tuple).
 """
 
 import os
@@ -36,7 +46,11 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     """Copy the option values where the test classes read them.
 
-    The shared implementation and its documentation live in
+    The values land in the environment variables COCOA_FASTPT_HIGH and
+    COCOA_FASTPT_MASK: the tests are unittest.TestCase classes, whose
+    methods cannot receive pytest fixtures, so they read the environment
+    (with the defaults "0" and "frozen", which a run outside pytest
+    also gets). The implementation lives in
     cocoa_testing.conftest_configure.
 
     Arguments:

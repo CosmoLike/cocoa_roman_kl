@@ -2,25 +2,30 @@
 
 The galaxy clustering (gg) spectrum C_l^gg enters the data vector
 through w(theta) in real space and directly in Fourier space. The
-likelihood yaml key adopt_limber_gg chooses how it is computed:
+Limber approximation replaces the exact projection of the 3D power
+spectrum onto the sky by the single wavenumber k = (l + 1/2)/chi; it
+fails at low l when the redshift kernels are narrow. The likelihood
+yaml key adopt_limber_gg chooses how C_l^gg is computed:
 
-  adopt_limber_gg: 0 (the default) - below l = 150 the exact
+  adopt_limber_gg: 0 (the default): below l = 150 the exact
       projection, computed by cosmolike's C_cl_tomo with the split of
       Fang, Krause, Eifler & MacCrann (arXiv:1911.11947): an FFTLog
       integral of the linear power spectrum plus, in Limber, what
       linear theory misses. In Fourier space each band center takes
       the Limber value plus the non-Limber correction interpolated
-      between integer multipoles.
-  adopt_limber_gg: 1 - Limber approximation at every multipole.
+      between integer multipoles; with the shipped binning the 8
+      lowest of the 20 band centers (l = 23 to 146) lie below l = 150.
+  adopt_limber_gg: 1: Limber approximation at every multipole.
 
-The lens galaxy redshift distributions are narrow, so the Limber
-approximation fails at low l for the clustering auto spectra; this
-project defaults to the exact projection (since 2026-10-01) because
-the delta chi2 below is too large to absorb. This test measures what
+The lens redshift distributions of this project are narrow (the KL
+sample has spectroscopic redshifts), so the Limber approximation fails
+at low l for the clustering auto spectra; the project defaults to the
+exact projection because the delta chi2 below (DCHI2_MEASURED = 47) is
+far above the 0.2 band of the reference tests. This test measures what
 Limber would cost.
 
-It evaluates the frozen 3x2pt fiducial (NLA) three times IN ONE
-PROCESS: the default, the other setting, the default again, and
+It evaluates the frozen 3x2pt fiducial (NLA) three times in one
+process: the default, the other setting, the default again, and
 computes
 
     delta chi2 = delta^T C^-1 delta,
@@ -55,15 +60,19 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
+# "4" is cocoa_test_utils.REQUIRED_OMP_THREADS: the race checks need
+# several threads, and the frozen references were computed with four.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import time
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py (this project's data bound to the shared
+# test machinery) lives one folder up, in tests/; insert(0, ...) puts
+# that folder first on the module search path, so a direct run of this
+# file and the worker subprocesses import this project's shim.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -73,8 +82,8 @@ REFERENCE_KEY = "example2_nla"
 # adopt_limber_gg of the likelihood yamls of this project
 DEFAULT = 0
 
-# (report tag, adopt_limber_gg): the default, the other setting, the
-# default again
+# (report tag, adopt_limber_gg): the default, the other setting
+# (1 - DEFAULT swaps 0 and 1), the default again
 _NAME = {0: "non-Limber", 1: "Limber"}
 SETTINGS = (
     (f"{_NAME[DEFAULT]} (default)", DEFAULT),
@@ -87,8 +96,9 @@ SETTINGS = (
 # dead flag.
 DCHI2_FLOOR = 1.0e-6
 
-# delta chi2 measured on 2026-10-01 (macOS, arm64), and the relative band
-# assertion 4 allows around it.
+# delta chi2 measured for this project (macOS, arm64, at the frozen
+# settings, nonlimber_accuracyboost 4), and the relative band assertion
+# 4 allows around it
 DCHI2_MEASURED = 47.09
 DCHI2_RTOL = 0.05
 
@@ -98,11 +108,23 @@ class TestNonLimberGG(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Check the Cocoa shell, verify the frozen files, load the references.
+
+        unittest calls this once, before the first test of the class;
+        @classmethod passes the class itself as cls, so cls.reference
+        (the frozen reference chi2 values) is shared by every test.
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
         cls.reference = u.load_reference()
 
     def test_nonlimber_gg(self):
+        """Run the three evaluations and check assertions 1-5.
+
+        Raises:
+          AssertionError at the first failed assertion (numbered in the
+          module docstring).
+        """
         import numpy as np
         import cosmolike_roman_kl_interface as ci
 
@@ -138,6 +160,9 @@ class TestNonLimberGG(unittest.TestCase):
                     sizes = ci.compute_data_vector_3x2pt_fourier_sizes()
                     nlen = int(like.ncl)
 
+        # tags maps each flag to its report tag (a dict comprehension over
+        # the first two settings); delta = non-Limber minus Limber, and
+        # @ is the matrix product, so dchi2 = delta^T C^-1 delta
         tags = {flag: tag for tag, flag in SETTINGS[:2]}
         dv_default = vectors[SETTINGS[0][0]]
         delta = vectors[tags[0]] - vectors[tags[1]]
@@ -163,6 +188,7 @@ class TestNonLimberGG(unittest.TestCase):
             sl = slice(gg0 + b*nlen, gg0 + (b + 1)*nlen)
             block[sl] = delta[sl]
             rows.append((float(block @ icov @ block), b))
+        # the largest contributions first; stop below 1e-3 of the total
         for contribution, b in sorted(rows, reverse=True):
             if contribution < 1.0e-3*max(dchi2, DCHI2_FLOOR):
                 break
@@ -200,5 +226,9 @@ class TestNonLimberGG(unittest.TestCase):
             f"reference {self.reference[REFERENCE_KEY]:.6f}")
 
 
+# __name__ is "__main__" only when this file runs directly as a
+# script; pytest imports the module instead, so this block stays
+# idle under pytest. unittest.main runs every test method of the
+# classes above and prints one line per method (verbosity=2).
 if __name__ == "__main__":
     unittest.main(verbosity=2)

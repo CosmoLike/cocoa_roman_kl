@@ -1,22 +1,23 @@
 """Advisory checks NL1-NL2: Halofit vs EuclidEmulator2.
 
 The likelihood can source the nonlinear matter power from CAMB's
-Takahashi halofit (non_linear_emul: 2, the frozen contracts'
-setting) or from EuclidEmulator2 (non_linear_emul: 1). NL1
-evaluates the cosmic-shear data vector and NL2 the 3x2pt data
-vector with both at ten fixed cosmologies across the omegam/ns/As
-space (NONLINEAR_COMPARISON_POINTS; every other parameter stays at
-the frozen fiducial) and reports, at each cosmology, the chi2 of
-the Halofit vector against the EE2 vector (delta^T C^-1 delta; the
-EE2 vector is that cosmology's fiducial, so the baseline is zero
-by construction).
+Takahashi halofit (non_linear_emul: 2, the setting of the frozen
+configurations) or from EuclidEmulator2 (EE2, non_linear_emul: 1, an
+emulator of the nonlinear boost P_nl/P_lin measured in N-body
+simulations). NL1 evaluates the cosmic-shear data vector and NL2 the
+3x2pt data vector with both at ten fixed cosmologies across the
+omegam/ns/As space (NONLINEAR_COMPARISON_POINTS; every other parameter
+stays at the frozen fiducial) and reports, at each cosmology, the chi2
+of the Halofit vector against the EE2 vector (delta^T C^-1 delta; the
+EE2 vector plays the data at that cosmology, so an EE2-vs-EE2
+comparison would give zero).
 
 There is no pass/fail: the numbers say how much of the statistical
 error budget the Halofit-vs-emulator difference consumes under the
-chosen scale cuts - the question "can Halofit be used on real data
-analysis at this mask". The checks read the --mask option of the
-comparison sweeps (conftest.py): --mask=frozen (each example's
-contract mask, the default) or --mask=ones (every data point
+chosen scale cuts, which answers whether Halofit can be used on real
+data with that mask. The checks read the --mask option of the
+comparison sweeps (conftest.py): --mask=frozen (the mask named in each
+frozen configuration, the default) or --mask=ones (every data point
 kept).
 
 To run (from the Cocoa/ folder, cocoa environment active,
@@ -30,14 +31,18 @@ start_cocoa.sh sourced):
 import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
-# this must run before ANY cobaya/cosmolike import in the process.
+# this must run before any cobaya/cosmolike import in the process.
+# "4" is cocoa_test_utils.REQUIRED_OMP_THREADS: the race checks need
+# several threads, and the frozen references were computed with four.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The harness stays in the parent tests/ folder. Add it explicitly so
-# direct execution and worker processes resolve this project's stored inputs.
+# The shim cocoa_test_utils.py (this project's data bound to the shared
+# test machinery) lives one folder up, in tests/; insert(0, ...) puts
+# that folder first on the module search path, so a direct run of this
+# file and the worker subprocesses import this project's shim.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
@@ -54,6 +59,11 @@ class TestHalofitVsEE2(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        """Check the Cocoa shell and verify the frozen files, once per class.
+
+        unittest calls this once, before the first test of the class
+        (@classmethod passes the class itself as cls).
+        """
         u.require_cocoa_environment()
         u.verify_frozen()
 
@@ -61,9 +71,11 @@ class TestHalofitVsEE2(unittest.TestCase):
         """Cosmic shear: Halofit scored against EE2 at ten cosmologies.
 
         Advisory: the printed report is the product. The only
-        assertion is structural - every cosmology must have produced
+        assertion is structural: every cosmology must have produced
         a number.
         """
+        # conftest.py copies the --mask command line option into this
+        # variable; "frozen" (each configuration's own mask) when unset
         mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
         dchi2s = u.halofit_vs_ee2_dchi2s("example1", mask=mask)
         u.report_nonlinear_comparison(
@@ -75,7 +87,7 @@ class TestHalofitVsEE2(unittest.TestCase):
         """3x2pt: Halofit scored against EE2 at ten cosmologies.
 
         Advisory: the printed report is the product. The only
-        assertion is structural - every cosmology must have produced
+        assertion is structural: every cosmology must have produced
         a number.
         """
         mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
@@ -88,6 +100,7 @@ class TestHalofitVsEE2(unittest.TestCase):
 
 # __name__ is "__main__" only when this file runs directly as a
 # script; pytest imports the module instead, so this block stays
-# idle under pytest
+# idle under pytest. unittest.main runs every test method of the
+# classes above and prints one line per method (verbosity=2).
 if __name__ == "__main__":
     unittest.main(verbosity=2)
