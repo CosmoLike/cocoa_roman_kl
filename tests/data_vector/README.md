@@ -381,6 +381,13 @@ settings. No pass/fail.
 > [!NOTE]
 > High-accuracy evaluations take minutes.
 
+#### Why these accuracy defaults? <a name="accuracy_defaults"></a>
+
+The examples default to `k_per_logint: 50`: the old default
+undersampled the CAMB transfer functions, and that error masqueraded
+as an apparent CAMB `AccuracyBoost` sensitivity until the transfer
+sampling was raised.
+
 #### Running Accuracy checks <a name="run_accuracy"></a>
 
 We assume users are in the Conda cocoa environment from a previous
