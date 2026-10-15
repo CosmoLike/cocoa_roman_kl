@@ -1,0 +1,80 @@
+{
+  "project": "roman_kl",
+  "part": "defaults",
+  "point": {
+    "As_1e9": 2.128048,
+    "H0": 67.27,
+    "ROMAN_KL_B1_1": 1.24,
+    "ROMAN_KL_B1_10": 2.32,
+    "ROMAN_KL_B1_2": 1.36,
+    "ROMAN_KL_B1_3": 1.48,
+    "ROMAN_KL_B1_4": 1.6,
+    "ROMAN_KL_B1_5": 1.72,
+    "ROMAN_KL_B1_6": 1.84,
+    "ROMAN_KL_B1_7": 1.96,
+    "ROMAN_KL_B1_8": 2.08,
+    "ROMAN_KL_B1_9": 2.2,
+    "ROMAN_KL_DZ_S1": 0.0,
+    "ROMAN_KL_DZ_S10": 0.0,
+    "ROMAN_KL_DZ_S2": 0.0,
+    "ROMAN_KL_DZ_S3": 0.0,
+    "ROMAN_KL_DZ_S4": 0.0,
+    "ROMAN_KL_DZ_S5": 0.0,
+    "ROMAN_KL_DZ_S6": 0.0,
+    "ROMAN_KL_DZ_S7": 0.0,
+    "ROMAN_KL_DZ_S8": 0.0,
+    "ROMAN_KL_DZ_S9": 0.0,
+    "ROMAN_KL_M1": 0.0,
+    "ROMAN_KL_M10": 0.0,
+    "ROMAN_KL_M2": 0.0,
+    "ROMAN_KL_M3": 0.0,
+    "ROMAN_KL_M4": 0.0,
+    "ROMAN_KL_M5": 0.0,
+    "ROMAN_KL_M6": 0.0,
+    "ROMAN_KL_M7": 0.0,
+    "ROMAN_KL_M8": 0.0,
+    "ROMAN_KL_M9": 0.0,
+    "mnu": 0.06,
+    "ns": 0.9645,
+    "omegab": 0.0491685,
+    "omegam": 0.3156,
+    "w": -1.0,
+    "w0pwa": -1.0
+  },
+  "input_files": {
+    "source_file": {
+      "name": "Roman_tomo_Ntomo10_src.nz",
+      "sha256": "a84874cd0cc8fb25c172065f64c9ba75effa2ef47198bb1f647e04be34776c43"
+    },
+    "lens_file": {
+      "name": "Roman_tomo_Ntomo10_src.nz",
+      "sha256": "a84874cd0cc8fb25c172065f64c9ba75effa2ef47198bb1f647e04be34776c43"
+    },
+    "cov_file": {
+      "name": "Roman_3x2pt_cov_Ncl20_Ntomo10.cv",
+      "sha256": "c9af1fdc788534a352bd9a3633bafa0af7b1c13b2d1194d2d2577226d7ee8e11"
+    },
+    "mask_file": {
+      "name": "ones.mask",
+      "sha256": "b49476a21d48ba8bc025002869e7504364cc499736472dfcad7e8ff610a34e16"
+    },
+    "data_vector_file": {
+      "name": "synthetic_roman_kl_3x2.modelvector",
+      "sha256": "daf99ecdf081d283fa0a41396b0a05bcf4f74818f2dddb8861dbf41cfb052dc2"
+    }
+  },
+  "accuracyboost": 1.0,
+  "integration_accuracy": 0,
+  "defaults_yaml_sha256": "0f2d88ed32b077c239a91604a5ee0cae3eb81cb74ff5b888b68b87bcec241f1f",
+  "interface_sha256": "035115eff0cad671e2fd45098488ef09442215fdd563fcc40db89fc7f01d9c7b",
+  "study_sha256": "ec356f5fe96ce3c418449392057aba238f77378e798274e807d4f70ff95d821c",
+  "delta_chi2": {},
+  "elapsed_seconds": 6.4653274160809815,
+  "thread_environment": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "inverse_covariance_sha256": "bd4a79bd0b6c841de4ddfc8664be41b2f1032b8dc4c7f73e885947d54eb19a7a"
+}

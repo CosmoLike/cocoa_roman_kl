@@ -109,6 +109,13 @@ PYBIND11_MODULE(cosmolike_roman_kl_interface, m)
       py::arg("field") = 0
     );
 
+  m.def("init_photoz_histogram_akima",
+      &cosmolike_interface::init_photoz_histogram_akima,
+      "Select n(z): 0 original midpoint curve, 1 histogram + Akima",
+      (py::arg("enabled") = 0).none(false),
+      (py::arg("preparation_factor") = 3).none(false)
+    );
+
   m.def("init_photoz_conventions",
       &cosmolike_interface::init_photoz_conventions,
       "Set the n(z) interpolation type (0: cspline, 1: linear, 2+: steffen) "
