@@ -167,7 +167,8 @@
     "numerical_delta_chi2": {
       "three": 0.00024467297343601146,
       "five": 0.0011247501639875994,
-      "seven": 0.0008387689918169099
+      "seven": 0.0008387689918169099,
+      "original": 9.883183864967682e-07
     },
     "pairwise": {
       "three_to_five": {
@@ -184,6 +185,11 @@
         "raised_delta_chi2": 0.013312093710733212,
         "reference_delta_chi2": 0.013293722813739264,
         "displacement_error_delta_chi2": 0.0004109456308346493
+      },
+      "original_to_three": {
+        "raised_delta_chi2": 0.6375974506812907,
+        "reference_delta_chi2": 0.6360572621591313,
+        "displacement_error_delta_chi2": 0.00024386454453627994
       }
     },
     "tests": {
@@ -197,6 +203,12 @@
     "vector_sha256": {
       "5": "7ab9f625adcfddee53a07af86998def193cc9228a13905a9edd75333e4599436",
       "7": "470764e1b767d1a27a8e0810a5ba854957181a56c831f470f686bdd381a14d11"
+    },
+    "original_vector_source": {
+      "project": "roman_kl",
+      "level": 3,
+      "status": "passed",
+      "returncode": 0
     }
   }
 }
