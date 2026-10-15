@@ -20,7 +20,7 @@ different scales:
 To run (from the Cocoa/ folder, cocoa environment active,
 start_cocoa.sh sourced):
 
-    python ./projects/roman_kl/tests/generate_photoz_convention_figure.py
+    python ./projects/roman_kl/tests/data_vector/generate_photoz_convention_figure.py
 """
 
 import os
@@ -40,9 +40,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-# the shim cocoa_test_utils.py sits in this folder (tests/); insert(0,
-# ...) puts the folder first on the module search path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Figures belong beside these data-vector checks. The shared harness and
+# frozen inputs remain one folder above, in tests/. Resolve both from
+# this script so it can be launched from any working directory.
+FIGURES = os.path.dirname(os.path.abspath(__file__))
+TESTS = os.path.dirname(FIGURES)
+sys.path.insert(0, TESTS)
 import cocoa_test_utils as u
 
 # example1 is the cosmic-shear configuration. NTOMO, NCL, L_MIN and L_MAX
@@ -53,7 +56,7 @@ EXAMPLE = "example1"
 NTOMO = 10
 NCL = 20
 L_MIN, L_MAX = 20.0, 4000.0
-MASK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+MASK_FILE = os.path.join(TESTS,
                          "frozen", "data", "roman_kl.mask")
 
 # (report tag, photoz_interpolation_type, photoz_zmid_convention), the
@@ -143,7 +146,7 @@ def plot(curves, fname, title, scale=100.0, unit="%", ylim=None):
         axes.ravel()[0].set_ylim(-ylim, ylim)
     axes.ravel()[0].legend(fontsize=9, loc="lower left")
     fig.suptitle(title, fontsize=17)
-    fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    fig.savefig(os.path.join(FIGURES,
                              fname), dpi=120, bbox_inches="tight")
     plt.close(fig)
     print(f"wrote {fname}")
