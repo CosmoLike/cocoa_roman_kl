@@ -318,6 +318,8 @@ report_accuracy = _cct.report_accuracy
 report_knob = _cct.report_knob
 report_fastpt_comparison = _cct.report_fastpt_comparison
 report_nonlinear_comparison = _cct.report_nonlinear_comparison
+report_emul2_advisory = _cct.report_emul2_advisory
+report_emul2_race = _cct.report_emul2_race
 
 # ---- bound methods of the harness (the machinery, project-bound) ------------
 compute_manifest = _H.compute_manifest
@@ -343,82 +345,6 @@ _run_fastpt_comparison_worker = _H._run_fastpt_comparison_worker
 cfastpt_vs_fastpt_chi2s = _H.cfastpt_vs_fastpt_chi2s
 _nonlinear_comparison_block = _H._nonlinear_comparison_block
 halofit_vs_ee2_dchi2s = _H.halofit_vs_ee2_dchi2s
-
-# ---- project-only reports ---------------------------------------------------
-
-def report_emul2_advisory(label, chi2, frozen_ref, exact_ref, limit):
-    """Print one EMUL2 accuracy check: measurements and a recommendation.
-
-    There is no pass/fail here. An emulator is an approximation, so
-    the useful outputs are the numbers themselves: the change against
-    the frozen emulator reference (nonzero: the installed emulator no
-    longer reproduces the chi2 it gave at freeze time),
-    the difference against the exact-physics chi2 at the same
-    cosmology (how accurate the emulator is), and the recommendation
-    derived from that accuracy. Emulated configuration and exact
-    counterpart both evaluate the counterpart's synthetic NLA vector
-    (see load_frozen_info), and the exact reference is 0.000000 there
-    by construction, so |emulator - exact| is the emulator error at
-    the same data and nothing else.
-
-    Arguments:
-      label      = one line naming the emulated configuration.
-      chi2       = the emulator chi2 computed in this run.
-      frozen_ref = the frozen emulator reference chi2.
-      exact_ref  = the exact-physics reference chi2 (from the matching
-                   example's frozen reference).
-      limit      = the recommendation threshold on |chi2 - exact_ref|.
-
-    Returns:
-      |chi2 - exact_ref|, the accuracy difference the recommendation
-      is based on.
-    """
-    drift = chi2 - frozen_ref
-    delta_exact = abs(chi2 - exact_ref)
-    if delta_exact < limit:
-        verdict = "RECOMMENDED for actual data analysis"
-    else:
-        verdict = ("NOT recommended for actual data analysis "
-                   f"(|delta chi2| >= {limit})")
-    # one multi-line f-string; the drift prints at :+.6f (fixed six
-    # decimals, sign always shown)
-    print(f"""
-{'-' * 66}
-EMUL2 ADVISORY: {label}
-  chi2 (this run, emulator)   = {chi2:.6f}
-  frozen emulator reference   = {frozen_ref:.6f}  (drift {drift:+.6f})
-  exact-physics reference     = {exact_ref:.6f}
-  |emulator - exact| chi2     = {delta_exact:.6f}   (threshold: {limit})
-  -> {verdict}
-{'-' * 66}""", flush=True)
-    return delta_exact
-
-def report_emul2_race(label, fresh, tenth):
-    """Print one EMUL2 race check, advisory only.
-
-    Arguments:
-      label = one line naming the emulated configuration.
-      fresh = chi2 of the point evaluated first on the model.
-      tenth = chi2 of the same point as the 10th of a row.
-
-    Returns:
-      |tenth - fresh|, the printed difference. A value above
-      RACE_TOLERANCE is flagged as a possible race or state leak, but
-      nothing fails: this file only alerts.
-    """
-    delta = abs(tenth - fresh)
-    # the a-if-else expression picks the note from the comparison
-    note = ("consistent" if delta < RACE_TOLERANCE
-            else "WARNING: possible race condition or state leak")
-    print(f"""
-{'-' * 66}
-EMUL2 ADVISORY: {label}
-  fresh-model chi2    = {fresh:.8f}
-  10th of 10 in a row = {tenth:.8f}
-  |delta chi2|        = {delta:.8f}   ({note})
-  OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
-{'-' * 66}""", flush=True)
-    return delta
 
 # ---- shared test-class factories (bound by the test files) ------------------
 example_suite = _cct_suites.example_suite
