@@ -1,17 +1,19 @@
-"""Shared set-up of the covariance tests: import path and build check.
+"""Locate the project interface for the optional covariance test sector.
 
-The covariance tests import the compiled interface directly, so this
-file puts projects/roman_kl/interface on the module search path
-(parents[2] of this file is the project folder). The covariance code is
-compiled into the interface unless IGNORE_COSMOLIKE_ROMAN_KL_COVARIANCE
-is set; such a build has no covariance bindings (its has_covariance
-attribute is False), and then every test of this folder is skipped
-with the instruction to rebuild.
+pytest reads a file named conftest.py before it collects the tests of
+the same folder, so the code here runs first for every test of
+tests/covariance. It puts interface/ (the folder of the compiled
+module) first on the import path and defines one fixture that skips
+the whole folder when the library was compiled without its covariance
+code.
 """
 
 from pathlib import Path
 import sys
 
+# parents[2] of this file is the project folder; its interface/ folder
+# holds the compiled module. Resolving from this file keeps the
+# documented commands working from Cocoa/ and from tests/.
 project = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project/"interface"))
 
@@ -19,17 +21,15 @@ import pytest
 import cosmolike_roman_kl_interface as ci
 
 
+# autouse=True applies the fixture to every test of this folder without
+# the tests naming it; scope="session" runs it once per pytest run
 @pytest.fixture(scope="session", autouse=True)
 def covariance_build():
-    """Skip the covariance tests when the interface lacks covariance code.
+    """Skip this sector when covariance generation was intentionally omitted.
 
-    @pytest.fixture(scope="session", autouse=True) makes pytest run this
-    function once, before the first test of this folder, without any test
-    asking for it. pytest.skip stops it there and marks the tests skipped,
-    with a message that says how to rebuild.
-
-    Returns:
-      nothing when the interface carries the covariance bindings.
+    The compiled module exposes has_covariance = True only when it was
+    built with the covariance code; otherwise every covariance test is
+    skipped with the rebuild instruction.
     """
     if not getattr(ci, "has_covariance", False):
         pytest.skip(

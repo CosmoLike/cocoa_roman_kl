@@ -1,29 +1,32 @@
-"""Check the roman_kl covariance adapter against the shared covariance code.
+"""Check this project's covariance adapter with the shared forecast check.
 
-roman_kl_covariance.py (the adapter: the survey choices of this project)
-is exercised by cocoa_covariance_testing.check_project_forecast from
-cosmolike_core, with small numerical settings and three measured
-observables (one shear, one galaxy-shear and one clustering pair, two
-bins each). It checks the full layout sizes, the accuracy controls, that
-the notebook wrappers and the production bindings give bitwise equal
-components in real and Fourier space, that one and eight OpenMP threads
-give bitwise equal matrices, that every matrix is finite and symmetric
-with total = G + SSC + cNG and a positive-definite total, and that the
-saved archive reads back intact. It does not certify the convergence of
-the survey covariance.
+The check is check_project_forecast of the shared module
+cocoa_covariance_testing.py (in cosmolike_core). With this project's
+survey adapter (under covariance/) it verifies the full layout lengths
+of both measurement spaces, that a refinement of the accuracy keeps
+the measurement bins fixed, that the G, SSC, cNG and total matrices of
+a measured subset are finite and symmetric in real and Fourier space,
+that every component is bitwise identical with one and eight OpenMP
+threads, that the subset's total has positive variances in every
+direction, and that the saved archive reads back.
 
-pytest.ini selects only tests/data_vector by default, so name this
-folder explicitly (from the Cocoa/ folder, cocoa environment active,
-start_cocoa.sh sourced):
+The check uses small numerical settings and a subset of the measured
+rows, so it does not certify survey convergence. Run it
+separately from tests/data_vector (the two sectors initialize
+different compiled-library state), from the Cocoa/ folder after
+`source start_cocoa.sh`, with the project built with covariance
+support:
 
-    python -m pytest ./projects/roman_kl/tests/covariance
+    python -m pytest projects/roman_kl/tests/covariance
 """
 
 from pathlib import Path
 import sys
 
-# project = projects/roman_kl; cosmolike_core holds the shared check, and
-# interface/ and covariance/ hold the compiled module and the adapter
+# parents[2] of this file is the project folder and its parents[1] is
+# Cocoa/: the shared core (cocoa_covariance_testing), the compiled
+# module (interface/) and the survey adapter (covariance/) go first on
+# the module search path.
 project = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project.parents[1]/"external_modules/code/cosmolike_core"))
 sys.path.insert(0, str(project/"interface"))
@@ -35,18 +38,22 @@ import roman_kl_covariance as survey
 
 
 def test_forecast_adapter(tmp_path):
-    """Run the shared adapter check on this project.
-
-    expected_sizes = (3300, 2200): the full real-space layout (55 xi_+
-    and 55 xi_- shear blocks, 45 galaxy-shear and 10 clustering blocks
-    of 20 angular bins) and the Fourier layout (55 + 45 + 10 blocks of
-    20 bands).
+    """Real and Fourier components repeat at one/eight threads and save intact.
 
     Arguments:
       tmp_path = a temporary folder pytest creates for this test (a
-                 fixture: pytest passes it by the argument's name); the
-                 saved archives go there.
+                 built-in fixture, passed by the argument's name); the
+                 check writes its archives there.
+
+    Returns:
+      nothing; a failed assertion inside check_project_forecast fails
+      the test.
     """
+    # expected_sizes = (3300, 2200): the full real-space layout
+    # (55 xi_+ and 55 xi_- shear blocks, 45 galaxy-shear and 10
+    # clustering blocks of 20 angular bins) and the Fourier
+    # layout (55 + 45 + 10 blocks of 20 bands).
     check_project_forecast(
-        interface=ci, survey=survey, expected_sizes=(3300, 2200), directory=tmp_path,
+        interface=ci, survey=survey, expected_sizes=(3300, 2200),
+        directory=tmp_path,
     )
