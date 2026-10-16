@@ -65,137 +65,30 @@ import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
 # this must run before any cobaya/cosmolike import in the process.
-# "4" is cocoa_test_utils.REQUIRED_OMP_THREADS: the race checks need
-# several threads, and the frozen references were computed with four.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The shim cocoa_test_utils.py (this project's data bound to the shared
-# test machinery) lives one folder up, in tests/; insert(0, ...) puts
-# that folder first on the module search path, so a direct run of this
-# file and the worker subprocesses import this project's shim.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# The tests folder is not a package; put it on the import path so the
+# shared harness resolves no matter where pytest was launched from.
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
-
-class TestCfastptVsFastptSweep(unittest.TestCase):
-    """Tests 15-17, the direct CFASTPT-vs-FASTPT comparison.
-
-    setUpClass runs once before the tests: it moves to ROOTDIR and
-    verifies every frozen file against the SHA-256 manifest. No
-    frozen reference chi2 is loaded: these tests compare the two
-    implementations against each other, so the frozen state only
-    supplies the configuration and the data files.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        """Check the Cocoa shell and verify the frozen files, once per class.
-
-        unittest calls this once, before the first test of the class
-        (@classmethod passes the class itself as cls).
-        """
-        u.require_cocoa_environment()
-        u.verify_frozen()
-
-    def test_x15_cfastpt_vs_fastpt_sweep(self):
-        """Cosmic shear: cfastpt and FASTPT agree at 30 IA points.
-
-        Raises:
-          AssertionError when the largest FASTPT(low)-vs-cfastpt chi2
-          over the points reaches FASTPT_COMPARISON_TOLERANCE.
-        """
-        # conftest.py copies the --high and --mask command line options
-        # into these variables; .get with the "0" and "frozen" defaults
-        # keeps a run outside pytest on the default settings unless the
-        # variables are exported by hand
-        high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
-        setting = "high accuracy" if high else "default settings"
-        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
-        # five per-point lists, in this order: the raw chi2 under
-        # cfastpt, FASTPT(low) and FASTPT(high) against the data, then
-        # the chi2 of the FASTPT(low) and FASTPT(high) vectors against
-        # the cfastpt vector (the tested quantities)
-        (chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
-         dchi2_low, dchi2_high) = u.cfastpt_vs_fastpt_chi2s(
-            "example1", high=high, mask=mask)
-        largest = u.report_fastpt_comparison(
-            15,
-            f"example1 (cosmic shear, TATT, camb/cosmolike {setting}, "
-            f"mask {mask}): CFASTPT vs FASTPT at 30 hard-coded points",
-            chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
-            dchi2_low, dchi2_high, u.FASTPT_COMPARISON_TOLERANCE)
-        self.assertLess(
-            largest, u.FASTPT_COMPARISON_TOLERANCE,
-            msg="max chi2 of the FASTPT(low)-vs-CFASTPT data-vector "
-                f"difference = {largest:.6f} over the comparison "
-                f"points ({setting}); limit "
-                f"{u.FASTPT_COMPARISON_TOLERANCE}")
-
-    def test_x16_cfastpt_vs_fastpt_sweep_3x2pt(self):
-        """3x2pt: cfastpt and FASTPT agree at the same 30 IA points.
-
-        Test 15 on example2: the same three blocks, the same points,
-        the same pass rule, with the TATT terms entering galaxy-galaxy
-        lensing as well and the difference weighted by the 3x2pt
-        masked inverse covariance. With b2 = 0 in every lens bin the
-        one-loop galaxy-bias terms are off, so this sweep compares the
-        intrinsic-alignment tables only.
-        """
-        high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
-        setting = "high accuracy" if high else "default settings"
-        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
-        (chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
-         dchi2_low, dchi2_high) = u.cfastpt_vs_fastpt_chi2s(
-            "example2", high=high, mask=mask)
-        largest = u.report_fastpt_comparison(
-            16,
-            f"example2 (3x2pt, TATT, camb/cosmolike {setting}, "
-            f"mask {mask}): CFASTPT vs FASTPT at 30 hard-coded points",
-            chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
-            dchi2_low, dchi2_high, u.FASTPT_COMPARISON_TOLERANCE)
-        self.assertLess(
-            largest, u.FASTPT_COMPARISON_TOLERANCE,
-            msg="max chi2 of the FASTPT(low)-vs-CFASTPT data-vector "
-                f"difference = {largest:.6f} over the comparison "
-                f"points ({setting}); limit "
-                f"{u.FASTPT_COMPARISON_TOLERANCE}")
-
-    def test_x17_cfastpt_vs_fastpt_sweep_2x2pt(self):
-        """2x2pt: cfastpt and FASTPT agree at the same 30 IA points.
-
-        Test 15 on example2_2x2pt: the same three blocks, the same
-        points, the same pass rule. Clustering carries no intrinsic
-        alignment, so the TATT tables enter through galaxy-galaxy
-        lensing alone and the difference is weighted by the 2x2pt
-        masked inverse covariance; the one-loop bias terms stay off as
-        in test 16.
-        """
-        high = os.environ.get("COCOA_FASTPT_HIGH", "0") == "1"
-        setting = "high accuracy" if high else "default settings"
-        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
-        (chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
-         dchi2_low, dchi2_high) = u.cfastpt_vs_fastpt_chi2s(
-            "example2_2x2pt", high=high, mask=mask)
-        largest = u.report_fastpt_comparison(
-            17,
-            f"example2_2x2pt (2x2pt, TATT, camb/cosmolike {setting}, "
-            f"mask {mask}): CFASTPT vs FASTPT at 30 hard-coded points",
-            chi2_cfastpt, chi2_fastpt_low, chi2_fastpt_high,
-            dchi2_low, dchi2_high, u.FASTPT_COMPARISON_TOLERANCE)
-        self.assertLess(
-            largest, u.FASTPT_COMPARISON_TOLERANCE,
-            msg="max chi2 of the FASTPT(low)-vs-CFASTPT data-vector "
-                f"difference = {largest:.6f} over the comparison "
-                f"points ({setting}); limit "
-                f"{u.FASTPT_COMPARISON_TOLERANCE}")
-
+# The shared factories (cosmolike_core/cocoa_testing_suites.py) build
+# the classes; assigning each return value to the usual module-level
+# name is what makes pytest collect it here, with unchanged test ids.
+TestCfastptVsFastptSweep = u.fastpt_sweep_suite(
+    u, name="TestCfastptVsFastptSweep",
+    cases=(
+        ('test_x15_cfastpt_vs_fastpt_sweep', 15, 'example1', 'example1 (cosmic shear'),
+        ('test_x16_cfastpt_vs_fastpt_sweep_3x2pt', 16, 'example2', 'example2 (3x2pt'),
+        ('test_x17_cfastpt_vs_fastpt_sweep_2x2pt', 17, 'example2_2x2pt', 'example2_2x2pt (2x2pt'),
+    ))
 
 # __name__ is "__main__" only when this file runs directly as a
 # script; pytest imports the module instead, so this block stays
-# idle under pytest. unittest.main runs every test method of the
-# classes above and prints one line per method (verbosity=2).
+# idle under pytest
 if __name__ == "__main__":
     unittest.main(verbosity=2)

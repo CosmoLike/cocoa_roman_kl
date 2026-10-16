@@ -32,75 +32,29 @@ import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
 # this must run before any cobaya/cosmolike import in the process.
-# "4" is cocoa_test_utils.REQUIRED_OMP_THREADS: the race checks need
-# several threads, and the frozen references were computed with four.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The shim cocoa_test_utils.py (this project's data bound to the shared
-# test machinery) lives one folder up, in tests/; insert(0, ...) puts
-# that folder first on the module search path, so a direct run of this
-# file and the worker subprocesses import this project's shim.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# The tests folder is not a package; put it on the import path so the
+# shared harness resolves no matter where pytest was launched from.
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
-
-class TestHalofitVsEE2(unittest.TestCase):
-    """Advisory checks NL1-NL2, sharing the frozen-state verification.
-
-    setUpClass runs once before the tests: it moves to ROOTDIR and
-    verifies every frozen file against the SHA-256 manifest. No
-    frozen reference chi2 is loaded: the checks compare the two
-    nonlinear-P(k) sources against each other, so the frozen state
-    only supplies the configuration and the data files.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        """Check the Cocoa shell and verify the frozen files, once per class.
-
-        unittest calls this once, before the first test of the class
-        (@classmethod passes the class itself as cls).
-        """
-        u.require_cocoa_environment()
-        u.verify_frozen()
-
-    def test_nl1_halofit_vs_ee2_cosmic_shear(self):
-        """Cosmic shear: Halofit scored against EE2 at ten cosmologies.
-
-        Advisory: the printed report is the product. The only
-        assertion is structural: every cosmology must have produced
-        a number.
-        """
-        # conftest.py copies the --mask command line option into this
-        # variable; "frozen" (each configuration's own mask) when unset
-        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
-        dchi2s = u.halofit_vs_ee2_dchi2s("example1", mask=mask)
-        u.report_nonlinear_comparison(
-            f"NL1: example1 (cosmic shear, NLA, mask {mask}): HALOFIT "
-            "vs EE2 at 10 fixed cosmologies", dchi2s)
-        self.assertEqual(len(dchi2s), len(u.NONLINEAR_COMPARISON_POINTS))
-
-    def test_nl2_halofit_vs_ee2_3x2pt(self):
-        """3x2pt: Halofit scored against EE2 at ten cosmologies.
-
-        Advisory: the printed report is the product. The only
-        assertion is structural: every cosmology must have produced
-        a number.
-        """
-        mask = os.environ.get("COCOA_FASTPT_MASK", "frozen")
-        dchi2s = u.halofit_vs_ee2_dchi2s("example2", mask=mask)
-        u.report_nonlinear_comparison(
-            f"NL2: example2 (3x2pt, NLA, mask {mask}): HALOFIT vs "
-            "EE2 at 10 fixed cosmologies", dchi2s)
-        self.assertEqual(len(dchi2s), len(u.NONLINEAR_COMPARISON_POINTS))
-
+# The shared factories (cosmolike_core/cocoa_testing_suites.py) build
+# the classes; assigning each return value to the usual module-level
+# name is what makes pytest collect it here, with unchanged test ids.
+TestHalofitVsEE2 = u.nonlinear_suite(
+    u, name="TestHalofitVsEE2",
+    cases=(
+        ('test_nl1_halofit_vs_ee2_cosmic_shear', 'NL1', 'example1', 'example1 (cosmic shear'),
+        ('test_nl2_halofit_vs_ee2_3x2pt', 'NL2', 'example2', 'example2 (3x2pt'),
+    ))
 
 # __name__ is "__main__" only when this file runs directly as a
 # script; pytest imports the module instead, so this block stays
-# idle under pytest. unittest.main runs every test method of the
-# classes above and prints one line per method (verbosity=2).
+# idle under pytest
 if __name__ == "__main__":
     unittest.main(verbosity=2)

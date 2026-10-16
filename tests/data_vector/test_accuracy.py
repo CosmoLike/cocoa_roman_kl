@@ -43,118 +43,43 @@ import os
 
 # OpenMP reads OMP_NUM_THREADS when the compiled libraries load, so
 # this must run before any cobaya/cosmolike import in the process.
-# "4" is cocoa_test_utils.REQUIRED_OMP_THREADS: the race checks need
-# several threads, and the frozen references were computed with four.
 os.environ["OMP_NUM_THREADS"] = "4"
 
 import sys
 import unittest
 
-# The shim cocoa_test_utils.py (this project's data bound to the shared
-# test machinery) lives one folder up, in tests/; insert(0, ...) puts
-# that folder first on the module search path, so a direct run of this
-# file and the worker subprocesses import this project's shim.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# The tests folder is not a package; put it on the import path so the
+# shared harness resolves no matter where pytest was launched from.
+sys.path.insert(0, os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))
 import cocoa_test_utils as u
 
-
-class TestAccuracyAdvisory(unittest.TestCase):
-    """Advisory checks A0-A6, sharing one frozen-state verification.
-
-    setUpClass runs once: it moves to ROOTDIR (the Cocoa/ folder), verifies
-    every frozen file against the SHA-256 manifest (an edited frozen state
-    must fail loudly before any physics runs), and loads the frozen
-    reference chi2 values.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        """Check the Cocoa shell, verify the frozen files, load the references.
-
-        unittest calls this once, before the first test of the class;
-        @classmethod passes the class itself as cls, so cls.reference
-        (the frozen reference chi2 values) is shared by every test.
-        """
-        u.require_cocoa_environment()
-        u.verify_frozen()
-        cls.reference = u.load_reference()
-
-    def _accuracy_check(self, name, example, tatt, label):
-        """Evaluate one configuration at high accuracy and report the delta.
-
-        The evaluation runs in a worker subprocess (single_model_chi2);
-        the report prints chi2(high accuracy), the frozen default
-        reference and their difference.
-
-        Arguments:
-          name    = the advisory label (A1-A6) for the report.
-          example = a key of cocoa_test_utils.EXAMPLES (exact-physics
-                    configurations only).
-          tatt    = True evaluates the TATT variant against the
-                    TATT-generated data vector, False the NLA one.
-          label   = one line naming the probe and IA model.
-
-        Returns:
-          nothing; advisory, so nothing is asserted.
-        """
-        chi2_high = u.single_model_chi2(example, tatt, high_accuracy=True)
-        # `"tatt" if tatt else "nla"` picks the reference-key suffix
-        suffix = "tatt" if tatt else "nla"
-        default_ref = self.reference[f"{example}_{suffix}"]
-        u.report_accuracy(f"{name}: {label}", chi2_high, default_ref)
-
-    def test_a0_one_knob_at_a_time(self):
-        """A0 scan: each accuracy knob alone on example2, NLA.
-
-        Advisory: each knob's chi2 and its difference to the frozen
-        default reference print as the scan runs. A knob whose delta
-        rivals the all-knobs delta (A5) is the driver; a knob whose
-        delta explodes (orders of magnitude beyond the others) signals
-        an interface breakdown, not a numerics improvement.
-        """
-        default_ref = self.reference["example2_nla"]
-        print("", flush=True)
-        # each entry is (label, likelihood overrides, camb overrides);
-        # the two _ discard the overrides, only the label is needed
-        # here (the worker looks the knob up again by its label)
-        for label, _, _ in u.ACCURACY_KNOBS:
-            chi2 = u.single_model_chi2("example2", False, knob=label)
-            u.report_knob(label, chi2, default_ref)
-
-    def test_a1_cosmic_shear_nla(self):
-        """A1: cosmic shear, NLA, default vs high accuracy."""
-        self._accuracy_check("A1", "example1", False,
-                             "example1 (cosmic shear, NLA)")
-
-    def test_a2_cosmic_shear_tatt(self):
-        """A2: cosmic shear, TATT, default vs high accuracy."""
-        self._accuracy_check("A2", "example1", True,
-                             "example1 (cosmic shear, TATT)")
-
-    def test_a3_2x2pt_nla(self):
-        """A3: 2x2pt, NLA, default vs high accuracy."""
-        self._accuracy_check("A3", "example2_2x2pt", False,
-                             "example2_2x2pt (2x2pt, NLA)")
-
-    def test_a4_2x2pt_tatt(self):
-        """A4: 2x2pt, TATT, default vs high accuracy."""
-        self._accuracy_check("A4", "example2_2x2pt", True,
-                             "example2_2x2pt (2x2pt, TATT)")
-
-    def test_a5_3x2pt_nla(self):
-        """A5: 3x2pt, NLA, default vs high accuracy."""
-        self._accuracy_check("A5", "example2", False,
-                             "example2 (3x2pt, NLA)")
-
-    def test_a6_3x2pt_tatt(self):
-        """A6: 3x2pt, TATT, default vs high accuracy."""
-        self._accuracy_check("A6", "example2", True,
-                             "example2 (3x2pt, TATT)")
-
+# The shared factory (cosmolike_core/cocoa_testing_suites.py) builds
+# the advisory class; assigning its return value to the usual
+# module-level name is what makes pytest collect it here, with
+# unchanged test ids. Each roster row is (method name, advisory
+# label, example, TATT flag, report label); knob_scan binds the
+# example the one-knob-at-a-time scan evaluates.
+TestAccuracyAdvisory = u.accuracy_suite(
+    u, name="TestAccuracyAdvisory",
+    checks=(
+        ("test_a1_cosmic_shear_nla", "A1", "example1",
+         False, "example1 (cosmic shear, NLA)"),
+        ("test_a2_cosmic_shear_tatt", "A2", "example1",
+         True, "example1 (cosmic shear, TATT)"),
+        ("test_a3_2x2pt_nla", "A3", "example2_2x2pt",
+         False, "example2_2x2pt (2x2pt, NLA)"),
+        ("test_a4_2x2pt_tatt", "A4", "example2_2x2pt",
+         True, "example2_2x2pt (2x2pt, TATT)"),
+        ("test_a5_3x2pt_nla", "A5", "example2",
+         False, "example2 (3x2pt, NLA)"),
+        ("test_a6_3x2pt_tatt", "A6", "example2",
+         True, "example2 (3x2pt, TATT)"),
+    ),
+    knob_scan="example2")
 
 # __name__ is "__main__" only when this file runs directly as a
 # script; pytest imports the module instead, so this block stays
-# idle under pytest. unittest.main runs every test method of the
-# classes above and prints one line per method (verbosity=2).
+# idle under pytest
 if __name__ == "__main__":
     unittest.main(verbosity=2)
