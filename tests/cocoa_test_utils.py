@@ -59,6 +59,10 @@ _CORE_DIR = os.path.abspath(os.path.join(
 if _CORE_DIR not in sys.path:
     sys.path.insert(0, _CORE_DIR)
 import cocoa_testing as _cct
+# cocoa_testing_suites holds the factories that build whole shared
+# test classes bound to this module; the project's test files assign
+# their return values to the module-level names pytest collects
+import cocoa_testing_suites as _cct_suites
 
 # ---- the project data ------------------------------------------------------
 
@@ -415,3 +419,7 @@ EMUL2 ADVISORY: {label}
   OMP_NUM_THREADS     = {os.environ.get('OMP_NUM_THREADS')}
 {'-' * 66}""", flush=True)
     return delta
+
+# ---- shared test-class factories (bound by the test files) ------------------
+baryon_accuracy_suite = _cct_suites.baryon_accuracy_suite
+baryon_drift_suite = _cct_suites.baryon_drift_suite
