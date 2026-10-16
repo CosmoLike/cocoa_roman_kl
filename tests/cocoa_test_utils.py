@@ -421,5 +421,6 @@ EMUL2 ADVISORY: {label}
     return delta
 
 # ---- shared test-class factories (bound by the test files) ------------------
+example_suite = _cct_suites.example_suite
 baryon_accuracy_suite = _cct_suites.baryon_accuracy_suite
 baryon_drift_suite = _cct_suites.baryon_drift_suite
